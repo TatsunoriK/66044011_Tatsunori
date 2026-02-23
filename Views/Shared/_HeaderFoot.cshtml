@@ -170,9 +170,21 @@
     <div class="top-auth-bar">
     <div class="container d-flex justify-content-end">
         <a href="#"><i class="fas fa-user-circle me-1"></i> โปรไฟล์ของฉัน</a>
-        <a asp-controller="Project" asp-action="Login">
-            <i class="fas fa-sign-in-alt me-1"></i> เข้าสู่ระบบ / สมัครสมาชิก
-        </a>
+        @if (Model != null && !string.IsNullOrEmpty(Model.UserId))
+        {
+            <a href="#" class="text-warning fw-bold">
+                <i class="fas fa-user me-1"></i> สวัสดี, @Model.UserId
+            </a>
+            <a asp-controller="Project" asp-action="Login">
+                <i class="fas fa-sign-out-alt me-1"></i> ออกจากระบบ
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Project" asp-action="Login">
+                <i class="fas fa-sign-in-alt me-1"></i> เข้าสู่ระบบ / สมัครสมาชิก
+            </a>
+        }
     </div>
 </div>
 
