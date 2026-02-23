@@ -1,0 +1,245 @@
+@{
+    Layout = "_HeaderFoot";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body {
+        background-color: #fff;
+        font-family: 'Inter', 'Kanit', sans-serif;
+        color: #333;
+    }
+
+    /* --- ส่วนของตารางสินค้า (ฝั่งซ้าย) --- */
+    .cart-container { padding: 60px 0; }
+    
+    .cart-header {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 15px;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        color: #888;
+        font-weight: 600;
+    }
+
+    .cart-item {
+        border-bottom: 1px solid #eee;
+        padding: 30px 0;
+        transition: all 0.3s ease;
+    }
+
+    .product-img-box {
+        width: 120px;
+        height: 90px;
+        background-color: #f9f9f9;
+        overflow: hidden;
+        border: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-img-box img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
+
+    .btn-remove {
+        color: #ccc;
+        text-decoration: none;
+        font-size: 1.4rem;
+        transition: 0.2s;
+        cursor: pointer;
+    }
+
+    .btn-remove:hover { color: #cf2127; }
+
+    .quantity-input {
+        width: 60px;
+        height: 40px;
+        text-align: center;
+        border: 1px solid #eee;
+        outline: none;
+    }
+
+    /* --- ส่วนของสรุปยอด & คูปอง (ฝั่งขวา) --- */
+    .cart-totals-sidebar {
+        border-left: 1px solid #eee;
+        padding-left: 40px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 18px 0;
+        border-bottom: 1px solid #f7f7f7;
+    }
+
+    .shipping-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        text-align: right;
+        font-size: 0.9rem;
+    }
+
+    .shipping-list li { margin-bottom: 10px; color: #666; }
+
+    /* --- ส่วนคูปองที่ย้ายมา --- */
+    .coupon-section {
+        margin-top: 30px;
+        padding: 20px 0;
+        border-top: 1px solid #eee;
+    }
+
+    .custom-input {
+        border: 1px solid #eee;
+        padding: 10px 15px;
+        border-radius: 0;
+        font-size: 0.9rem;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .btn-outline-custom {
+        border: 1px solid #222;
+        background: #fff;
+        border-radius: 0;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        padding: 10px 20px;
+        width: 100%;
+        transition: 0.3s;
+    }
+
+    .btn-outline-custom:hover {
+        background: #222;
+        color: #fff;
+    }
+
+    .btn-checkout {
+        background: #1a1a1a;
+        color: #fff;
+        width: 100%;
+        padding: 18px;
+        border: none;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 2px;
+        margin-top: 15px;
+        transition: 0.3s;
+    }
+
+    .btn-checkout:hover {
+        background: #cf2127;
+        transform: translateY(-2px);
+    }
+
+    @@media (max-width: 991px) {
+        .cart-totals-sidebar {
+            border-left: none;
+            padding-left: 0;
+            margin-top: 50px;
+            border-top: 2px solid #eee;
+            padding-top: 40px;
+        }
+    }
+</style>
+
+<div class="container cart-container">
+    <div class="row g-5">
+        
+        <div class="col-lg-8">
+            <h2 class="fw-bold mb-5">ตะกร้าสินค้า</h2>
+            
+            <div class="row cart-header d-none d-md-flex">
+                <div class="col-md-6">สินค้า</div>
+                <div class="col-md-2 text-center">ราคา</div>
+                <div class="col-md-2 text-center">จำนวน</div>
+                <div class="col-md-2 text-end">ยอดรวม</div>
+            </div>
+
+            <div class="row cart-item align-items-center" id="item-1">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-4">
+                        <span class="btn-remove" onclick="removeItem('item-1')">×</span>
+                        <div class="product-img-box">
+                            <img src="https://images.unsplash.com/photo-1595591935583-b8275822c536?q=80&w=200" alt="M4A1">
+                        </div>
+                        <span class="align-self-center fw-medium">M4A1 Carbine GBBR (Black)</span>
+                    </div>
+                </div>
+                <div class="col-md-2 text-center text-muted">฿12,500.00</div>
+                <div class="col-md-2 text-center">
+                    <input type="number" value="1" class="quantity-input" onchange="updateSubtotal(this, 12500)">
+                </div>
+                <div class="col-md-2 text-end fw-bold">฿12,500.00</div>
+            </div>
+
+            <div class="row cart-item align-items-center" id="item-2">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-4">
+                        <span class="btn-remove" onclick="removeItem('item-2')">×</span>
+                        <div class="product-img-box">
+                            <img src="https://images.unsplash.com/photo-1620248408226-9d0a7905b871?q=80&w=200" alt="Glock">
+                        </div>
+                        <span class="align-self-center fw-medium">Glock 17 Gen 5 Gas Blowback</span>
+                    </div>
+                </div>
+                <div class="col-md-2 text-center text-muted">฿4,200.00</div>
+                <div class="col-md-2 text-center">
+                    <input type="number" value="1" class="quantity-input" onchange="updateSubtotal(this, 4200)">
+                </div>
+                <div class="col-md-2 text-end fw-bold">฿4,200.00</div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="cart-totals-sidebar">
+                <h2 class="fw-bold mb-5">สรุปคำสั่งซื้อ</h2>
+                
+                <div class="summary-row">
+                    <span class="text-muted">ยอดรวมสินค้า</span>
+                    <span class="fw-bold" id="main-subtotal">฿16,700.00</span>
+                </div>
+
+                <div class="summary-row align-items-start border-0">
+                    <span class="text-muted">การจัดส่ง</span>
+                    <div class="text-end">
+                        <ul class="shipping-list">
+                            <li>จัดส่งฟรี <input type="radio" name="s" class="ms-2" checked onchange="calculateFullTotal()"></li>
+                            <li>ขนส่งด่วน (Kerry): ฿150.00 <input type="radio" name="s" class="ms-2" onchange="calculateFullTotal()"></li>
+                        </ul>
+                        <p class="small text-muted mt-3 mb-1">จัดส่งไปที่ <strong>กรุงเทพมหานคร</strong></p>
+                        <a href="#" class="text-dark small text-decoration-underline">เปลี่ยนที่อยู่</a>
+                    </div>
+                </div>
+
+                <div class="summary-row border-top mt-3 pt-3">
+                    <span class="fs-5 fw-bold">ยอดสุทธิ</span>
+                    <span class="fs-4 fw-bold text-danger" id="main-total">฿16,700.00</span>
+                </div>
+
+                <div class="coupon-section">
+                    <p class="small fw-bold mb-2">หากคุณมีรหัสส่วนลด:</p>
+                    <input type="text" class="custom-input shadow-sm" placeholder="รหัสคูปอง">
+                    <button class="btn btn-outline-custom">ใช้คูปอง</button>
+                </div>
+
+                <button class="btn btn-checkout">ไปหน้าชำระเงิน</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@RenderBody()

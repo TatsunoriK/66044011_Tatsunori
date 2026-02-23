@@ -1,0 +1,727 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+
+<body>
+
+    <div class="manage-wrapper">
+        <div class="management-header">
+            <div class="title-section">
+                <h2 class="main-title">Employee List</h2>
+                <p class="sub-title">จัดการข้อมูลและสิทธิ์การเข้าถึงของพนักงานทั้งหมด</p>
+            </div>
+            <div class="stat-summary-card">
+                <span class="stat-label">Total Employees</span>
+                <span class="stat-value">120</span>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="ค้นหาชื่อ, รหัสพนักงาน หรือเบอร์โทรศัพท์...">
+            </div>
+            <div class="action-buttons">
+                <button class="btn-outline"><i class="bi bi-funnel"></i> Filters</button>
+                <button class="btn-dark" onclick="openModal()"><i class="bi bi-plus-lg"></i> Add Employee</button>
+            </div>
+        </div>
+
+        <div class="table-outer-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Employee ID</th>
+                        <th>Full Name</th>
+                        <th style="width: 100px;">Gender</th>
+                        <th style="width: 140px;">Birth Date</th>
+                        <th style="width: 160px;">Tel</th>
+                        <th style="width: 200px;">System Role</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="id-badge">#SF-001</span></td>
+                        <td>
+                            <div class="user-cell">
+                                <img src="https://ui-avatars.com/api/?name=Somchai+S&background=000&color=fff"
+                                     alt="avatar">
+                                <div class="user-meta">
+                                    <span class="user-name">สมชาย สายตรวจ</span>
+                                    <span class="user-email">somchai.s@tatsunori.com</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>ชาย</td>
+                        <td>15 May 1990</td>
+                        <td>081-234-5678</td>
+                        <td>
+                            <select class="role-selector admin-role">
+                                <option selected>Admin</option>
+                                <option>พนักงาน (Staff)</option>
+                                <option>ฝ่ายคลังสินค้า</option>
+                                <option>ฝ่ายบัญชี</option>
+                                <option>ลูกค้า</option>
+                            </select>
+                        </td>
+                        <td style="text-align: center;">
+                            <button class="btn-delete" title="ลบข้อมูล">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><span class="id-badge">#SF-002</span></td>
+                        <td>
+                            <div class="user-cell">
+                                <img src="https://ui-avatars.com/api/?name=Wipa+W&background=333&color=fff"
+                                     alt="avatar">
+                                <div class="user-meta">
+                                    <span class="user-name">วิภา บัญชีงาม</span>
+                                    <span class="user-email">wipa.w@tatsunori.com</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>หญิง</td>
+                        <td>22 Nov 1995</td>
+                        <td>089-876-5432</td>
+                        <td>
+                            <select class="role-selector">
+                                <option>Admin</option>
+                                <option>พนักงาน (Staff)</option>
+                                <option>ฝ่ายคลังสินค้า</option>
+                                <option selected>ฝ่ายบัญชี</option>
+                                <option>ลูกค้า</option>
+                            </select>
+                        </td>
+                        <td style="text-align: center;">
+                            <button class="btn-delete" title="ลบข้อมูล">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-footer">
+            <span class="records-info">Showing 1-2 of 120 employees</span>
+            <div class="pagination">
+                <button class="p-arrow"><i class="bi bi-chevron-left"></i></button>
+                <button class="p-index active">1</button>
+                <button class="p-index">2</button>
+                <button class="p-index">3</button>
+                <button class="p-arrow"><i class="bi bi-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addEmployeeModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h1 class="modal-title">Add New Employee</h1>
+                    <p class="modal-subtitle">Join the elite Strike Force community</p>
+                </div>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+
+            <form method="post" id="addEmployeeForm">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" name="Username" placeholder="ชื่อผู้ใช้" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" name="Password" placeholder="รหัสผ่าน" required>
+                    </div>
+                    <div class="input-group full-width">
+                        <label>Email Address</label>
+                        <input type="email" name="Email" placeholder="example@mail.com" required>
+                    </div>
+                    <div class="input-group full-width">
+                        <label>Full Name</label>
+                        <input type="text" name="FullName" placeholder="ชื่อ-นามสกุลจริง" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Gender</label>
+                        <select name="Gender" required>
+                            <option value="" disabled selected>เลือกเพศ</option>
+                            <option value="male">ชาย</option>
+                            <option value="female">หญิง</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Birthday</label>
+                        <input type="date" name="Birthday" required>
+                    </div>
+                    <div class="input-group full-width">
+                        <label>Address</label>
+                        <textarea name="Address" placeholder="ระบุที่อยู่" rows="2"></textarea>
+                    </div>
+                    <div class="input-group full-width">
+                        <label>Phone Number</label>
+                        <input type="tel" name="Phone" placeholder="08X-XXX-XXXX" required>
+                    </div>
+                    <div class="input-group full-width">
+                        <label>System Role</label>
+                        <select name="SystemRole" required>
+                            <option value="" disabled selected>กำหนดสิทธิ์การเข้าถึง</option>
+                            <option value="admin">Admin (ผู้ดูแลระบบ)</option>
+                            <option value="staff">พนักงาน (Staff)</option>
+                            <option value="warehouse">ฝ่ายคลังสินค้า</option>
+                            <option value="accountant">ฝ่ายบัญชี</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="register-btn">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+                    const modal = document.getElementById('addEmployeeModal');
+
+                    function openModal() {
+                        modal.style.display = 'flex';
+                        document.body.style.overflow = 'hidden'; // ป้องกันการเลื่อนหน้าจอหลักขณะเปิด modal
+                    }
+
+                    function closeModal() {
+                        modal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+
+                    // ปิด Modal เมื่อคลิกพื้นหลังสีดำ
+                    window.onclick = function (event) {
+                        if (event.target == modal) {
+                            closeModal();
+                        }
+                    }
+    </script>
+</body>
+
+</html>
+
+<style>
+    /* ---------------------------------------------------------
+       BASE STYLES
+    --------------------------------------------------------- */
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #f5f7fa;
+    }
+
+    .manage-wrapper {
+        padding: 40px;
+        background-color: #f8f9fa;
+        min-height: 100vh;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        color: #1f2937;
+    }
+
+    /* ---------------------------------------------------------
+       HEADER & STATS
+    --------------------------------------------------------- */
+    .management-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 35px;
+    }
+
+    .main-title {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0;
+        color: #111;
+        letter-spacing: -0.5px;
+    }
+
+    .sub-title {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 8px 0 0 0;
+    }
+
+    .stat-summary-card {
+        text-align: right;
+        padding: 15px 30px;
+        background: #fff;
+        border-radius: 12px;
+        border: 2px solid #000;
+        box-shadow: 4px 4px 0px #000;
+        /* Hard Shadow Style */
+        min-width: 150px;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        font-size: 36px;
+        font-weight: 900;
+        display: block;
+        line-height: 1;
+        margin-top: 5px;
+        color: #000;
+    }
+
+    /* ---------------------------------------------------------
+       TOOLBAR
+    --------------------------------------------------------- */
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 25px;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 480px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 16px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 12px 16px 12px 48px;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.2s ease;
+        background: #fff;
+        color: #1f2937;
+        box-sizing: border-box;
+    }
+
+    .search-box input:focus {
+        border-color: #000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn-dark,
+    .btn-outline {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+
+    .btn-dark {
+        background: #000;
+        color: #fff;
+        border: 2px solid #000;
+    }
+
+    .btn-dark:hover {
+        background: #222;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-outline {
+        background: #fff;
+        border: 2px solid #e5e7eb;
+        color: #374151;
+    }
+
+    .btn-outline:hover {
+        border-color: #000;
+        transform: translateY(-2px);
+    }
+
+    /* ---------------------------------------------------------
+       TABLE SYSTEM
+    --------------------------------------------------------- */
+    .table-outer-container {
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: #f9fafb;
+        padding: 18px 20px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-bottom: 1px solid #e5e7eb;
+        color: #6b7280;
+        letter-spacing: 0.05em;
+    }
+
+    td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 14px;
+        vertical-align: middle;
+        color: #1f2937;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover {
+        background: #f0f7ff;
+        /* Hover สีฟ้าอ่อน */
+    }
+
+    /* User Cell Styling */
+    .id-badge {
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        color: #4b5563;
+        background: #f3f4f6;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        letter-spacing: -0.5px;
+    }
+
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .user-cell img {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .user-name {
+        display: block;
+        font-weight: 600;
+        color: #111;
+        font-size: 15px;
+        margin-bottom: 2px;
+    }
+
+    .user-email {
+        display: block;
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    /* Role Dropdown */
+    .role-selector {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: #fff;
+        appearance: none;
+        /* Custom Chevron SVG */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        color: #374151;
+        transition: all 0.2s;
+    }
+
+    .role-selector:hover {
+        border-color: #d1d5db;
+        background-color: #f9fafb;
+    }
+
+    .role-selector:focus {
+        outline: none;
+        border-color: #000;
+    }
+
+    /* ---------------------------------------------------------
+       DELETE BUTTON STYLES (BOOTSTRAP ICON)
+    --------------------------------------------------------- */
+    .btn-delete {
+        /* Reset */
+        background: transparent;
+        border: none;
+        outline: none;
+
+        /* Layout */
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        /* Typography & Icon */
+        color: #9ca3af;
+        /* สีเทาอ่อน (ปกติ) */
+        font-size: 18px;
+        /* ขนาดไอคอน */
+
+        /* Animation */
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-delete:hover {
+        background-color: #fee2e2;
+        /* พื้นหลังสีแดงอ่อนมาก */
+        color: #dc2626;
+        /* ไอคอนสีแดงสด */
+        transform: scale(1.1);
+        /* ขยายขึ้นเล็กน้อย */
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+        /* เงาสีแดงจางๆ */
+    }
+
+    .btn-delete:active {
+        transform: scale(0.95);
+        background-color: #fca5a5;
+    }
+
+    /* ---------------------------------------------------------
+       PAGINATION
+    --------------------------------------------------------- */
+    .table-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 25px;
+        padding: 0 5px;
+    }
+
+    .records-info {
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 8px;
+    }
+
+    .p-arrow,
+    .p-index {
+        width: 36px;
+        height: 36px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+        color: #4b5563;
+    }
+
+    .p-index.active {
+        background: #000;
+        color: #fff;
+        border-color: #000;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .p-arrow:hover,
+    .p-index:not(.active):hover {
+        background: #f3f4f6;
+        color: #111;
+        border-color: #d1d5db;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        display: none;
+        /* ปิดไว้เริ่มต้น */
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-content {
+        background: #fff;
+        width: 100%;
+        max-width: 600px;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 25px;
+    }
+
+    .modal-title {
+        font-size: 24px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .modal-subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 5px 0 0 0;
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #9ca3af;
+    }
+
+    /* Form Grid inside Modal */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .full-width {
+        grid-column: span 2;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #374151;
+    }
+
+    .input-group input,
+    .input-group select,
+    .input-group textarea {
+        width: 100%;
+        padding: 10px 14px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        transition: 0.2s;
+        box-sizing: border-box;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+        border-color: #000;
+    }
+
+    .modal-footer {
+        margin-top: 25px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .register-btn {
+        background: #000;
+        color: #fff;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .register-btn:hover {
+        background: #333;
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+        background: #f3f4f6;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    /* ตกแต่ง select ใน modal ให้ดูพรีเมียมขึ้น */
+    .modal-content select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 14px;
+        padding-right: 35px;
+        /* กันข้อความทับลูกศร */
+    }
+</style>

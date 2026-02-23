@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="th">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@ViewData["Title"] - STRIKE FORCE</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Krub:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+
+<style>
+    /* --- Base Layout --- */
+    body {
+        font-family: 'Krub', sans-serif;
+        background-color: #f0f2f5;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        color: #2d3436;
+    }
+
+    /* --- 1. Top Auth Bar --- */
+    .top-auth-bar {
+        background: #11181e;
+        padding: 5px 0;
+        border-bottom: 1px solid #333;
+    }
+
+    .top-auth-bar a {
+        color: #adb5bd;
+        text-decoration: none;
+        font-size: 0.8rem;
+        margin-left: 15px;
+        transition: 0.3s;
+    }
+
+    .top-auth-bar a:hover {
+        color: #f39c12;
+    }
+
+    /* --- 2. Header & Logo --- */
+    header {
+        background: #ffffff;
+        padding: 15px 0;
+        border-bottom: 4px solid #f39c12;
+        position: relative;
+    }
+
+    .logo-img {
+        max-height: 200px;
+        width: auto;
+        display: block;
+        margin: 0 auto;
+        transition: transform 0.3s;
+        filter: drop-shadow(0 0 8px rgba(243, 156, 18, 0.3));
+    }
+
+    .logo-img:hover {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 15px rgba(243, 156, 18, 0.7));
+    }
+
+    /* --- 3. Main Navigation --- */
+    .main-nav {
+        background: #1a1a1a;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        padding: 0;
+    }
+
+    .navbar-nav .nav-link {
+        color: #ffffff !important;
+        font-weight: 600;
+        padding: 14px 20px !important;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        transition: 0.3s all ease;
+        position: relative;
+    }
+
+    .navbar-nav .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 3px;
+        background: #f39c12;
+        transition: 0.3s;
+        transform: translateX(-50%);
+    }
+
+    .navbar-nav .nav-link:hover::after {
+        width: 100%;
+    }
+
+    .navbar-nav .nav-link:hover {
+        color: #f39c12 !important;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* --- 4. Content Wrapper --- */
+    .content-wrapper {
+        flex: 1;
+        padding: 40px 0;
+    }
+
+    /* --- 5. Footer Design --- */
+    footer {
+        background: #11181e;
+        color: #ecf0f1;
+        padding-top: 50px;
+        border-top: 5px solid #1a1a1a;
+    }
+
+    footer h4 {
+        color: #ffffff;
+        font-size: 1.2rem;
+        margin-bottom: 25px;
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+    footer h4::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 40px;
+        height: 2px;
+        background: #f39c12;
+    }
+
+    .text-muted-custom {
+        color: #95a5a6;
+        text-decoration: none;
+        transition: 0.3s;
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+
+    .text-muted-custom:hover {
+        color: #f39c12;
+        transform: translateX(5px);
+    }
+
+    .payment-icons i {
+        font-size: 2rem;
+        color: #555;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .payment-icons i:hover {
+        color: #f39c12;
+        transform: translateY(-5px);
+    }
+
+    .copyright-bar {
+        background: #0a0e12;
+        padding: 20px 0;
+        margin-top: 50px;
+        color: #555;
+        font-size: 0.85rem;
+    }
+</style>
+<body>
+    <head>
+    </head>
+
+    <div class="top-auth-bar">
+    <div class="container d-flex justify-content-end">
+        <a href="#"><i class="fas fa-user-circle me-1"></i> โปรไฟล์ของฉัน</a>
+        <a asp-controller="Project" asp-action="Login">
+            <i class="fas fa-sign-in-alt me-1"></i> เข้าสู่ระบบ / สมัครสมาชิก
+        </a>
+    </div>
+</div>
+
+        <header class="text-center">
+            <div class="container">
+                <a href="/" class="d-inline-block text-decoration-none">
+                    <img src="/images/Logo.png" alt="Strike Force Logo" class="logo-img">
+                </a>
+                <p class="text-warning mt-1 mb-0 fw-bold" style="letter-spacing: 2px; font-size: 1rem;">
+                    <i class="fas fa-crosshairs me-2"></i>PREMIUM BB GUN & GEAR
+                </p>
+            </div>
+        </header>
+
+        <nav class="navbar navbar-expand-lg navbar-dark main-nav sticky-top">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                    <ul class="navbar-nav">
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Project" asp-action="Project1">
+            <i class="fas fa-home me-1"></i> หน้าแรก
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Project" asp-action="Project1">
+            <i class="fas fa-shopping-bag me-1"></i> สินค้าทั้งหมด
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Project" asp-action="CartPage">
+            <i class="fas fa-shopping-cart me-1"></i> ตะกร้าของฉัน
+        </a>
+    </li>
+</ul>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="container content-wrapper">
+                @RenderBody()
+            </main>
+
+            <footer>
+                <div class="container">
+                    <div class="row g-4">
+                        <div class="col-lg-4 col-md-12">
+                            <h4 class="fw-bold">STRIKE FORCE SHOP</h4>
+                            <p class="small mb-4">ศูนย์รวมปืนบีบีกันและอุปกรณ์ยุทธวิธีระดับพรีเมียม</p>
+                            <ul class="list-unstyled small">
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="fas fa-map-marker-alt me-3 text-warning mt-1"></i>
+                                    <span>123/45 ถนนยุทธวิธี แขวงลาดพร้าว กรุงเทพฯ</span>
+                                </li>
+                                <li class="mb-3"><i class="fas fa-phone-alt me-3 text-warning"></i> 081-XXX-XXXX</li>
+                                <li><i class="fas fa-envelope me-3 text-warning"></i> contact@strikeforce.com</li>
+                            </ul>
+                        </div>
+
+                        <div class="col-lg-2 col-md-6 ms-lg-auto">
+                            <h4 class="fw-bold">ช่วยเหลือ</h4>
+                            <ul class="list-unstyled small">
+                                <li><a href="#" class="text-muted-custom">วิธีการสั่งซื้อ</a></li>
+                                <li><a href="#" class="text-muted-custom">การจัดส่งสินค้า</a></li>
+                                <li><a href="#" class="text-muted-custom">ติดต่อสอบถาม</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="col-lg-3 col-md-12">
+                            <h4 class="fw-bold">การชำระเงิน</h4>
+                            <div class="payment-icons d-flex gap-3 flex-wrap">
+                                <i class="fab fa-cc-visa"></i>
+                                <i class="fab fa-cc-mastercard"></i>
+                                <i class="fas fa-university"></i>
+                                <i class="fas fa-qrcode"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="copyright-bar text-center">
+                    <div class="container">
+                        © 2026 STRIKE FORCE TACTICAL. All Rights Reserved.
+                    </div>
+                </div>
+            </footer>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            @RenderSection("Scripts", required: false)
+        </body>
+
+    </html>
