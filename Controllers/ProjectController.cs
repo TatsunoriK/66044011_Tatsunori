@@ -3,11 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using _66044011_Tatsunori.Models;
 using _66044011_Tatsunori.ViewModels;
 
-
 namespace _66044011_Tatsunori.Controllers;
 
 public class ProjectController : Controller
 {
+    private readonly Csi402dbContext _db;
+    public ProjectController(Csi402dbContext db)
+    {
+        _db = db;
+    }
+
     public IActionResult Login()
     {
         return View();
