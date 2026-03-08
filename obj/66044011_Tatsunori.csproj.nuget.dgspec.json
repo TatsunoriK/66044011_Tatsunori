@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\66044011_Tatsunori.csproj": {}
+    "c:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\66044011_Tatsunori.csproj": {}
   },
   "projects": {
-    "C:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\66044011_Tatsunori.csproj": {
+    "c:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\66044011_Tatsunori.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\66044011_Tatsunori.csproj",
+        "projectUniqueName": "c:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\66044011_Tatsunori.csproj",
         "projectName": "66044011_Tatsunori",
-        "projectPath": "C:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\66044011_Tatsunori.csproj",
+        "projectPath": "c:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\66044011_Tatsunori.csproj",
         "packagesPath": "C:\\Users\\tatsu\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\obj\\",
+        "outputPath": "c:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\tatsu\\AppData\\Roaming\\NuGet\\NuGet.Config"

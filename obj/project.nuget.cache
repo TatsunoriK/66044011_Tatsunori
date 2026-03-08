@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "hkurm92V/e0=",
+  "dgSpecHash": "pjgSbp9FHMQ=",
   "success": true,
-  "projectFilePath": "C:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\66044011_Tatsunori.csproj",
+  "projectFilePath": "c:\\Users\\tatsu\\OneDrive\\Desktop\\CSI402_L001_66044011_ทัตซึโนริ_คาโต้\\66044011\\66044011_Tatsunori\\66044011_Tatsunori.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\tatsu\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\tatsu\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

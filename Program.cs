@@ -6,18 +6,25 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// ADD DATABASE CONTEXT
+// DATABASE
 builder.Services.AddDbContext<Csi402dbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(8, 0, 36))
     ));
 
-builder.Services.AddSession();
+// SESSION
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ERROR HANDLING
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -28,12 +35,12 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseSession();
+
+app.UseSession(); // ต้องอยู่ก่อน Authorization
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
+// ROUTE
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Project}/{action=Login}/{id?}");

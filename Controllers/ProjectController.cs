@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using _66044011_Tatsunori.Models;
 using _66044011_Tatsunori.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace _66044011_Tatsunori.Controllers;
 
@@ -26,7 +27,7 @@ public class ProjectController : Controller
     {
         return RedirectToAction("Login");
     }
-    
+
     // =========================
     // LOGIN PAGE
     // =========================
@@ -60,17 +61,27 @@ public class ProjectController : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(User user)
+    public IActionResult Register(User user, string Gender, DateOnly Birthday, string Address, string Phone)
     {
-        var exist = _db.Users.FirstOrDefault(u => u.Username == user.Username);
+        // สมัครใหม่ = Guest
+        user.RoleId = 5;
+        user.CreatedAt = DateTime.Now;
 
-        if (exist != null)
-        {
-            ViewBag.Error = "Username already exists";
-            return View();
-        }
-
+        // บันทึก Users
         _db.Users.Add(user);
+        _db.SaveChanges();
+
+        // สร้าง UserProfile
+        Userprofile profile = new Userprofile
+        {
+            UserId = user.Id,
+            Gender = Gender,
+            Birthday = Birthday,
+            Address = Address,
+            Tel = Phone
+        };
+
+        _db.Userprofiles.Add(profile);
         _db.SaveChanges();
 
         return RedirectToAction("Login");
@@ -80,6 +91,52 @@ public class ProjectController : Controller
     public IActionResult CartPage()
     {
         return View();
+    }
+
+    public IActionResult Management()
+    {
+        var users = _db.Users
+            .Include(u => u.Role)
+            .Include(u => u.Userprofile)
+            .ToList();
+
+        return View(users);
+    }
+
+    public IActionResult DeleteUser(int id)
+    {
+        var user = _db.Users.Find(id);
+
+        if (user != null)
+        {
+            _db.Users.Remove(user);
+            _db.SaveChanges();
+        }
+
+        return RedirectToAction("Management");
+    }
+
+    [HttpPost]
+    public IActionResult ChangeRole(int userId, int roleId)
+    {
+        var user = _db.Users.Find(userId);
+
+        if (user != null)
+        {
+            user.RoleId = roleId;
+            _db.SaveChanges();
+        }
+
+        return RedirectToAction("Management");
+    }
+
+    public IActionResult EditUser(int id)
+    {
+        var user = _db.Users
+            .Include(u => u.Userprofile)
+            .FirstOrDefault(u => u.Id == id);
+
+        return View(user);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
