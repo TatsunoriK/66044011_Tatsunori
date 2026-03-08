@@ -13,34 +13,69 @@ public class ProjectController : Controller
         _db = db;
     }
 
-    public IActionResult Login()
-    {
-        return View();
-    }
-    [HttpPost]
-    public IActionResult Login(_66044011_Tatsunori.ViewModels.LoginViewModels data)
-    {
-        string A, B;
-        A = data.UserId;
-        B = data.Password;
-        ViewData["UserId"] = A;
-        ViewData["Password"] = B;
-        return RedirectToAction("Project1", "Project", new { UserId = A, Password = B });
-    }
     public IActionResult Project1(string UserId, string Password)
     {
         var model = new LoginViewModels
         {
-            UserId = UserId,     
-            Password = Password  
+            UserId = UserId,
+            Password = Password
         };
         return View(model);
     }
+    public IActionResult Index()
+    {
+        return RedirectToAction("Login");
+    }
+    
+    // =========================
+    // LOGIN PAGE
+    // =========================
+    public IActionResult Login()
+    {
+        return View();
+    }
 
+    [HttpPost]
+    public IActionResult Login(LoginViewModels data)
+    {
+        var user = _db.Users
+            .FirstOrDefault(u => u.Username == data.UserId && u.Password == data.Password);
+
+        if (user != null)
+        {
+            HttpContext.Session.SetString("User", user.Username);
+            return RedirectToAction("ProductList");
+        }
+
+        ViewBag.Error = "Username or Password incorrect";
+        return View();
+    }
+
+    // =========================
+    // REGISTER PAGE
+    // =========================
     public IActionResult Register()
     {
         return View();
     }
+
+    [HttpPost]
+    public IActionResult Register(User user)
+    {
+        var exist = _db.Users.FirstOrDefault(u => u.Username == user.Username);
+
+        if (exist != null)
+        {
+            ViewBag.Error = "Username already exists";
+            return View();
+        }
+
+        _db.Users.Add(user);
+        _db.SaveChanges();
+
+        return RedirectToAction("Login");
+    }
+
 
     public IActionResult CartPage()
     {
