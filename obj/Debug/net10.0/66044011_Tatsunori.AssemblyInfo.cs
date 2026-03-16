@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("66044011_Tatsunori")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d4dd54f713356926334d097aaf1c560f6e8f6c8e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+58f33dad38585ffd0933c8c17cf8a65c6c333ebc")]
 [assembly: System.Reflection.AssemblyProductAttribute("66044011_Tatsunori")]
 [assembly: System.Reflection.AssemblyTitleAttribute("66044011_Tatsunori")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

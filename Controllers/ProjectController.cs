@@ -67,11 +67,11 @@ public class ProjectController : Controller
         user.RoleId = 5;
         user.CreatedAt = DateTime.Now;
 
-        // บันทึก Users
+        // Create Users
         _db.Users.Add(user);
         _db.SaveChanges();
 
-        // สร้าง UserProfile
+        // สร้าง UserProfile ควบคู่กับ User
         Userprofile profile = new Userprofile
         {
             UserId = user.Id,
@@ -93,16 +93,23 @@ public class ProjectController : Controller
         return View();
     }
 
+    // public IActionResult Management()
+    // {
+    //     var users = _db.Users
+    //         .Include(u => u.Role)
+    //         .Include(u => u.Userprofile)
+    //         .ToList();
+
+    //     return View(users);
+    // }
+
     public IActionResult Management()
     {
-        var users = _db.Users
-            .Include(u => u.Role)
-            .Include(u => u.Userprofile)
-            .ToList();
+        var users = (from u in _db.Users.Include(u => u.Role).Include(u => u.Userprofile)
+                     select u).ToList();
 
         return View(users);
     }
-
     public IActionResult DeleteUser(int id)
     {
         var user = _db.Users.Find(id);
@@ -124,6 +131,7 @@ public class ProjectController : Controller
         if (user != null)
         {
             user.RoleId = roleId;
+            _db.Users.Update(user);
             _db.SaveChanges();
         }
 
@@ -132,13 +140,50 @@ public class ProjectController : Controller
 
     public IActionResult EditUser(int id)
     {
-        var user = _db.Users
-            .Include(u => u.Userprofile)
-            .FirstOrDefault(u => u.Id == id);
+        var user = (from u in _db.Users
+                    .Include(u => u.Userprofile) // ดึงตาราง Profile มาด้วย
+                    where u.Id == id
+                    select u).FirstOrDefault();
+
+        if (user == null)
+        {
+            return NotFound();
+        }
 
         return View(user);
     }
+    [HttpPost]
+    public IActionResult EditUser(User data)
+    {
+        var user = (from u in _db.Users
+                    .Include(u => u.Userprofile)
+                    where u.Id == data.Id
+                    select u).FirstOrDefault();
 
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        // 2. อัปเดตข้อมูลใน User
+        user.Username = data.Username ?? user.Username;
+        user.FullName = data.FullName ?? user.FullName;
+        user.Email = data.Email ?? user.Email;
+
+        // 3. อัปเดตข้อมูลใน Userprofile
+        if (user.Userprofile != null && data.Userprofile != null)
+        {
+            user.Userprofile.Tel = data.Userprofile.Tel;
+            user.Userprofile.Address = data.Userprofile.Address;
+            user.Userprofile.Gender = data.Userprofile.Gender;
+            user.Userprofile.Birthday = data.Userprofile.Birthday;
+        }
+
+            _db.Update(user);
+            _db.SaveChanges();
+            return RedirectToAction("Management");
+        
+    }
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

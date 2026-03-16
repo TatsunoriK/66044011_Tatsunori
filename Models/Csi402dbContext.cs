@@ -33,6 +33,8 @@ public partial class Csi402dbContext : DbContext
 
     public virtual DbSet<Userprofile> Userprofiles { get; set; }
 
+    public virtual DbSet<LabStudent> LabStudents { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseMySql("server=localhost;port=3306;database=csi402db;user=root;password=Nori_kato43016", Microsoft.EntityFrameworkCore.ServerVersion.Parse("9.6.0-mysql"));
 
@@ -202,6 +204,26 @@ public partial class Csi402dbContext : DbContext
                 .HasForeignKey<Userprofile>(d => d.UserId)
                 .HasConstraintName("userprofiles_ibfk_1");
         });
+
+        modelBuilder.Entity<LabStudent>(entity =>
+{
+    entity.HasKey(e => e.StdID).HasName("PRIMARY");
+
+    entity.ToTable("LabStudent");
+
+    entity.Property(e => e.StdID)
+          .HasMaxLength(10)
+          .IsRequired();
+
+    entity.Property(e => e.StdPASSWORD)
+          .HasMaxLength(30);
+
+    entity.Property(e => e.StdName)
+          .HasMaxLength(50);
+
+    entity.Property(e => e.StdLastname)
+          .HasMaxLength(100);
+});
 
         OnModelCreatingPartial(modelBuilder);
     }

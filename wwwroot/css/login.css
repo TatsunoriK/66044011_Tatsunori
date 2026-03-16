@@ -1,0 +1,182 @@
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        /* ฝั่งซ้าย 70% ใช้รูปที่ Download มาไว้ในเครื่อง */
+        .left-side {
+            flex: 7;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                url('/images/bbgun_armory.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            /* ต้องมีตัวนี้เพื่อให้มีพื้นที่แสดงรูป */
+        }
+
+        .divider {
+            width: 2px;
+            background-color: #f39c12;
+        }
+
+        .right-side {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            padding: 40px;
+            min-width: 400px;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+        }
+
+        /* ปรับสไตล์ Logo ใหม่ */
+        .logo {
+            width: 120px;
+            /* เพิ่มขนาดเล็กน้อยเพื่อให้เห็นรายละเอียดปีก */
+            height: auto;
+            margin-bottom: 10px;
+            /* เพิ่มเงาจางๆ เพื่อให้ดูมีมิติ */
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: 1px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            background-color: #fcfcfc;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #f39c12;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
+        }
+
+        .forget-pwd {
+            display: block;
+            text-align: right;
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+            margin-bottom: 25px;
+        }
+
+        .forget-pwd:hover {
+            color: #f39c12;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #1a1a1a;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 30px;
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            background-color: #f39c12;
+            transform: translateY(-2px);
+        }
+
+        .social-text {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .icon-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 20px;
+            border: 1px solid #eee;
+            transition: 0.3s;
+        }
+
+        .icon-btn:hover {
+            background-color: #f9f9f9;
+            transform: scale(1.1);
+        }
+
+        .google {
+            color: #DB4437;
+        }
+
+        .facebook {
+            color: #4267B2;
+        }
+
+        .x-twitter {
+            color: #000;
+        }
+
+        .signup-text {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #444;
+        }
+
+        .signup-text a {
+            color: #f39c12;
+            font-weight: bold;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+        }
+
+        .signup-text a:hover {
+            border-bottom: 2px solid #f39c12;
+        }
+    
