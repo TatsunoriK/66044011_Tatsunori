@@ -13,25 +13,37 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     @RenderSection("Styles", required: false)
     <style>
-        body { font-family: 'Krub', sans-serif; background: #f0f2f5; display: flex; flex-direction: column; min-height: 100vh; }
+        body {
+            font-family: 'Krub', sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
         .top-auth-bar { background: #11181e; padding: 5px 0; border-bottom: 1px solid #333; }
         .top-auth-bar a { color: #adb5bd; text-decoration: none; font-size: .8rem; margin-left: 15px; transition: .3s; }
         .top-auth-bar a:hover { color: #f39c12; }
         header { background: #fff; padding: 15px 0; border-bottom: 4px solid #f39c12; }
-        .logo-img { max-height: 140px; width: auto; display: block; margin: 0 auto; transition: transform .3s;
-                    filter: drop-shadow(0 0 8px rgba(243,156,18,.3)); }
+        .logo-img {
+            max-height: 140px; width: auto; display: block; margin: 0 auto;
+            transition: transform .3s; filter: drop-shadow(0 0 8px rgba(243,156,18,.3));
+        }
         .logo-img:hover { transform: scale(1.05); }
         .main-nav { background: #1a1a1a; box-shadow: 0 4px 10px rgba(0,0,0,.3); }
-        .navbar-nav .nav-link { color: #fff !important; font-weight: 600; padding: 14px 20px !important;
-                                 text-transform: uppercase; font-size: .85rem; transition: .3s; position: relative; }
-        .navbar-nav .nav-link::after { content:""; position:absolute; bottom:0; left:50%; width:0; height:3px;
-                                        background:#f39c12; transition:.3s; transform:translateX(-50%); }
+        .navbar-nav .nav-link {
+            color: #fff !important; font-weight: 600; padding: 14px 20px !important;
+            text-transform: uppercase; font-size: .85rem; transition: .3s; position: relative;
+        }
+        .navbar-nav .nav-link::after {
+            content: ""; position: absolute; bottom: 0; left: 50%;
+            width: 0; height: 3px; background: #f39c12; transition: .3s; transform: translateX(-50%);
+        }
         .navbar-nav .nav-link:hover::after { width: 100%; }
         .navbar-nav .nav-link:hover { color: #f39c12 !important; }
         .content-wrapper { flex: 1; padding: 40px 0; }
         footer { background: #11181e; color: #ecf0f1; padding-top: 50px; border-top: 5px solid #1a1a1a; }
         footer h4 { color: #fff; font-size: 1.1rem; margin-bottom: 20px; padding-bottom: 8px; position: relative; }
-        footer h4::after { content:""; position:absolute; left:0; bottom:0; width:40px; height:2px; background:#f39c12; }
+        footer h4::after { content: ""; position: absolute; left: 0; bottom: 0; width: 40px; height: 2px; background: #f39c12; }
         .text-muted-custom { color: #95a5a6; text-decoration: none; transition: .3s; display: inline-block; margin-bottom: 6px; }
         .text-muted-custom:hover { color: #f39c12; }
         .copyright-bar { background: #0a0e12; padding: 16px 0; margin-top: 40px; color: #555; font-size: .85rem; }
@@ -46,9 +58,12 @@
             <span class="text-warning fw-bold" style="font-size:.85rem; margin-left:15px;">
                 <i class="fas fa-user me-1"></i> สวัสดี, @sessionUser
             </span>
-            <a asp-controller="Project" asp-action="OrderHistory">
-                <i class="fas fa-history me-1"></i> ประวัติการสั่งซื้อ
-            </a>
+            @if (sessionRole == 4)
+            {
+                <a asp-controller="Project" asp-action="OrderHistory">
+                    <i class="fas fa-history me-1"></i> ประวัติการสั่งซื้อ
+                </a>
+            }
             <a asp-controller="Project" asp-action="Logout" class="text-danger">
                 <i class="fas fa-sign-out-alt me-1"></i> ออกจากระบบ
             </a>
@@ -67,7 +82,7 @@
         <a asp-controller="Project" asp-action="ProductList" class="d-inline-block">
             <img src="/images/Logo.png" alt="Strike Force" class="logo-img">
         </a>
-        <p class="text-warning mt-1 mb-0 fw-bold" style="letter-spacing:2px;font-size:1rem;">
+        <p class="text-warning mt-1 mb-0 fw-bold" style="letter-spacing:2px; font-size:1rem;">
             <i class="fas fa-crosshairs me-2"></i>PREMIUM BB GUN & GEAR
         </p>
     </div>
@@ -80,24 +95,73 @@
         </button>
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
             <ul class="navbar-nav">
+
                 <li class="nav-item">
                     <a class="nav-link" asp-controller="Project" asp-action="ProductList">
                         <i class="fas fa-home me-1"></i> หน้าแรก
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Project" asp-action="CartPage">
-                        <i class="fas fa-shopping-cart me-1"></i> ตะกร้า
-                    </a>
-                </li>
-                @if (sessionRole != null && sessionRole <= 2)
+
+                @* Customer (4) *@
+                @if (sessionRole == 4)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Project" asp-action="CartPage">
+                            <i class="fas fa-shopping-cart me-1"></i> ตะกร้า
+                        </a>
+                    </li>
+                }
+
+                @* Staff (3) *@
+                @if (sessionRole == 3)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" asp-controller="Project" asp-action="OrderManagement">
+                            <i class="fas fa-clipboard-list me-1"></i> จัดการออเดอร์
+                        </a>
+                    </li>
+                }
+
+                @* Manager (2) — ออเดอร์ + รายงาน เท่านั้น *@
+                @if (sessionRole == 2)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" asp-controller="Project" asp-action="OrderManagement">
+                            <i class="fas fa-clipboard-list me-1"></i> จัดการออเดอร์
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" asp-controller="Project" asp-action="SalesReport">
+                            <i class="fas fa-chart-bar me-1"></i> รายงาน
+                        </a>
+                    </li>
+                }
+
+                @* Admin (1) — ทุกหน้า *@
+                @if (sessionRole == 1)
                 {
                     <li class="nav-item">
                         <a class="nav-link text-warning" asp-controller="Project" asp-action="Management">
                             <i class="fas fa-users-cog me-1"></i> จัดการระบบ
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" asp-controller="Project" asp-action="OrderManagement">
+                            <i class="fas fa-clipboard-list me-1"></i> จัดการออเดอร์
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" asp-controller="Project" asp-action="StockList">
+                            <i class="fas fa-boxes me-1"></i> สต็อก
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" asp-controller="Project" asp-action="SalesReport">
+                            <i class="fas fa-chart-bar me-1"></i> รายงาน
+                        </a>
+                    </li>
                 }
+
             </ul>
         </div>
     </div>

@@ -11,10 +11,9 @@ public class ProjectController : Controller
     private readonly Csi402dbContext _db;
     public ProjectController(Csi402dbContext db) { _db = db; }
 
-    // ── Helpers ──────────────────────────────────────────────
-    private string? SessionUser => HttpContext.Session.GetString("Username");
-    private int? SessionUserId => HttpContext.Session.GetInt32("UserId");
-    private int? SessionRoleId => HttpContext.Session.GetInt32("RoleId");
+    private string? SessionUser   => HttpContext.Session.GetString("Username");
+    private int?    SessionUserId => HttpContext.Session.GetInt32("UserId");
+    private int?    SessionRoleId => HttpContext.Session.GetInt32("RoleId");
 
     // =========================
     // LOGIN
@@ -34,8 +33,8 @@ public class ProjectController : Controller
         if (user != null)
         {
             HttpContext.Session.SetString("Username", user.Username);
-            HttpContext.Session.SetInt32("UserId", user.Id);
-            HttpContext.Session.SetInt32("RoleId", user.RoleId ?? 5);
+            HttpContext.Session.SetInt32("UserId",   user.Id);
+            HttpContext.Session.SetInt32("RoleId",   user.RoleId ?? 5);
             HttpContext.Session.SetString("FullName", user.FullName ?? user.Username);
             return RedirectToAction("ProductList");
         }
@@ -50,7 +49,6 @@ public class ProjectController : Controller
         return RedirectToAction("Login");
     }
 
-    // ── รองรับ URL เดิมที่เคยใช้ Project1 ──────────────────
     public IActionResult Project1() => RedirectToAction("ProductList");
     public IActionResult Index()    => RedirectToAction("ProductList");
 
@@ -64,7 +62,8 @@ public class ProjectController : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(User user, string Gender, DateOnly Birthday, string Address, string Phone)
+    public IActionResult Register(User user, string Gender, DateOnly Birthday,
+        string Address, string Phone)
     {
         if (_db.Users.Any(u => u.Username == user.Username))
         {
@@ -77,18 +76,18 @@ public class ProjectController : Controller
             return View();
         }
 
-        user.RoleId = 4; // Customer
+        user.RoleId    = 4;
         user.CreatedAt = DateTime.Now;
         _db.Users.Add(user);
         _db.SaveChanges();
 
         _db.Userprofiles.Add(new Userprofile
         {
-            UserId = user.Id,
-            Gender = Gender,
+            UserId   = user.Id,
+            Gender   = Gender,
             Birthday = Birthday,
-            Address = Address,
-            Tel = Phone
+            Address  = Address,
+            Tel      = Phone
         });
         _db.SaveChanges();
 
@@ -96,7 +95,7 @@ public class ProjectController : Controller
     }
 
     // =========================
-    // PRODUCT LIST (หน้าหลัก)
+    // PRODUCT LIST
     // =========================
     public IActionResult ProductList(string? search, int? catId, int? brandId,
         decimal? minPrice, decimal? maxPrice, string? sort)
@@ -161,7 +160,6 @@ public class ProjectController : Controller
             Subtotal = p.Price * cart[p.Pid]
         }).ToList();
 
-        ViewBag.Username = SessionUser;
         return View(items);
     }
 
@@ -196,7 +194,7 @@ public class ProjectController : Controller
     }
 
     // =========================
-    // CHECKOUT / PLACE ORDER
+    // PLACE ORDER
     // =========================
     [HttpPost]
     public IActionResult PlaceOrder()
@@ -238,7 +236,7 @@ public class ProjectController : Controller
     }
 
     // =========================
-    // ORDER HISTORY
+    // ORDER HISTORY (Customer)
     // =========================
     public IActionResult OrderHistory()
     {
@@ -250,29 +248,29 @@ public class ProjectController : Controller
             .OrderByDescending(o => o.OrderDate)
             .ToList();
 
-        ViewBag.Username = SessionUser;
         return View(orders);
     }
 
     // =========================
-    // MANAGEMENT (Admin/Manager)
+    // MANAGEMENT (Admin=1 only)
     // =========================
     public IActionResult Management()
     {
-        if (SessionRoleId > 2) return RedirectToAction("ProductList");
+        if (SessionRoleId != 1)
+            return RedirectToAction("ProductList");
 
         var users = _db.Users
             .Include(u => u.Role)
             .Include(u => u.Userprofile)
             .ToList();
-        ViewBag.Roles    = _db.Roles.ToList();
-        ViewBag.Username = SessionUser;
+        ViewBag.Roles = _db.Roles.ToList();
         return View(users);
     }
 
     public IActionResult DeleteUser(int id)
     {
-        if (SessionRoleId > 2) return RedirectToAction("ProductList");
+        if (SessionRoleId != 1)
+            return RedirectToAction("ProductList");
         var user = _db.Users.Find(id);
         if (user != null) { _db.Users.Remove(user); _db.SaveChanges(); }
         return RedirectToAction("Management");
@@ -281,7 +279,8 @@ public class ProjectController : Controller
     [HttpPost]
     public IActionResult ChangeRole(int userId, int roleId)
     {
-        if (SessionRoleId > 2) return RedirectToAction("ProductList");
+        if (SessionRoleId != 1)
+            return RedirectToAction("ProductList");
         var user = _db.Users.Find(userId);
         if (user != null) { user.RoleId = roleId; _db.SaveChanges(); }
         return RedirectToAction("Management");
@@ -289,17 +288,18 @@ public class ProjectController : Controller
 
     public IActionResult EditUser(int id)
     {
-        if (SessionRoleId > 2) return RedirectToAction("ProductList");
+        if (SessionRoleId != 1)
+            return RedirectToAction("ProductList");
         var user = _db.Users.Include(u => u.Userprofile).FirstOrDefault(u => u.Id == id);
         if (user == null) return NotFound();
-        ViewBag.Username = SessionUser;
         return View(user);
     }
 
     [HttpPost]
     public IActionResult EditUser(User data)
     {
-        if (SessionRoleId > 2) return RedirectToAction("ProductList");
+        if (SessionRoleId != 1)
+            return RedirectToAction("ProductList");
         var user = _db.Users.Include(u => u.Userprofile).FirstOrDefault(u => u.Id == data.Id);
         if (user == null) return NotFound();
 
@@ -319,7 +319,136 @@ public class ProjectController : Controller
     }
 
     // =========================
-    // HELPERS - Cart Session
+    // ORDER MANAGEMENT (Admin=1, Manager=2, Staff=3)
+    // =========================
+    public IActionResult OrderManagement(string? status)
+    {
+        if (SessionRoleId != 1 && SessionRoleId != 2 && SessionRoleId != 3)
+            return RedirectToAction("ProductList");
+
+        var query = _db.Orders
+            .Include(o => o.User)
+            .Include(o => o.Orderdetails).ThenInclude(d => d.PidNavigation)
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(status))
+            query = query.Where(o => o.Status == status);
+
+        ViewBag.StatusFilter = status;
+        ViewBag.AllCount     = _db.Orders.Count();
+        ViewBag.PendingCount = _db.Orders.Count(o => o.Status == "Pending");
+        ViewBag.PaidCount    = _db.Orders.Count(o => o.Status == "Paid");
+        ViewBag.ShippedCount = _db.Orders.Count(o => o.Status == "Shipped");
+        ViewBag.CancelCount  = _db.Orders.Count(o => o.Status == "Cancelled");
+
+        return View(query.OrderByDescending(o => o.OrderDate).ToList());
+    }
+
+    [HttpPost]
+    public IActionResult UpdateOrderStatus(int orderId, string newStatus)
+    {
+        if (SessionRoleId != 1 && SessionRoleId != 2 && SessionRoleId != 3)
+            return RedirectToAction("ProductList");
+
+        var order = _db.Orders.Find(orderId);
+        if (order != null)
+        {
+            order.Status = newStatus;
+            _db.SaveChanges();
+            TempData["Success"] = $"อัปเดตสถานะออเดอร์ #{orderId} เป็น {newStatus} เรียบร้อย";
+        }
+        return RedirectToAction("OrderManagement");
+    }
+
+    // =========================
+    // STOCK (Admin=1 only)
+    // =========================
+    public IActionResult StockList()
+    {
+        if (SessionRoleId != 1)
+            return RedirectToAction("ProductList");
+
+        var stocks = _db.Productstocks
+            .Include(s => s.PidNavigation).ThenInclude(p => p.Cat)
+            .Include(s => s.PidNavigation).ThenInclude(p => p.Brand)
+            .OrderBy(s => s.PidNavigation.Pname)
+            .ToList();
+
+        return View(stocks);
+    }
+
+    [HttpPost]
+    public IActionResult UpdateStock(int pid, int quantity)
+    {
+        if (SessionRoleId != 1)
+            return RedirectToAction("ProductList");
+
+        var stock = _db.Productstocks.Find(pid);
+        if (stock != null)
+        {
+            stock.Quantity   = quantity;
+            stock.LastUpdate = DateTime.Now;
+            _db.SaveChanges();
+            TempData["Success"] = "อัปเดตสต็อกเรียบร้อย";
+        }
+        return RedirectToAction("StockList");
+    }
+
+    // =========================
+    // SALES REPORT (Admin=1, Manager=2)
+    // =========================
+    public IActionResult SalesReport(string period = "monthly")
+    {
+        if (SessionRoleId != 1 && SessionRoleId != 2)
+            return RedirectToAction("ProductList");
+
+        DateTime start, end;
+        var now = DateTime.Today;
+
+        switch (period)
+        {
+            case "daily":
+                start = now; end = now; break;
+            case "yearly":
+                start = new DateTime(now.Year, 1, 1);
+                end   = new DateTime(now.Year, 12, 31); break;
+            default:
+                start = new DateTime(now.Year, now.Month, 1);
+                end   = start.AddMonths(1).AddDays(-1); break;
+        }
+
+        var orders = _db.Orders
+            .Include(o => o.User)
+            .Include(o => o.Orderdetails).ThenInclude(d => d.PidNavigation)
+            .Where(o => o.OrderDate >= start
+                     && o.OrderDate <= end.AddDays(1)
+                     && o.Status != "Cancelled")
+            .OrderByDescending(o => o.OrderDate)
+            .ToList();
+
+        ViewBag.Period       = period;
+        ViewBag.Start        = start;
+        ViewBag.End          = end;
+        ViewBag.TotalRevenue = orders.Sum(o => o.TotalAmount);
+        ViewBag.TotalOrders  = orders.Count;
+        ViewBag.TotalItems   = orders.SelectMany(o => o.Orderdetails).Sum(d => d.Qty);
+        ViewBag.TopProducts  = orders
+            .SelectMany(o => o.Orderdetails)
+            .GroupBy(d => d.PidNavigation?.Pname ?? $"#{d.Pid}")
+            .Select(g => new {
+                Name    = g.Key,
+                Qty     = g.Sum(d => d.Qty),
+                Revenue = g.Sum(d => d.UnitPrice * d.Qty)
+            })
+            .OrderByDescending(x => x.Revenue)
+            .Take(5)
+            .ToList();
+
+        return View(orders);
+    }
+
+    // =========================
+    // HELPERS
     // =========================
     private Dictionary<int, int> GetCart()
     {

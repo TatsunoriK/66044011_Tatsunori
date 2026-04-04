@@ -1,0 +1,150 @@
+@model IEnumerable<_66044011_Tatsunori.Models.Productstock>
+@{
+    Layout = "_HeaderFoot";
+    ViewData["Title"] = "จัดการสต็อกสินค้า";
+}
+
+@section Styles {
+<style>
+    .stock-wrapper { max-width: 1100px; margin: 0 auto; }
+    .page-header {
+        display: flex; justify-content: space-between;
+        align-items: center; margin-bottom: 28px;
+    }
+    .stock-card {
+        background: #fff; border-radius: 12px; border: 1px solid #eee;
+        box-shadow: 0 2px 8px rgba(0,0,0,.04); overflow: hidden;
+    }
+    .stock-card th {
+        background: #1a1a1a; color: #fff;
+        padding: 14px 20px; font-size: .85rem; font-weight: 600; white-space: nowrap;
+    }
+    .stock-card td {
+        padding: 14px 20px; vertical-align: middle;
+        border-bottom: 1px solid #f5f5f5;
+    }
+    .stock-card tr:last-child td { border-bottom: none; }
+    .stock-card tr:hover td { background: #fafafa; }
+    .qty-input {
+        width: 90px; text-align: center; border: 1px solid #ddd;
+        border-radius: 8px; padding: 6px 10px; font-weight: 600; transition: .2s;
+    }
+    .qty-input:focus { outline: none; border-color: #1a1a1a; }
+    .btn-save {
+        background: #1a1a1a; color: #fff; border: none;
+        padding: 7px 16px; border-radius: 8px; font-weight: 600;
+        font-size: .85rem; cursor: pointer; transition: .2s;
+    }
+    .btn-save:hover { background: #f39c12; color: #1a1a1a; }
+    .badge-stock { padding: 5px 12px; border-radius: 20px; font-size: .75rem; font-weight: 700; }
+    .low-row td { background: #fff8f0 !important; }
+    .summary-bar { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .summary-item {
+        background: #fff; border-radius: 10px; border: 1px solid #eee;
+        padding: 14px 20px; flex: 1; min-width: 150px;
+        box-shadow: 0 2px 6px rgba(0,0,0,.04);
+    }
+    .summary-item .val { font-size: 1.8rem; font-weight: 700; }
+    .summary-item .lbl { font-size: .78rem; color: #adb5bd; text-transform: uppercase; }
+</style>
+}
+
+<div class="stock-wrapper">
+    <div class="page-header">
+        <div>
+            <h2 class="fw-bold mb-0"><i class="fas fa-boxes me-2"></i>จัดการสต็อกสินค้า</h2>
+            <small class="text-muted">อัปเดตจำนวนสินค้าคงเหลือในคลัง</small>
+        </div>
+        <a asp-action="ProductList" asp-controller="Project" class="btn btn-outline-dark btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>กลับหน้าหลัก
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show py-2 mb-4">
+            <i class="fas fa-check-circle me-1"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @{
+        var totalItems  = Model.Count();
+        var outOfStock  = Model.Count(s => (s.Quantity ?? 0) <= 0);
+        var lowStock    = Model.Count(s => (s.Quantity ?? 0) > 0 && (s.Quantity ?? 0) <= 5);
+        var normalStock = Model.Count(s => (s.Quantity ?? 0) > 5);
+    }
+
+    <div class="summary-bar">
+        <div class="summary-item">
+            <div class="val">@totalItems</div>
+            <div class="lbl">สินค้าทั้งหมด</div>
+        </div>
+        <div class="summary-item">
+            <div class="val text-success">@normalStock</div>
+            <div class="lbl">สต็อกปกติ</div>
+        </div>
+        <div class="summary-item">
+            <div class="val text-warning">@lowStock</div>
+            <div class="lbl">เหลือน้อย (≤5)</div>
+        </div>
+        <div class="summary-item">
+            <div class="val text-danger">@outOfStock</div>
+            <div class="lbl">หมดสต็อก</div>
+        </div>
+    </div>
+
+    <div class="stock-card">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>ชื่อสินค้า</th>
+                    <th>ประเภท</th>
+                    <th>ยี่ห้อ</th>
+                    <th class="text-center">สถานะ</th>
+                    <th class="text-center">คงเหลือ</th>
+                    <th>อัปเดตล่าสุด</th>
+                    <th class="text-center">แก้ไข</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var s in Model)
+            {
+                var qty     = s.Quantity ?? 0;
+                var isLow   = qty > 0 && qty <= 5;
+                var isEmpty = qty <= 0;
+                <tr class="@(isLow || isEmpty ? "low-row" : "")">
+                    <td class="text-muted small">@s.Pid</td>
+                    <td class="fw-semibold">@s.PidNavigation?.Pname</td>
+                    <td class="text-muted small">@(s.PidNavigation?.Cat?.CatName ?? "-")</td>
+                    <td class="text-muted small">@(s.PidNavigation?.Brand?.BrandName ?? "-")</td>
+                    <td class="text-center">
+                        @if (isEmpty)
+                        { <span class="badge-stock bg-danger text-white">หมดสต็อก</span> }
+                        else if (isLow)
+                        { <span class="badge-stock bg-warning text-dark">เหลือน้อย</span> }
+                        else
+                        { <span class="badge-stock bg-success text-white">ปกติ</span> }
+                    </td>
+                    <td class="text-center fw-bold fs-5">@qty</td>
+                    <td class="text-muted small">
+                        @(s.LastUpdate?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+                    </td>
+                    <td class="text-center">
+                        <form asp-action="UpdateStock" asp-controller="Project"
+                              method="post" class="d-flex gap-2 justify-content-center">
+                            <input type="hidden" name="pid" value="@s.Pid" />
+                            <input type="number" name="quantity" value="@qty"
+                                   min="0" class="qty-input" />
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save me-1"></i>บันทึก
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
