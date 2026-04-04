@@ -1,4 +1,4 @@
-@model IEnumerable<User>
+@model IEnumerable<_66044011_Tatsunori.Models.User>
 @{
     Layout = null;
 }
@@ -9,149 +9,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Management</title>
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="~/css/management.css" asp-append-version="true">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
 
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    </head>
+<body>
+    <div class="manage-wrapper">
 
-    <body>
-
-        <div class="manage-wrapper">
-
-            <div class="management-header">
-
-                <div class="title-section">
-                    <h2 class="main-title">Employee List</h2>
-                    <p class="sub-title">จัดการข้อมูลและสิทธิ์การเข้าถึงของพนักงานทั้งหมด</p>
-                </div>
-
-                <div style="display:flex;gap:15px;align-items:center;">
-
-                    <a asp-controller="Project" asp-action="Register" class="btn-add">
-                        <i class="bi bi-person-plus"></i> Add Employee
-                    </a>
-
-                    <div class="stat-summary-card">
-                        <span class="stat-label">Total Employees</span>
-                        <span class="stat-value">@Model.Count()</span>
-                    </div>
-
-                </div>
-
+        <div class="management-header">
+            <div class="title-section">
+                <h2 class="main-title">Employee List</h2>
+                <p class="sub-title">จัดการข้อมูลและสิทธิ์การเข้าถึงของพนักงานทั้งหมด</p>
             </div>
-
-
-            <div class="table-outer-container">
-
-                <table>
-
-                    <thead>
-                        <tr>
-                            <th style="width:100px;">Employee ID</th>
-                            <th>Full Name</th>
-                            <th style="width:100px;">Gender</th>
-                            <th style="width:140px;">Birth Date</th>
-                            <th style="width:160px;">Tel</th>
-                            <th style="width:200px;">System Role</th>
-                            <th style="width:120px;text-align:center;">Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        @foreach (var user in Model)
-                        {
-                            <tr>
-
-                                <td>
-                                    <span class="id-badge">#@user.Id</span>
-                                </td>
-
-                                <td>
-                                    <div class="user-cell">
-
-                                        <img
-                                        src="https://ui-avatars.com/api/?name=@(user.FullName ?? "User")&background=000&color=fff">
-
-                                        <div class="user-meta">
-
-                                            <span class="user-name">
-                                                @(user.FullName ?? "-")
-                                            </span>
-
-                                            <span class="user-email">
-                                                @(user.Email ?? "-")
-                                            </span>
-
-                                        </div>
-                                    </div>
-                                </td>
-
-
-                                <td>
-                                    @(user.Userprofile?.Gender ?? "-")
-                                </td>
-
-                                <td>
-                                    @(user.Userprofile?.Birthday?.ToString("dd MMM yyyy") ?? "-")
-                                </td>
-
-                                <td>
-                                    @(user.Userprofile?.Tel ?? "-")
-                                </td>
-
-
-                                <td>
-
-                                    <form asp-controller="Project" asp-action="ChangeRole" method="post">
-
-                                        <input type="hidden" name="userId" value="@user.Id" />
-
-                                        <select name="roleId" class="role-selector" onchange="this.form.submit()">
-
-                                            <option value="1" selected="@(user.RoleId == 1)">Admin</option>
-                                            <option value="2" selected="@(user.RoleId == 2)">Manager</option>
-                                            <option value="3" selected="@(user.RoleId == 3)">Staff</option>
-                                            <option value="4" selected="@(user.RoleId == 4)">Customer</option>
-                                            <option value="5" selected="@(user.RoleId == 5)">Guest</option>
-
-                                        </select>
-
-                                    </form>
-
-                                </td>
-
-
-                                <td style="text-align:center">
-
-                                    <a asp-controller="Project" asp-action="EditUser" asp-route-id="@user.Id" class="btn-edit">
-
-                                        <i class="bi bi-pencil"></i>
-
-                                    </a>
-
-                                    <a asp-controller="Project" asp-action="DeleteUser" asp-route-id="@user.Id"
-                                           class="btn-delete">
-
-                                        <i class="bi bi-trash3"></i>
-
-                                    </a>
-
-                                </td>
-
-                            </tr>
-                        }
-
-                    </tbody>
-
-                </table>
-
+            <div style="display:flex;gap:15px;align-items:center;">
+                <a asp-controller="Project" asp-action="ProductList" class="btn-add"
+                   style="background:#444;">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+                <div class="stat-summary-card">
+                    <span class="stat-label">Total Employees</span>
+                    <span class="stat-value">@Model.Count()</span>
+                </div>
             </div>
-
         </div>
 
-    </body>
+        <div class="table-outer-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:100px;">Employee ID</th>
+                        <th>Full Name</th>
+                        <th style="width:100px;">Gender</th>
+                        <th style="width:140px;">Birth Date</th>
+                        <th style="width:160px;">Tel</th>
+                        <th style="width:200px;">System Role</th>
+                        <th style="width:120px;text-align:center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td><span class="id-badge">#@user.Id</span></td>
 
+                        <td>
+                            <div class="user-cell">
+                                <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(user.FullName ?? "User")&background=000&color=fff">
+                                <div class="user-meta">
+                                    <span class="user-name">@(user.FullName ?? "-")</span>
+                                    <span class="user-email">@(user.Email ?? "-")</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>@(user.Userprofile?.Gender ?? "-")</td>
+                        <td>@(user.Userprofile?.Birthday?.ToString("dd MMM yyyy") ?? "-")</td>
+                        <td>@(user.Userprofile?.Tel ?? "-")</td>
+
+                        <td>
+                            <form asp-controller="Project" asp-action="ChangeRole" method="post">
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <select name="roleId" class="role-selector" onchange="this.form.submit()">
+                                    @{
+                                        var roles = new[] {
+                                            (1, "Admin"),
+                                            (2, "Manager"),
+                                            (3, "Staff"),
+                                            (4, "Customer"),
+                                            (5, "Guest")
+                                        };
+                                        foreach (var (rid, rname) in roles)
+                                        {
+                                            if (user.RoleId == rid)
+                                            {
+                                                <option value="@rid" selected="selected">@rname</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@rid">@rname</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            </form>
+                        </td>
+
+                        <td style="text-align:center">
+                            <a asp-controller="Project" asp-action="EditUser"
+                               asp-route-id="@user.Id" class="btn-edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a asp-controller="Project" asp-action="DeleteUser"
+                               asp-route-id="@user.Id" class="btn-delete"
+                               onclick="return confirm('ลบผู้ใช้ @(user.FullName ?? user.Username)?')">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</body>
 </html>

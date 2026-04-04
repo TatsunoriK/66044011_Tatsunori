@@ -1,288 +1,312 @@
+@model IEnumerable<_66044011_Tatsunori.Models.Product>
 @{
     Layout = "_HeaderFoot";
+    ViewData["Title"] = "สินค้าทั้งหมด";
 }
 
+@section Styles {
+<style>
+    .promo-banner {
+        background-color: #1a1a1a;
+        color: #ffc107;
+        padding: 12px 0;
+        font-weight: 600;
+        text-align: center;
+        border-bottom: 4px solid #ffc107;
+        font-size: 0.95rem;
+    }
+    .filter-sidebar {
+        background: #fff;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.05);
+        border: 1px solid #e0e0e0;
+        position: sticky;
+        top: 80px;
+    }
+    .filter-group h5 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 18px;
+        color: #1a1a1a;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+    }
+    .filter-label {
+        font-size: .8rem;
+        font-weight: 600;
+        color: #6c757d;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .product-card {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all .3s ease;
+        border: 1px solid #eee;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0,0,0,.1);
+    }
+    .product-img {
+        background-color: #f8f9fa;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        color: #dee2e6;
+    }
+    .stock-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: .7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+    .product-info {
+        padding: 18px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .brand-label {
+        font-size: .72rem;
+        color: #95a5a6;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+    }
+    .product-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2d3436;
+        margin-bottom: 6px;
+        flex: 1;
+    }
+    .price-text {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0d6efd;
+        margin-bottom: 14px;
+    }
+    .btn-add-cart {
+        background-color: #1a1a1a;
+        color: #fff;
+        border: none;
+        padding: 10px;
+        border-radius: 8px;
+        width: 100%;
+        font-weight: 600;
+        margin-top: auto;
+        transition: .2s;
+        cursor: pointer;
+    }
+    .btn-add-cart:hover { background-color: #ffc107; color: #1a1a1a; }
+    .btn-add-cart:disabled { background: #ccc; cursor: not-allowed; }
+</style>
+}
 
+<div class="promo-banner" style="margin: -40px -12px 30px -12px;">
+    <i class="fas fa-bolt me-2"></i> Flash Sale: ปืนยาว AEG ลด 20% | แถมฟรี! ลูกกระสุน 1 ถุง เมื่อโอนเงินออนไลน์วันนี้
+</div>
 
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strike Force - Tactical Shop</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="project1.css" asp-append-version="true">
+<div class="container-fluid px-lg-4">
+<div class="row g-4">
 
-    <style>
-            body {
-                background-color: #f4f6f9;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            }
+    <aside class="col-lg-3">
+        <div class="filter-sidebar">
+            <div class="filter-group">
+                <h5><i class="fas fa-filter me-2"></i>กรองสินค้า</h5>
+                <form method="get" asp-action="ProductList" asp-controller="Project">
 
-            /* Promo Banner */
-            .promo-banner {
-                background-color: #1a1a1a;
-                color: #ffc107;
-                padding: 12px 0;
-                font-weight: 600;
-                text-align: center;
-                border-bottom: 4px solid #ffc107;
-                font-size: 0.95rem;
-            }
-
-            /* Sidebar Styling */
-            .filter-sidebar {
-                background: #ffffff;
-                padding: 24px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-                border: 1px solid #e0e0e0;
-            }
-
-            .filter-group h3 {
-                font-size: 1.25rem;
-                font-weight: 700;
-                margin-bottom: 20px;
-                color: #1a1a1a;
-                border-bottom: 2px solid #f0f0f0;
-                padding-bottom: 10px;
-            }
-
-            .filter-group h6 {
-                font-weight: 600;
-                color: #6c757d;
-                margin-bottom: 15px;
-            }
-
-            /* Product Card Styling */
-            .product-card {
-                background: #ffffff;
-                border-radius: 12px;
-                overflow: hidden;
-                transition: all 0.3s ease;
-                border: 1px solid #eee;
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .product-card:hover {
-                transform: translateY(-8px);
-                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-            }
-
-            .product-img {
-                background-color: #f8f9fa;
-                height: 220px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                color: #dee2e6;
-            }
-
-            .badge-status {
-                position: absolute;
-                top: 12px;
-                left: 12px;
-                padding: 5px 12px;
-                border-radius: 20px;
-                font-size: 0.7rem;
-                font-weight: bold;
-                text-transform: uppercase;
-            }
-
-            .product-info {
-                padding: 20px;
-                flex-grow: 1;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .product-info h4 {
-                font-size: 1.1rem;
-                font-weight: 600;
-                margin-bottom: 8px;
-                color: #2d3436;
-            }
-
-            .price-text {
-                font-size: 1.4rem;
-                font-weight: 700;
-                color: #0d6efd;
-            }
-
-            .old-price {
-                text-decoration: line-through;
-                color: #adb5bd;
-                font-size: 0.9rem;
-                margin-left: 8px;
-            }
-
-            /* Button Styling */
-            .btn-add-cart {
-                background-color: #1a1a1a;
-                color: #ffffff;
-                border: none;
-                padding: 10px;
-                border-radius: 8px;
-                width: 100%;
-                font-weight: 600;
-                margin-top: auto;
-                transition: 0.2s;
-            }
-
-            .btn-add-cart:hover {
-                background-color: #ffc107;
-                color: #1a1a1a;
-            }
-
-            /* Utility */
-            .brand-label {
-                font-size: 0.75rem;
-                color: #95a5a6;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                margin-bottom: 4px;
-            }
-    </style>
-</head>
-
-<body>
-
-    <div class="promo-banner">
-        <i class="fas fa-bolt me-2"></i> Flash Sale: ปืนยาว AEG ลด 20% | แถมฟรี! ลูกกระสุน 1 ถุง
-        เมื่อโอนเงินออนไลน์วันนี้
-    </div>
-
-    <div class="container-fluid py-5 px-lg-5">
-        <div class="row g-4">
-
-            <aside class="col-lg-3">
-                <div class="filter-sidebar">
-                    <div class="filter-group">
-                        <h3><i class="fas fa-cog me-2"></i>จัดการสินค้า</h3>
-
-                        <div class="mb-4">
-                            <h6>ประเภทระบบ</h6>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="aeg">
-                                <label class="form-check-label" for="aeg">ไฟฟ้า (AEG)</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="gbb">
-                                <label class="form-check-label" for="gbb">แก๊ส (GBB)</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="spring">
-                                <label class="form-check-label" for="spring">สปริง (Spring)</label>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <h6>งบประมาณ (บาท)</h6>
-                            <input type="range" class="form-range" min="1000" max="30000" id="priceRange">
-                            <div class="d-flex justify-content-between small text-muted mt-2">
-                                <span>1,000</span>
-                                <span class="fw-bold text-dark">30,000</span>
-                            </div>
-                        </div>
-
-                        <div class="mb-2">
-                            <h6>แบรนด์ยอดนิยม</h6>
-                            <select class="form-select border-2">
-                                <option selected>Tokyo Marui</option>
-                                <option>VFC / Umarex</option>
-                                <option>G&G Armament</option>
-                                <option>WE Tech</option>
-                            </select>
-                        </div>
+                    <div class="mb-3">
+                        <span class="filter-label">ค้นหา</span>
+                        <input type="text" name="search" class="form-control form-control-sm"
+                               placeholder="ชื่อสินค้า..." value="@ViewBag.Search" />
                     </div>
-                </div>
-            </aside>
 
-            <main class="col-lg-9">
-                <div class="d-flex justify-content-between align-items-end mb-4">
-                    <div>
-                        <h2 class="fw-bold mb-1">ชิ้นส่วนมาใหม่</h2>
-                        <p class="text-muted small m-0">แสดงผล 12 รายการที่ตรงกับเงื่อนไข</p>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <select class="form-select form-select-sm" style="width: 160px;">
-                            <option>เรียงตาม: ล่าสุด</option>
-                            <option>ราคา: ต่ำ - สูง</option>
-                            <option>ราคา: สูง - ต่ำ</option>
+                    <div class="mb-3">
+                        <span class="filter-label">ประเภทสินค้า</span>
+                        <select name="catId" class="form-select form-select-sm">
+                            <option value="">-- ทั้งหมด --</option>
+                            @foreach (var c in (IEnumerable<_66044011_Tatsunori.Models.Category>)ViewBag.Categories)
+                            {
+                                if (ViewBag.CatId != null && (int)ViewBag.CatId == c.CatId)
+                                {
+                                    <option value="@c.CatId" selected="selected">@c.CatName</option>
+                                }
+                                else
+                                {
+                                    <option value="@c.CatId">@c.CatName</option>
+                                }
+                            }
                         </select>
                     </div>
-                </div>
 
-                <div class="row g-4">
-                    <div class="col-md-6 col-xl-4">
-                        <div class="product-card">
-                            <div class="product-img">
-                                <span class="badge-status bg-danger text-white">Hot Item</span>
-                                <i class="fas fa-gun fa-4x opacity-25"></i>
-                            </div>
-                            <div class="product-info">
-                                <span class="brand-label">Tokyo Marui</span>
-                                <h4>M4A1 Carbine (Full Metal)</h4>
-                                <div class="mb-3">
-                                    <span class="price-text">฿8,500</span>
-                                    <span class="old-price">฿10,900</span>
-                                </div>
-                                <button class="btn-add-cart">
-                                    <i class="fas fa-shopping-cart me-2"></i>เพิ่มลงตะกร้า
-                                </button>
-                            </div>
+                    <div class="mb-3">
+                        <span class="filter-label">ยี่ห้อ</span>
+                        <select name="brandId" class="form-select form-select-sm">
+                            <option value="">-- ทั้งหมด --</option>
+                            @foreach (var b in (IEnumerable<_66044011_Tatsunori.Models.Brand>)ViewBag.Brands)
+                            {
+                                if (ViewBag.BrandId != null && (int)ViewBag.BrandId == b.BrandId)
+                                {
+                                    <option value="@b.BrandId" selected="selected">@b.BrandName</option>
+                                }
+                                else
+                                {
+                                    <option value="@b.BrandId">@b.BrandName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="filter-label">ช่วงราคา (฿)</span>
+                        <div class="d-flex gap-2">
+                            <input type="number" name="minPrice" class="form-control form-control-sm"
+                                   placeholder="ต่ำสุด" value="@ViewBag.MinPrice" min="0" />
+                            <input type="number" name="maxPrice" class="form-control form-control-sm"
+                                   placeholder="สูงสุด" value="@ViewBag.MaxPrice" min="0" />
                         </div>
                     </div>
 
-                    <div class="col-md-6 col-xl-4">
-                        <div class="product-card">
-                            <div class="product-img">
-                                <span class="badge-status bg-dark text-white">New</span>
-                                <i class="fas fa-bullseye fa-4x opacity-25"></i>
-                            </div>
-                            <div class="product-info">
-                                <span class="brand-label">Accessories</span>
-                                <h4>กล้อง Dot Sight T1</h4>
-                                <div class="mb-3">
-                                    <span class="price-text">฿1,200</span>
-                                </div>
-                                <button class="btn-add-cart">
-                                    <i class="fas fa-shopping-cart me-2"></i>เพิ่มลงตะกร้า
-                                </button>
-                            </div>
-                        </div>
+                    <div class="mb-4">
+                        <span class="filter-label">เรียงโดย</span>
+                        <select name="sort" class="form-select form-select-sm">
+                            <option value="">ค่าเริ่มต้น</option>
+                            @if (ViewBag.Sort == "price_asc")
+                            {
+                                <option value="price_asc" selected="selected">ราคา ต่ำ → สูง</option>
+                                <option value="price_desc">ราคา สูง → ต่ำ</option>
+                            }
+                            else if (ViewBag.Sort == "price_desc")
+                            {
+                                <option value="price_asc">ราคา ต่ำ → สูง</option>
+                                <option value="price_desc" selected="selected">ราคา สูง → ต่ำ</option>
+                            }
+                            else
+                            {
+                                <option value="price_asc">ราคา ต่ำ → สูง</option>
+                                <option value="price_desc">ราคา สูง → ต่ำ</option>
+                            }
+                        </select>
                     </div>
 
-                    <div class="col-md-6 col-xl-4">
-                        <div class="product-card">
-                            <div class="product-img">
-                                <i class="fas fa-box-open fa-4x opacity-25"></i>
-                            </div>
-                            <div class="product-info">
-                                <span class="brand-label">G&G Armament</span>
-                                <h4>ARP9 CQB Carbine</h4>
-                                <div class="mb-3">
-                                    <span class="price-text">฿7,200</span>
-                                </div>
-                                <button class="btn-add-cart">
-                                    <i class="fas fa-shopping-cart me-2"></i>เพิ่มลงตะกร้า
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <button type="submit" class="btn btn-dark btn-sm w-100">
+                        <i class="fas fa-search me-1"></i>ค้นหา
+                    </button>
+                    <a asp-action="ProductList" asp-controller="Project"
+                       class="btn btn-outline-secondary btn-sm w-100 mt-2">
+                        <i class="fas fa-undo me-1"></i>ล้างตัวกรอง
+                    </a>
 
-                    
-                </div>
-            </main>
-
+                </form>
+            </div>
         </div>
-    </div>
+    </aside>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <main class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">สินค้าทั้งหมด</h2>
+                <small class="text-muted">พบ @Model.Count() รายการ</small>
+            </div>
+            @if (ViewBag.RoleId != null && (int)ViewBag.RoleId <= 2)
+            {
+                <a asp-action="Management" asp-controller="Project" class="btn btn-sm btn-outline-dark">
+                    <i class="fas fa-users-cog me-1"></i>จัดการระบบ
+                </a>
+            }
+        </div>
 
-</html>
+        @if (TempData["CartMsg"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show py-2">
+                <i class="fas fa-check-circle me-1"></i> @TempData["CartMsg"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-box-open fa-3x mb-3"></i>
+                <p>ไม่พบสินค้าที่ตรงกับเงื่อนไข</p>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            @foreach (var p in Model)
+            {
+                var inStock = p.Productstock?.Quantity ?? 0;
+                <div class="col">
+                    <div class="product-card">
+                        <div class="product-img">
+                            @if (inStock <= 0)
+                            {
+                                <span class="stock-badge bg-danger text-white">หมด</span>
+                            }
+                            else if (inStock <= 5)
+                            {
+                                <span class="stock-badge bg-warning text-dark">เหลือน้อย</span>
+                            }
+                            else
+                            {
+                                <span class="stock-badge bg-success text-white">มีสินค้า</span>
+                            }
+                            <i class="fas fa-gun fa-4x opacity-25"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="brand-label">
+                                @(p.Brand?.BrandName ?? "—") · @(p.Cat?.CatName ?? "—")
+                            </div>
+                            <div class="product-name">@p.Pname</div>
+                            <div class="price-text">฿@p.Price.ToString("N0")</div>
+
+                            @if (ViewBag.Username != null)
+                            {
+                                <form asp-action="AddToCart" asp-controller="Project" method="post">
+                                    <input type="hidden" name="pid" value="@p.Pid" />
+                                    <input type="hidden" name="qty" value="1" />
+                                    @if (inStock <= 0)
+                                    {
+                                        <button type="submit" class="btn-add-cart" disabled>
+                                            <i class="fas fa-shopping-cart me-2"></i>สินค้าหมด
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn-add-cart">
+                                            <i class="fas fa-shopping-cart me-2"></i>เพิ่มลงตะกร้า
+                                        </button>
+                                    }
+                                </form>
+                            }
+                            else
+                            {
+                                <a asp-action="Login" asp-controller="Project"
+                                   class="btn-add-cart text-center d-block text-decoration-none">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login เพื่อซื้อ
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            </div>
+        }
+    </main>
+
+</div>
+</div>

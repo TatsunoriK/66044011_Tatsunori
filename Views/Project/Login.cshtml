@@ -7,39 +7,51 @@
 <html lang="th">
 
 <head>
-       
     <meta charset="UTF-8">
-       
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login - STRIKE FORCE BB GUN</title>
-       
+    <title>Login - STRIKE FORCE BB GUN</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="/css/login.css" asp-append-version="true">
-        
 </head>
 
 <body>
-        <div class="left-side"></div>
-        <div class="divider"></div>
-        <div class="right-side">
-                <div class="login-box">
-                        <img src="/images/Logo.png" alt="Strike Force Logo" class="logo">
-                        <h1>Login</h1>
-                        <form asp-action="Project1" asp-controller="Project" method="post">
-                                <div class="input-group"><input type="text" asp-for="UserId" placeholder="Username" required></div>
-                                <div class="input-group"><input type="password" asp-for="Password" placeholder="Password" required></div>
-                                <a href="#" class="forget-pwd">Forgot Password?</a>
-                                <button type="submit" class="login-btn">Login</button>
-                            </form>
-                        <p class="social-text">Or login with</p>
-                        <div class="social-icons">
-                                <a href="#" class="icon-btn google"><i class="fab fa-google"></i></a>
-                                <a href="#" class="icon-btn facebook"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#" class="icon-btn x-twitter"><i class="fab fa-x-twitter"></i></a>
-                            </div>
-                        <p class="signup-text">Don't have an account? <a asp-action="Register" asp-controller="Project">Sign Up</a></p>
-                    </div>
+    <div class="left-side"></div>
+    <div class="divider"></div>
+    <div class="right-side">
+        <div class="login-box">
+            <img src="/images/Logo.png" alt="Strike Force Logo" class="logo">
+            <h1>Login</h1>
+
+            @if (ViewBag.Error != null)
+            {
+                <p style="color:#ff6b6b; font-size:.9rem; margin-bottom:10px;">
+                    <i class="fas fa-exclamation-circle me-1"></i>@ViewBag.Error
+                </p>
+            }
+
+            <form asp-action="Login" asp-controller="Project" method="post">
+                <div class="input-group">
+                    <input type="text" asp-for="UserId" placeholder="Username" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" asp-for="Password" placeholder="Password" required>
+                </div>
+                <a href="#" class="forget-pwd">Forgot Password?</a>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+
+            <p class="social-text">Or login with</p>
+            <div class="social-icons">
+                <a href="#" class="icon-btn google"><i class="fab fa-google"></i></a>
+                <a href="#" class="icon-btn facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="icon-btn x-twitter"><i class="fab fa-x-twitter"></i></a>
             </div>
+            <p class="signup-text">
+                Don't have an account?
+                <a asp-action="Register" asp-controller="Project">Sign Up</a>
+            </p>
+        </div>
+    </div>
 </body>
 
 </html>

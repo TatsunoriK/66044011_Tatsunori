@@ -1,0 +1,79 @@
+@model IEnumerable<_66044011_Tatsunori.Models.Order>
+@{
+    Layout = "_HeaderFoot";
+    ViewData["Title"] = "ประวัติการสั่งซื้อ";
+}
+
+@section Styles {
+<style>
+    .history-wrapper { max-width: 900px; margin: 0 auto; }
+    .order-card { background: #fff; border-radius: 12px; border: 1px solid #eee;
+                  margin-bottom: 20px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+    .order-head { background: #f8f9fa; padding: 14px 20px;
+                  display: flex; justify-content: space-between; align-items: center;
+                  border-bottom: 1px solid #eee; }
+    .order-id { font-weight: 700; color: #1a1a1a; }
+    .order-date { font-size: .85rem; color: #6c757d; }
+    .status-badge { padding: 5px 14px; border-radius: 20px; font-size: .8rem; font-weight: 700; }
+    .status-Pending   { background: #fff3cd; color: #856404; }
+    .status-Paid      { background: #d1e7dd; color: #0f5132; }
+    .status-Shipped   { background: #cff4fc; color: #055160; }
+    .status-Cancelled { background: #f8d7da; color: #842029; }
+    .order-body { padding: 16px 20px; }
+    .item-row { display: flex; justify-content: space-between;
+                padding: 8px 0; border-bottom: 1px dashed #f0f0f0; font-size: .9rem; }
+    .item-row:last-child { border: none; }
+    .total-row { font-weight: 700; font-size: 1rem; color: #0d6efd;
+                 padding-top: 12px; text-align: right; }
+    .empty-history { text-align: center; padding: 80px 20px; color: #adb5bd; }
+</style>
+}
+
+<div class="history-wrapper py-2">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0"><i class="fas fa-history me-2"></i>ประวัติการสั่งซื้อ</h2>
+        <a asp-action="ProductList" class="btn btn-outline-dark btn-sm">
+            <i class="fas fa-store me-1"></i>เลือกซื้อสินค้า
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-history">
+            <i class="fas fa-receipt fa-3x mb-3"></i>
+            <h5>ยังไม่มีประวัติการสั่งซื้อ</h5>
+        </div>
+    }
+    else
+    {
+        @foreach (var order in Model)
+        {
+            <div class="order-card">
+                <div class="order-head">
+                    <div>
+                        <span class="order-id">ออเดอร์ #@order.OrderId</span>
+                        <span class="order-date ms-3">
+                            <i class="fas fa-calendar-alt me-1"></i>
+                            @order.OrderDate?.ToString("dd/MM/yyyy HH:mm")
+                        </span>
+                    </div>
+                    <span class="status-badge status-@order.Status">@order.Status</span>
+                </div>
+                <div class="order-body">
+                    @foreach (var d in order.Orderdetails)
+                    {
+                        <div class="item-row">
+                            <span>@(d.PidNavigation?.Pname ?? $"สินค้า #{d.Pid}")</span>
+                            <span>x@d.Qty &nbsp;
+                                <strong class="text-primary">฿@((d.UnitPrice * d.Qty).ToString("N0"))</strong>
+                            </span>
+                        </div>
+                    }
+                    <div class="total-row">
+                        ยอดรวมทั้งสิ้น: ฿@order.TotalAmount.ToString("N0")
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
