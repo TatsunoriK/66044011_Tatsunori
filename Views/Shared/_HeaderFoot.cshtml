@@ -13,31 +13,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     @RenderSection("Styles", required: false)
     <style>
-        body {
-            font-family: 'Krub', sans-serif;
-            background: #f0f2f5;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+        body { font-family: 'Krub', sans-serif; background: #f0f2f5; display: flex; flex-direction: column; min-height: 100vh; }
         .top-auth-bar { background: #11181e; padding: 5px 0; border-bottom: 1px solid #333; }
         .top-auth-bar a { color: #adb5bd; text-decoration: none; font-size: .8rem; margin-left: 15px; transition: .3s; }
         .top-auth-bar a:hover { color: #f39c12; }
         header { background: #fff; padding: 15px 0; border-bottom: 4px solid #f39c12; }
-        .logo-img {
-            max-height: 140px; width: auto; display: block; margin: 0 auto;
-            transition: transform .3s; filter: drop-shadow(0 0 8px rgba(243,156,18,.3));
-        }
+        .logo-img { max-height: 140px; width: auto; display: block; margin: 0 auto; transition: transform .3s; filter: drop-shadow(0 0 8px rgba(243,156,18,.3)); }
         .logo-img:hover { transform: scale(1.05); }
         .main-nav { background: #1a1a1a; box-shadow: 0 4px 10px rgba(0,0,0,.3); }
-        .navbar-nav .nav-link {
-            color: #fff !important; font-weight: 600; padding: 14px 20px !important;
-            text-transform: uppercase; font-size: .85rem; transition: .3s; position: relative;
-        }
-        .navbar-nav .nav-link::after {
-            content: ""; position: absolute; bottom: 0; left: 50%;
-            width: 0; height: 3px; background: #f39c12; transition: .3s; transform: translateX(-50%);
-        }
+        .navbar-nav .nav-link { color: #fff !important; font-weight: 600; padding: 14px 20px !important; text-transform: uppercase; font-size: .85rem; transition: .3s; position: relative; }
+        .navbar-nav .nav-link::after { content: ""; position: absolute; bottom: 0; left: 50%; width: 0; height: 3px; background: #f39c12; transition: .3s; transform: translateX(-50%); }
         .navbar-nav .nav-link:hover::after { width: 100%; }
         .navbar-nav .nav-link:hover { color: #f39c12 !important; }
         .content-wrapper { flex: 1; padding: 40px 0; }
@@ -122,7 +107,7 @@
                     </li>
                 }
 
-                @* Manager (2) — ออเดอร์ + รายงาน เท่านั้น *@
+                @* Manager (2) *@
                 @if (sessionRole == 2)
                 {
                     <li class="nav-item">
@@ -137,9 +122,14 @@
                     </li>
                 }
 
-                @* Admin (1) — ทุกหน้า *@
+                @* Admin (1) *@
                 @if (sessionRole == 1)
                 {
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" asp-controller="Project" asp-action="Dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link text-warning" asp-controller="Project" asp-action="Management">
                             <i class="fas fa-users-cog me-1"></i> จัดการระบบ

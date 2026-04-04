@@ -1,0 +1,161 @@
+@{
+    Layout = "_HeaderFoot";
+    ViewData["Title"] = "Dashboard";
+    var alertStocks = (IEnumerable<_66044011_Tatsunori.Models.Productstock>)ViewBag.AlertStocks;
+}
+
+@section Styles {
+<style>
+    .dash-wrapper { max-width: 1200px; margin: 0 auto; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 16px; margin-bottom: 28px; }
+    .kpi-card { background: #fff; border-radius: 14px; padding: 22px 24px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,.04); position: relative; overflow: hidden; }
+    .kpi-card .kpi-icon { font-size: 3rem; opacity: .07; position: absolute; right: 16px; bottom: 10px; }
+    .kpi-card .kpi-val { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+    .kpi-card .kpi-lbl { font-size: .78rem; color: #adb5bd; text-transform: uppercase; margin-top: 6px; }
+    .kpi-card .kpi-sub { font-size: .82rem; color: #6c757d; margin-top: 4px; }
+    .section-card { background: #fff; border-radius: 14px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,.04); overflow: hidden; margin-bottom: 24px; }
+    .section-head { background: #1a1a1a; color: #fff; padding: 14px 20px; font-weight: 700; font-size: .95rem; display: flex; justify-content: space-between; align-items: center; }
+    .section-head a { color: #f39c12; font-size: .82rem; text-decoration: none; }
+    .section-head a:hover { text-decoration: underline; }
+    .dash-table { width: 100%; border-collapse: collapse; }
+    .dash-table th { background: #f8f9fa; padding: 11px 16px; font-size: .82rem; color: #6c757d; font-weight: 600; border-bottom: 2px solid #eee; white-space: nowrap; }
+    .dash-table td { padding: 12px 16px; border-bottom: 1px solid #f5f5f5; font-size: .9rem; vertical-align: middle; }
+    .dash-table tr:last-child td { border-bottom: none; }
+    .dash-table tr:hover td { background: #fafafa; }
+    .status-pill { padding: 3px 10px; border-radius: 20px; font-size: .75rem; font-weight: 700; }
+    .pill-Pending   { background: #fff3cd; color: #856404; }
+    .pill-Paid      { background: #d1e7dd; color: #0f5132; }
+    .pill-Shipped   { background: #cff4fc; color: #055160; }
+    .pill-Cancelled { background: #f8d7da; color: #842029; }
+    .bar-bg { background: #f0f0f0; border-radius: 4px; height: 8px; margin-top: 6px; }
+    .bar-fg { background: #1a1a1a; border-radius: 4px; height: 8px; }
+    .alert-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-bottom: 1px solid #f5f5f5; font-size: .9rem; }
+    .alert-item:last-child { border: none; }
+    .alert-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+</style>
+}
+
+<div class="dash-wrapper">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h2>
+            <small class="text-muted">ภาพรวมระบบ ณ วันที่ @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+        </div>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <i class="fas fa-users kpi-icon"></i>
+            <div class="kpi-val text-primary">@ViewBag.TotalUsers</div>
+            <div class="kpi-lbl">ผู้ใช้งานทั้งหมด</div>
+        </div>
+        <div class="kpi-card">
+            <i class="fas fa-box kpi-icon"></i>
+            <div class="kpi-val text-success">@ViewBag.TotalProducts</div>
+            <div class="kpi-lbl">สินค้าทั้งหมด</div>
+        </div>
+        <div class="kpi-card">
+            <i class="fas fa-shopping-bag kpi-icon"></i>
+            <div class="kpi-val">@ViewBag.TotalOrders</div>
+            <div class="kpi-lbl">ออเดอร์ทั้งหมด</div>
+            @if ((int)ViewBag.PendingOrders > 0)
+            {
+                <div class="kpi-sub text-warning">
+                    <i class="fas fa-clock me-1"></i>รอดำเนินการ @ViewBag.PendingOrders รายการ
+                </div>
+            }
+        </div>
+        <div class="kpi-card">
+            <i class="fas fa-dollar-sign kpi-icon"></i>
+            <div class="kpi-val" style="color:#f39c12; font-size:1.6rem;">฿@((decimal)ViewBag.TotalRevenue).ToString("N0")</div>
+            <div class="kpi-lbl">รายได้รวม</div>
+            <div class="kpi-sub text-success">เดือนนี้: ฿@((decimal)ViewBag.MonthRevenue).ToString("N0")</div>
+        </div>
+        <div class="kpi-card">
+            <i class="fas fa-exclamation-triangle kpi-icon"></i>
+            <div class="kpi-val text-danger">@ViewBag.OutOfStock</div>
+            <div class="kpi-lbl">สินค้าหมดสต็อก</div>
+            <div class="kpi-sub text-warning">เหลือน้อย: @ViewBag.LowStock รายการ</div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="section-card">
+                <div class="section-head">
+                    <span><i class="fas fa-clock me-2"></i>ออเดอร์ล่าสุด</span>
+                    <a asp-action="OrderManagement" asp-controller="Project">ดูทั้งหมด →</a>
+                </div>
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>ลูกค้า</th><th>วันที่</th>
+                            <th class="text-end">ยอด</th><th class="text-center">สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var o in (dynamic)ViewBag.RecentOrders)
+                    {
+                        <tr>
+                            <td class="fw-bold">#@o.OrderId</td>
+                            <td>@(o.User?.FullName ?? o.User?.Username ?? "-")</td>
+                            <td class="text-muted small">@o.OrderDate?.ToString("dd/MM/yy HH:mm")</td>
+                            <td class="text-end fw-bold text-primary">฿@o.TotalAmount.ToString("N0")</td>
+                            <td class="text-center"><span class="status-pill pill-@o.Status">@o.Status</span></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="section-card mb-4">
+                <div class="section-head">
+                    <span><i class="fas fa-trophy me-2"></i>สินค้าขายดี</span>
+                    <a asp-action="SalesReport" asp-controller="Project">ดูรายงาน →</a>
+                </div>
+                <div class="p-3">
+                @{
+                    var tops   = (dynamic)ViewBag.TopProducts;
+                    int maxQty = 0;
+                    foreach (var t in tops) { if ((int)t.Qty > maxQty) maxQty = (int)t.Qty; }
+                }
+                @foreach (var t in tops)
+                {
+                    int pct = maxQty > 0 ? (int)((decimal)(int)t.Qty / maxQty * 100) : 0;
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="small fw-semibold">@t.Name</span>
+                            <span class="small text-muted">@t.Qty ชิ้น</span>
+                        </div>
+                        <div class="bar-bg"><div class="bar-fg" style="width:@pct%"></div></div>
+                    </div>
+                }
+                </div>
+            </div>
+
+            @if (alertStocks.Any())
+            {
+                <div class="section-card">
+                    <div class="section-head">
+                        <span><i class="fas fa-bell me-2"></i>แจ้งเตือนสต็อก</span>
+                        <a asp-action="StockList" asp-controller="Project">จัดการ →</a>
+                    </div>
+                    @foreach (var s in alertStocks)
+                    {
+                        var qty = s.Quantity ?? 0;
+                        <div class="alert-item">
+                            <div class="alert-dot @(qty <= 0 ? "bg-danger" : "bg-warning")"></div>
+                            <span class="flex-grow-1 small">@s.PidNavigation?.Pname</span>
+                            <span class="fw-bold @(qty <= 0 ? "text-danger" : "text-warning") small">
+                                @(qty <= 0 ? "หมด" : $"เหลือ {qty}")
+                            </span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
