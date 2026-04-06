@@ -1,0 +1,163 @@
+/* ===========================
+   STOCK LIST + STOCK HISTORY
+   =========================== */
+.stock-wrapper  { max-width: 1100px; margin: 0 auto; }
+.history-wrapper { max-width: 900px; margin: 0 auto; }
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+/* Summary Bar */
+.summary-bar { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.summary-item {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    padding: 14px 20px;
+    flex: 1;
+    min-width: 150px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.04);
+}
+.summary-item .val { font-size: 1.8rem; font-weight: 700; }
+.summary-item .lbl { font-size: .78rem; color: #adb5bd; text-transform: uppercase; }
+
+/* Table Card */
+.stock-card,
+.history-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    overflow: hidden;
+}
+.stock-card th,
+.history-card th {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 14px 20px;
+    font-size: .85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.stock-card td,
+.history-card td {
+    padding: 14px 20px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f5f5f5;
+}
+.stock-card tr:last-child td,
+.history-card tr:last-child td { border-bottom: none; }
+.stock-card tr:hover td,
+.history-card tr:hover td { background: #fafafa; }
+
+/* Quantity Input */
+.qty-input {
+    width: 90px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-weight: 600;
+    transition: .2s;
+}
+.qty-input:focus { outline: none; border-color: #1a1a1a; box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
+
+/* Save Button */
+.btn-save {
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: .2s;
+    white-space: nowrap;
+}
+.btn-save:hover { background: #f39c12; color: #1a1a1a; }
+
+/* History Button */
+.btn-history {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #ddd;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-history:hover { background: #e9ecef; color: #1a1a1a; }
+
+/* Stock Status Badge */
+.badge-stock { padding: 5px 12px; border-radius: 20px; font-size: .75rem; font-weight: 700; }
+
+/* Low Stock Row */
+.low-row td { background: #fff8f0 !important; }
+
+/* History Change Colors */
+.change-up   { color: #198754; font-weight: 700; }
+.change-down { color: #dc3545; font-weight: 700; }
+.change-none { color: #adb5bd; }
+
+.arrow-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8f9fa;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: .85rem;
+    font-weight: 600;
+}
+
+/* Confirm Modal */
+.confirm-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+.confirm-modal-overlay.show { display: flex; }
+.confirm-modal-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+.confirm-qty-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+}
+.confirm-qty-val {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.confirm-qty-lbl {
+    font-size: .72rem;
+    color: #adb5bd;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+.confirm-arrow { font-size: 1.4rem; color: #adb5bd; }
+.confirm-diff  { font-size: 1.1rem; font-weight: 700; margin-left: auto; }

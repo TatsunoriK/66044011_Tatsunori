@@ -1,0 +1,113 @@
+/* ===========================
+   DASHBOARD
+   =========================== */
+.dash-wrapper { max-width: 1200px; margin: 0 auto; }
+
+/* KPI Grid */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.kpi-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 22px 24px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    position: relative;
+    overflow: hidden;
+}
+.kpi-card .kpi-icon {
+    font-size: 3rem;
+    opacity: .07;
+    position: absolute;
+    right: 16px;
+    bottom: 10px;
+}
+.kpi-card .kpi-val {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.kpi-card .kpi-lbl {
+    font-size: .78rem;
+    color: #adb5bd;
+    text-transform: uppercase;
+    margin-top: 6px;
+}
+.kpi-card .kpi-sub {
+    font-size: .82rem;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+/* Section Cards */
+.section-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+.section-head {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: .95rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.section-head a {
+    color: #f39c12;
+    font-size: .82rem;
+    text-decoration: none;
+}
+.section-head a:hover { text-decoration: underline; }
+
+/* Dashboard Table */
+.dash-table { width: 100%; border-collapse: collapse; }
+.dash-table th {
+    background: #f8f9fa;
+    padding: 11px 16px;
+    font-size: .82rem;
+    color: #6c757d;
+    font-weight: 600;
+    border-bottom: 2px solid #eee;
+    white-space: nowrap;
+}
+.dash-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: .9rem;
+    vertical-align: middle;
+}
+.dash-table tr:last-child td { border-bottom: none; }
+.dash-table tr:hover td { background: #fafafa; }
+
+/* Status Pills */
+.status-pill { padding: 3px 10px; border-radius: 20px; font-size: .75rem; font-weight: 700; }
+.pill-Pending   { background: #fff3cd; color: #856404; }
+.pill-Paid      { background: #d1e7dd; color: #0f5132; }
+.pill-Shipped   { background: #cff4fc; color: #055160; }
+.pill-Cancelled { background: #f8d7da; color: #842029; }
+
+/* Bar Chart */
+.bar-bg { background: #f0f0f0; border-radius: 4px; height: 8px; margin-top: 6px; }
+.bar-fg { background: #1a1a1a; border-radius: 4px; height: 8px; }
+
+/* Alert Items */
+.alert-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: .9rem;
+}
+.alert-item:last-child { border: none; }
+.alert-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }

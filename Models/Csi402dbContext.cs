@@ -35,6 +35,8 @@ public partial class Csi402dbContext : DbContext
 
     public virtual DbSet<LabStudent> LabStudents { get; set; }
 
+    public virtual DbSet<Stockhistory> Stockhistories { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseMySql("server=localhost;port=3306;database=csi402db;user=root;password=Nori_kato43016", Microsoft.EntityFrameworkCore.ServerVersion.Parse("9.6.0-mysql"));
 
@@ -224,6 +226,15 @@ public partial class Csi402dbContext : DbContext
     entity.Property(e => e.StdLastname)
           .HasMaxLength(100);
 });
+        modelBuilder.Entity<Stockhistory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.ToTable("stockhistory");
+            entity.Property(e => e.ChangedAt).HasColumnType("datetime");
+            entity.HasOne(d => d.PidNavigation)
+                  .WithMany()
+                  .HasForeignKey(d => d.Pid);
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }

@@ -11,9 +11,9 @@ public class ProjectController : Controller
     private readonly Csi402dbContext _db;
     public ProjectController(Csi402dbContext db) { _db = db; }
 
-    private string? SessionUser   => HttpContext.Session.GetString("Username");
-    private int?    SessionUserId => HttpContext.Session.GetInt32("UserId");
-    private int?    SessionRoleId => HttpContext.Session.GetInt32("RoleId");
+    private string? SessionUser => HttpContext.Session.GetString("Username");
+    private int? SessionUserId => HttpContext.Session.GetInt32("UserId");
+    private int? SessionRoleId => HttpContext.Session.GetInt32("RoleId");
 
     public IActionResult Login()
     {
@@ -29,8 +29,8 @@ public class ProjectController : Controller
         if (user != null)
         {
             HttpContext.Session.SetString("Username", user.Username);
-            HttpContext.Session.SetInt32("UserId",   user.Id);
-            HttpContext.Session.SetInt32("RoleId",   user.RoleId ?? 5);
+            HttpContext.Session.SetInt32("UserId", user.Id);
+            HttpContext.Session.SetInt32("RoleId", user.RoleId ?? 5);
             HttpContext.Session.SetString("FullName", user.FullName ?? user.Username);
             return RedirectToAction("ProductList");
         }
@@ -45,7 +45,7 @@ public class ProjectController : Controller
     }
 
     public IActionResult Project1() => RedirectToAction("ProductList");
-    public IActionResult Index()    => RedirectToAction("ProductList");
+    public IActionResult Index() => RedirectToAction("ProductList");
 
     public IActionResult Register()
     {
@@ -57,9 +57,9 @@ public class ProjectController : Controller
     public IActionResult Register(User user, string Gender, DateOnly Birthday, string Address, string Phone)
     {
         if (_db.Users.Any(u => u.Username == user.Username)) { ViewBag.Error = "Username นี้ถูกใช้งานแล้ว"; return View(); }
-        if (_db.Users.Any(u => u.Email == user.Email))       { ViewBag.Error = "Email นี้ถูกใช้งานแล้ว";    return View(); }
+        if (_db.Users.Any(u => u.Email == user.Email)) { ViewBag.Error = "Email นี้ถูกใช้งานแล้ว"; return View(); }
 
-        user.RoleId    = 4;
+        user.RoleId = 4;
         user.CreatedAt = DateTime.Now;
         _db.Users.Add(user);
         _db.SaveChanges();
@@ -75,20 +75,20 @@ public class ProjectController : Controller
         var query = _db.Products.Include(p => p.Cat).Include(p => p.Brand).Include(p => p.Productstock).AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search)) query = query.Where(p => p.Pname.Contains(search));
-        if (catId.HasValue)    query = query.Where(p => p.CatId   == catId);
-        if (brandId.HasValue)  query = query.Where(p => p.BrandId == brandId);
-        if (minPrice.HasValue) query = query.Where(p => p.Price   >= minPrice);
-        if (maxPrice.HasValue) query = query.Where(p => p.Price   <= maxPrice);
+        if (catId.HasValue) query = query.Where(p => p.CatId == catId);
+        if (brandId.HasValue) query = query.Where(p => p.BrandId == brandId);
+        if (minPrice.HasValue) query = query.Where(p => p.Price >= minPrice);
+        if (maxPrice.HasValue) query = query.Where(p => p.Price <= maxPrice);
 
         query = sort switch
         {
-            "price_asc"  => query.OrderBy(p => p.Price),
+            "price_asc" => query.OrderBy(p => p.Price),
             "price_desc" => query.OrderByDescending(p => p.Price),
-            _            => query.OrderBy(p => p.Pid)
+            _ => query.OrderBy(p => p.Pid)
         };
 
         ViewBag.Categories = _db.Categories.ToList();
-        ViewBag.Brands      = _db.Brands.ToList();
+        ViewBag.Brands = _db.Brands.ToList();
         ViewBag.Search = search; ViewBag.CatId = catId; ViewBag.BrandId = brandId;
         ViewBag.MinPrice = minPrice; ViewBag.MaxPrice = maxPrice; ViewBag.Sort = sort;
         ViewBag.Username = SessionUser; ViewBag.RoleId = SessionRoleId;
@@ -102,7 +102,7 @@ public class ProjectController : Controller
         if (SessionUser == null) return RedirectToAction("Login");
         var cart = GetCart();
         if (!cart.Any()) return View(new List<CartItemViewModel>());
-        var pids     = cart.Keys.ToList();
+        var pids = cart.Keys.ToList();
         var products = _db.Products.Where(p => pids.Contains(p.Pid)).ToList();
         var items = products.Select(p => new CartItemViewModel { Pid = p.Pid, Pname = p.Pname, Price = p.Price, Qty = cart[p.Pid], Subtotal = p.Price * cart[p.Pid] }).ToList();
         return View(items);
@@ -144,7 +144,7 @@ public class ProjectController : Controller
         if (SessionUser == null) return RedirectToAction("Login");
         var cart = GetCart();
         if (!cart.Any()) return RedirectToAction("CartPage");
-        var pids     = cart.Keys.ToList();
+        var pids = cart.Keys.ToList();
         var products = _db.Products.Where(p => pids.Contains(p.Pid)).ToList();
         decimal total = products.Sum(p => p.Price * cart[p.Pid]);
 
@@ -177,17 +177,17 @@ public class ProjectController : Controller
     public IActionResult Dashboard()
     {
         if (SessionRoleId != 1) return RedirectToAction("ProductList");
-        var now   = DateTime.Today;
+        var now = DateTime.Today;
         var month = new DateTime(now.Year, now.Month, 1);
 
-        ViewBag.TotalUsers    = _db.Users.Count();
+        ViewBag.TotalUsers = _db.Users.Count();
         ViewBag.TotalProducts = _db.Products.Count();
-        ViewBag.TotalOrders   = _db.Orders.Count();
+        ViewBag.TotalOrders = _db.Orders.Count();
         ViewBag.PendingOrders = _db.Orders.Count(o => o.Status == "Pending");
-        ViewBag.TotalRevenue  = _db.Orders.Where(o => o.Status != "Cancelled").Sum(o => (decimal?)o.TotalAmount) ?? 0;
-        ViewBag.MonthRevenue  = _db.Orders.Where(o => o.Status != "Cancelled" && o.OrderDate >= month).Sum(o => (decimal?)o.TotalAmount) ?? 0;
-        ViewBag.LowStock      = _db.Productstocks.Count(s => (s.Quantity ?? 0) > 0 && (s.Quantity ?? 0) <= 5);
-        ViewBag.OutOfStock    = _db.Productstocks.Count(s => (s.Quantity ?? 0) <= 0);
+        ViewBag.TotalRevenue = _db.Orders.Where(o => o.Status != "Cancelled").Sum(o => (decimal?)o.TotalAmount) ?? 0;
+        ViewBag.MonthRevenue = _db.Orders.Where(o => o.Status != "Cancelled" && o.OrderDate >= month).Sum(o => (decimal?)o.TotalAmount) ?? 0;
+        ViewBag.LowStock = _db.Productstocks.Count(s => (s.Quantity ?? 0) > 0 && (s.Quantity ?? 0) <= 5);
+        ViewBag.OutOfStock = _db.Productstocks.Count(s => (s.Quantity ?? 0) <= 0);
 
         ViewBag.RecentOrders = _db.Orders.Include(o => o.User).OrderByDescending(o => o.OrderDate).Take(5).ToList();
 
@@ -246,12 +246,12 @@ public class ProjectController : Controller
         var user = _db.Users.Include(u => u.Userprofile).FirstOrDefault(u => u.Id == data.Id);
         if (user == null) return NotFound();
         user.FullName = data.FullName ?? user.FullName;
-        user.Email    = data.Email    ?? user.Email;
+        user.Email = data.Email ?? user.Email;
         if (user.Userprofile != null && data.Userprofile != null)
         {
-            user.Userprofile.Tel      = data.Userprofile.Tel;
-            user.Userprofile.Address  = data.Userprofile.Address;
-            user.Userprofile.Gender   = data.Userprofile.Gender;
+            user.Userprofile.Tel = data.Userprofile.Tel;
+            user.Userprofile.Address = data.Userprofile.Address;
+            user.Userprofile.Gender = data.Userprofile.Gender;
             user.Userprofile.Birthday = data.Userprofile.Birthday;
         }
         _db.Update(user);
@@ -267,11 +267,11 @@ public class ProjectController : Controller
         if (!string.IsNullOrEmpty(status)) query = query.Where(o => o.Status == status);
 
         ViewBag.StatusFilter = status;
-        ViewBag.AllCount     = _db.Orders.Count();
+        ViewBag.AllCount = _db.Orders.Count();
         ViewBag.PendingCount = _db.Orders.Count(o => o.Status == "Pending");
-        ViewBag.PaidCount    = _db.Orders.Count(o => o.Status == "Paid");
+        ViewBag.PaidCount = _db.Orders.Count(o => o.Status == "Paid");
         ViewBag.ShippedCount = _db.Orders.Count(o => o.Status == "Shipped");
-        ViewBag.CancelCount  = _db.Orders.Count(o => o.Status == "Cancelled");
+        ViewBag.CancelCount = _db.Orders.Count(o => o.Status == "Cancelled");
         return View(query.OrderByDescending(o => o.OrderDate).ToList());
     }
 
@@ -310,9 +310,52 @@ public class ProjectController : Controller
     public IActionResult UpdateStock(int pid, int quantity)
     {
         if (SessionRoleId != 1) return RedirectToAction("ProductList");
+
         var stock = _db.Productstocks.Find(pid);
-        if (stock != null) { stock.Quantity = quantity; stock.LastUpdate = DateTime.Now; _db.SaveChanges(); TempData["Success"] = "อัปเดตสต็อกเรียบร้อย"; }
+        var product = _db.Products.Find(pid);
+
+        if (stock != null)
+        {
+            int oldQty = stock.Quantity ?? 0;
+            string note = quantity > oldQty ? $"เพิ่มสต็อก +{quantity - oldQty}"
+                        : quantity < oldQty ? $"ลดสต็อก -{oldQty - quantity}"
+                        : "ไม่มีการเปลี่ยนแปลง";
+
+            _db.Stockhistories.Add(new Stockhistory
+            {
+                Pid = pid,
+                OldQty = oldQty,
+                NewQty = quantity,
+                ChangedBy = SessionUser,
+                ChangedAt = DateTime.Now,
+                Note = note
+            });
+
+            stock.Quantity = quantity;
+            stock.LastUpdate = DateTime.Now;
+            _db.SaveChanges();
+
+            TempData["Success"] = $"อัปเดตสต็อก {product?.Pname} ({oldQty} → {quantity}) เรียบร้อย";
+        }
         return RedirectToAction("StockList");
+    }
+
+    public IActionResult StockHistory(int? pid)
+    {
+        if (SessionRoleId != 1) return RedirectToAction("ProductList");
+
+        var query = _db.Stockhistories
+            .Include(h => h.PidNavigation)
+            .AsQueryable();
+
+        if (pid.HasValue)
+            query = query.Where(h => h.Pid == pid.Value);
+
+        ViewBag.FilterPid = pid;
+        ViewBag.Product = pid.HasValue ? _db.Products.Find(pid.Value) : null;
+        ViewBag.Products = _db.Products.OrderBy(p => p.Pname).ToList();
+
+        return View(query.OrderByDescending(h => h.ChangedAt).ToList());
     }
 
     // SALES REPORT
@@ -323,9 +366,9 @@ public class ProjectController : Controller
         var now = DateTime.Today;
         switch (period)
         {
-            case "daily":  start = now; end = now; break;
+            case "daily": start = now; end = now; break;
             case "yearly": start = new DateTime(now.Year, 1, 1); end = new DateTime(now.Year, 12, 31); break;
-            default:       start = new DateTime(now.Year, now.Month, 1); end = start.AddMonths(1).AddDays(-1); break;
+            default: start = new DateTime(now.Year, now.Month, 1); end = start.AddMonths(1).AddDays(-1); break;
         }
 
         var orders = _db.Orders.Include(o => o.User).Include(o => o.Orderdetails).ThenInclude(d => d.PidNavigation)
@@ -334,9 +377,9 @@ public class ProjectController : Controller
 
         ViewBag.Period = period; ViewBag.Start = start; ViewBag.End = end;
         ViewBag.TotalRevenue = orders.Sum(o => o.TotalAmount);
-        ViewBag.TotalOrders  = orders.Count;
-        ViewBag.TotalItems   = orders.SelectMany(o => o.Orderdetails).Sum(d => d.Qty);
-        ViewBag.TopProducts  = orders.SelectMany(o => o.Orderdetails)
+        ViewBag.TotalOrders = orders.Count;
+        ViewBag.TotalItems = orders.SelectMany(o => o.Orderdetails).Sum(d => d.Qty);
+        ViewBag.TopProducts = orders.SelectMany(o => o.Orderdetails)
             .GroupBy(d => d.PidNavigation?.Pname ?? $"#{d.Pid}")
             .Select(g => new { Name = g.Key, Qty = g.Sum(d => d.Qty), Revenue = g.Sum(d => d.UnitPrice * d.Qty) })
             .OrderByDescending(x => x.Revenue).Take(5).ToList();

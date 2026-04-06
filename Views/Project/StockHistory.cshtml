@@ -1,0 +1,113 @@
+@model IEnumerable<_66044011_Tatsunori.Models.Stockhistory>
+@{
+    Layout = "_HeaderFoot";
+    ViewData["Title"] = "ประวัติสต็อก";
+    int? filterPid = ViewBag.FilterPid;
+    var  filterProduct = ViewBag.Product;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/stockList.css" asp-append-version="true">
+}
+
+<div class="history-wrapper">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">
+                <i class="fas fa-history me-2"></i>ประวัติการเปลี่ยนแปลงสต็อก
+            </h2>
+            @if (filterProduct != null)
+            {
+                <small class="text-muted">สินค้า: <strong>@filterProduct.Pname</strong></small>
+            }
+            else
+            {
+                <small class="text-muted">แสดงทุกสินค้า — @Model.Count() รายการ</small>
+            }
+        </div>
+        <a asp-action="StockList" asp-controller="Project" class="btn btn-outline-dark btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>กลับจัดการสต็อก
+        </a>
+    </div>
+
+    @* Filter by product *@
+    <div class="mb-4 d-flex gap-2 align-items-center flex-wrap">
+        <a asp-action="StockHistory" asp-controller="Project"
+           class="btn btn-sm @(filterPid == null ? "btn-dark" : "btn-outline-secondary")">
+            ทุกสินค้า
+        </a>
+        @foreach (var p in (IEnumerable<_66044011_Tatsunori.Models.Product>)ViewBag.Products)
+        {
+            <a asp-action="StockHistory" asp-controller="Project"
+               asp-route-pid="@p.Pid"
+               class="btn btn-sm @(filterPid == p.Pid ? "btn-dark" : "btn-outline-secondary")">
+                @p.Pname
+            </a>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+            <p>ยังไม่มีประวัติการเปลี่ยนแปลง</p>
+        </div>
+    }
+    else
+    {
+        <div class="history-card">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>สินค้า</th>
+                        <th class="text-center">เดิม</th>
+                        <th class="text-center">ใหม่</th>
+                        <th class="text-center">เปลี่ยนแปลง</th>
+                        <th>หมายเหตุ</th>
+                        <th>แก้ไขโดย</th>
+                        <th>วันที่เวลา</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var h in Model)
+                {
+                    var diff = h.NewQty - h.OldQty;
+                    <tr>
+                        <td class="text-muted small">@h.Id</td>
+                        <td class="fw-semibold small">@(h.PidNavigation?.Pname ?? $"#{h.Pid}")</td>
+                        <td class="text-center fw-semibold">@h.OldQty</td>
+                        <td class="text-center fw-semibold text-primary">@h.NewQty</td>
+                        <td class="text-center">
+                            <span class="arrow-badge">
+                                @if (diff > 0)
+                                {
+                                    <span class="change-up">
+                                        <i class="fas fa-arrow-up me-1"></i>+@diff
+                                    </span>
+                                }
+                                else if (diff < 0)
+                                {
+                                    <span class="change-down">
+                                        <i class="fas fa-arrow-down me-1"></i>@diff
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="change-none">±0</span>
+                                }
+                            </span>
+                        </td>
+                        <td class="text-muted small">@(h.Note ?? "-")</td>
+                        <td class="small fw-semibold">@(h.ChangedBy ?? "-")</td>
+                        <td class="small text-muted">
+                            @h.ChangedAt?.ToString("dd/MM/yyyy HH:mm")
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

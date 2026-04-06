@@ -1,179 +1,157 @@
+/* ===========================
+   REGISTER PAGE
+   =========================== */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
-                * {
-                    margin: 0;
-                    padding: 0;
-                    box-sizing: border-box;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                }
+body, html {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: #000;
+}
 
-                body,
-                html {
-                    height: 100%;
-                    width: 100%;
-                    overflow: hidden;
-                    /* ป้องกัน scrollbar นอก */
-                    background-color: #000;
-                }
+body { display: flex; }
 
-                body {
-                    display: flex;
-                }
+/* Left Side */
+.left-side {
+    flex: 7;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)),
+                url('/images/bbgun_armory.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
 
-                /* ฝั่งซ้าย: รูปภาพ Background */
-                .left-side {
-                    flex: 7;
-                    /* แก้ไข Path ให้เริ่มจาก /images/ (ใน wwwroot) */
-                    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                                url('/images/bbgun_armory.jpg');
-                    background-size: cover;
-                    background-position: center;
-                    background-repeat: no-repeat;
-                }
+/* Divider */
+.divider {
+    width: 3px;
+    background-color: #f39c12;
+    box-shadow: 0 0 15px rgba(243,156,18,.5);
+    z-index: 10;
+}
 
-                /* เส้นแบ่งสีส้ม */
-                .divider {
-                    width: 3px;
-                    background-color: #f39c12;
-                    box-shadow: 0 0 15px rgba(243, 156, 18, 0.5);
-                    z-index: 10;
-                }
+/* Right Side */
+.right-side {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    padding: 20px 40px;
+    min-width: 480px;
+    overflow-y: auto;
+}
+.right-side::-webkit-scrollbar { width: 6px; }
+.right-side::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
 
-                /* ฝั่งขวา: ฟอร์มสมัครสมาชิก */
-                .right-side {
-                    flex: 3;
-                    display: flex;
-                    flex-direction: column;
-                    background-color: #ffffff;
-                    padding: 20px 40px;
-                    min-width: 480px;
-                    overflow-y: auto;
-                    /* ให้เลื่อนลงได้ถ้าฟอร์มยาว */
-                }
+/* Register Box */
+.register-box {
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+    text-align: center;
+    padding: 20px 0;
+}
 
-                /* สไตล์ Scrollbar ฝั่งขวา */
-                .right-side::-webkit-scrollbar {
-                    width: 6px;
-                }
+.logo {
+    width: 160px;
+    height: auto;
+    margin-bottom: 5px;
+    mix-blend-mode: multiply;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.1));
+}
 
-                .right-side::-webkit-scrollbar-thumb {
-                    background: #ddd;
-                    border-radius: 10px;
-                }
+h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 5px;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+}
 
-                .register-box {
-                    width: 100%;
-                    max-width: 400px;
-                    margin: auto;
-                    text-align: center;
-                    padding: 20px 0;
-                }
+.subtitle {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 25px;
+}
 
-                .logo {
-                    width: 160px;
-                    height: auto;
-                    margin-bottom: 5px;
-                    /* ลบพื้นหลังสีขาวของรูป (ถ้ามี) */
-                    mix-blend-mode: multiply;
-                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-                }
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    text-align: left;
+}
+.full-width { grid-column: span 2; }
 
-                h1 {
-                    font-size: 32px;
-                    font-weight: 800;
-                    margin-bottom: 5px;
-                    color: #1a1a1a;
-                    text-transform: uppercase;
-                    letter-spacing: -1px;
-                }
+label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 6px;
+    display: block;
+    text-transform: uppercase;
+}
 
-                .subtitle {
-                    font-size: 14px;
-                    color: #888;
-                    margin-bottom: 25px;
-                }
+input, select, textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1.5px solid #eee;
+    border-radius: 12px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    outline: none;
+    transition: all .3s ease;
+    font-family: inherit;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: #f39c12;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(243,156,18,.1);
+}
+textarea { resize: none; }
 
-                /* จัดระเบียบฟอร์มแบบ Grid */
-                .form-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 12px;
-                    text-align: left;
-                }
+/* Register Button */
+.register-btn {
+    width: 100%;
+    padding: 16px;
+    background-color: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 25px;
+    transition: all .3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,.2);
+    font-family: inherit;
+}
+.register-btn:hover {
+    background-color: #f39c12;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(243,156,18,.3);
+}
 
-                .full-width {
-                    grid-column: span 2;
-                }
+/* Login Link */
+.login-text {
+    margin-top: 25px;
+    font-size: 14px;
+    color: #666;
+    padding-bottom: 20px;
+}
+.login-text a {
+    color: #f39c12;
+    font-weight: 700;
+    text-decoration: none;
+    transition: .3s;
+}
+.login-text a:hover { color: #e67e22; text-decoration: underline; }
 
-                label {
-                    font-size: 11px;
-                    font-weight: 700;
-                    color: #555;
-                    margin-bottom: 6px;
-                    display: block;
-                    text-transform: uppercase;
-                }
-
-                input,
-                select,
-                textarea {
-                    width: 100%;
-                    padding: 12px 15px;
-                    border: 1.5px solid #eee;
-                    border-radius: 12px;
-                    font-size: 14px;
-                    background-color: #f9f9f9;
-                    outline: none;
-                    transition: all 0.3s ease;
-                }
-
-                input:focus,
-                select:focus,
-                textarea:focus {
-                    border-color: #f39c12;
-                    background-color: #fff;
-                    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.1);
-                }
-
-                textarea {
-                    resize: none;
-                }
-
-                .register-btn {
-                    width: 100%;
-                    padding: 16px;
-                    background-color: #1a1a1a;
-                    color: #fff;
-                    border: none;
-                    border-radius: 12px;
-                    font-size: 16px;
-                    font-weight: 700;
-                    cursor: pointer;
-                    margin-top: 25px;
-                    transition: all 0.3s;
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                }
-
-                .register-btn:hover {
-                    background-color: #f39c12;
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(243, 156, 18, 0.3);
-                }
-
-                .login-text {
-                    margin-top: 25px;
-                    font-size: 14px;
-                    color: #666;
-                    padding-bottom: 20px;
-                }
-
-                .login-text a {
-                    color: #f39c12;
-                    font-weight: 700;
-                    text-decoration: none;
-                    transition: 0.3s;
-                }
-
-                .login-text a:hover {
-                    color: #e67e22;
-                    text-decoration: underline;
-                }
+/* Error */
+.error-msg {
+    color: #dc2626;
+    font-size: 13px;
+    margin-top: 10px;
+    text-align: center;
+}
