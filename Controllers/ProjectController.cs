@@ -579,14 +579,15 @@ public class ProjectController : Controller
                     var stock = _db.Productstocks.Find(detail.Pid);
                     if (stock != null)
                     {
-                        int before = stock.Quantity ?? 0;
-                        stock.Quantity   = before + (detail.Qty ?? 0);
+                        int before    = Convert.ToInt32(stock.Quantity);
+                        int detailQty = Convert.ToInt32(detail.Qty);
+                        stock.Quantity   = before + detailQty;
                         stock.LastUpdate = DateTime.Now;
                         _db.Stockhistories.Add(new Stockhistory
                         {
-                            Pid       = detail.Pid,
+                            Pid = detail.Pid ?? 0,
                             OldQty    = before,
-                            NewQty    = stock.Quantity ?? 0,
+                            NewQty    = Convert.ToInt32(stock.Quantity),
                             ChangedBy = SessionUser,
                             ChangedAt = DateTime.Now,
                             Note      = $"คืน stock จากออเดอร์ #{order.OrderId} (Cancelled)"

@@ -1,16 +1,13 @@
-/* ===========================
-   DASHBOARD
-   =========================== */
+/* DASHBOARD - scoped under .dash-wrapper */
 .dash-wrapper { max-width: 1200px; margin: 0 auto; }
 
-/* KPI Grid */
-.kpi-grid {
+.dash-wrapper .kpi-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 16px;
     margin-bottom: 28px;
 }
-.kpi-card {
+.dash-wrapper .kpi-card {
     background: #fff;
     border-radius: 14px;
     padding: 22px 24px;
@@ -19,96 +16,32 @@
     position: relative;
     overflow: hidden;
 }
-.kpi-card .kpi-icon {
-    font-size: 3rem;
-    opacity: .07;
-    position: absolute;
-    right: 16px;
-    bottom: 10px;
-}
-.kpi-card .kpi-val {
-    font-size: 2.2rem;
-    font-weight: 800;
-    line-height: 1;
-}
-.kpi-card .kpi-lbl {
-    font-size: .78rem;
-    color: #adb5bd;
-    text-transform: uppercase;
-    margin-top: 6px;
-}
-.kpi-card .kpi-sub {
-    font-size: .82rem;
-    color: #6c757d;
-    margin-top: 4px;
-}
+.dash-wrapper .kpi-card .kpi-icon { font-size: 3rem; opacity: .07; position: absolute; right: 16px; bottom: 10px; }
+.dash-wrapper .kpi-card .kpi-val  { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+.dash-wrapper .kpi-card .kpi-lbl  { font-size: .78rem; color: #adb5bd; text-transform: uppercase; margin-top: 6px; }
+.dash-wrapper .kpi-card .kpi-sub  { font-size: .82rem; color: #6c757d; margin-top: 4px; }
+.dash-wrapper .kpi-revenue         { color: #f39c12; font-size: 1.6rem; }
 
-/* Section Cards */
-.section-card {
-    background: #fff;
-    border-radius: 14px;
-    border: 1px solid #eee;
-    box-shadow: 0 2px 8px rgba(0,0,0,.04);
-    overflow: hidden;
-    margin-bottom: 24px;
-}
-.section-head {
-    background: #1a1a1a;
-    color: #fff;
-    padding: 14px 20px;
-    font-weight: 700;
-    font-size: .95rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.section-head a {
-    color: #f39c12;
-    font-size: .82rem;
-    text-decoration: none;
-}
-.section-head a:hover { text-decoration: underline; }
+.dash-wrapper .section-card { background: #fff; border-radius: 14px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,.04); overflow: hidden; margin-bottom: 24px; }
+.dash-wrapper .section-head { background: #1a1a1a; color: #fff; padding: 14px 20px; font-weight: 700; font-size: .95rem; display: flex; justify-content: space-between; align-items: center; }
+.dash-wrapper .section-head a { color: #f39c12; font-size: .82rem; text-decoration: none; }
+.dash-wrapper .section-head a:hover { text-decoration: underline; }
 
-/* Dashboard Table */
-.dash-table { width: 100%; border-collapse: collapse; }
-.dash-table th {
-    background: #f8f9fa;
-    padding: 11px 16px;
-    font-size: .82rem;
-    color: #6c757d;
-    font-weight: 600;
-    border-bottom: 2px solid #eee;
-    white-space: nowrap;
-}
-.dash-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid #f5f5f5;
-    font-size: .9rem;
-    vertical-align: middle;
-}
-.dash-table tr:last-child td { border-bottom: none; }
-.dash-table tr:hover td { background: #fafafa; }
+.dash-wrapper .dash-table { width: 100%; border-collapse: collapse; }
+.dash-wrapper .dash-table th { background: #f8f9fa; padding: 11px 16px; font-size: .82rem; color: #6c757d; font-weight: 600; border-bottom: 2px solid #eee; white-space: nowrap; }
+.dash-wrapper .dash-table td { padding: 12px 16px; border-bottom: 1px solid #f5f5f5; font-size: .9rem; vertical-align: middle; }
+.dash-wrapper .dash-table tr:last-child td { border-bottom: none; }
+.dash-wrapper .dash-table tr:hover td { background: #fafafa; }
 
-/* Status Pills */
-.status-pill { padding: 3px 10px; border-radius: 20px; font-size: .75rem; font-weight: 700; }
-.pill-Pending   { background: #fff3cd; color: #856404; }
-.pill-Paid      { background: #d1e7dd; color: #0f5132; }
-.pill-Shipped   { background: #cff4fc; color: #055160; }
-.pill-Cancelled { background: #f8d7da; color: #842029; }
+.dash-wrapper .status-pill { padding: 3px 10px; border-radius: 20px; font-size: .75rem; font-weight: 700; }
+.dash-wrapper .pill-Pending   { background: #fff3cd; color: #856404; }
+.dash-wrapper .pill-Paid      { background: #d1e7dd; color: #0f5132; }
+.dash-wrapper .pill-Shipped   { background: #cff4fc; color: #055160; }
+.dash-wrapper .pill-Cancelled { background: #f8d7da; color: #842029; }
 
-/* Bar Chart */
-.bar-bg { background: #f0f0f0; border-radius: 4px; height: 8px; margin-top: 6px; }
-.bar-fg { background: #1a1a1a; border-radius: 4px; height: 8px; }
+.dash-wrapper .bar-bg { background: #f0f0f0; border-radius: 4px; height: 8px; margin-top: 6px; }
+.dash-wrapper .bar-fg { background: #1a1a1a; border-radius: 4px; height: 8px; }
 
-/* Alert Items */
-.alert-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 20px;
-    border-bottom: 1px solid #f5f5f5;
-    font-size: .9rem;
-}
-.alert-item:last-child { border: none; }
-.alert-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.kpi-revenue { color: #f39c12; font-size: 1.6rem; }
+.dash-wrapper .alert-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-bottom: 1px solid #f5f5f5; font-size: .9rem; }
+.dash-wrapper .alert-item:last-child { border: none; }
+.dash-wrapper .alert-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }

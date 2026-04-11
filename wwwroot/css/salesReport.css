@@ -1,81 +1,29 @@
-/* ===========================
-   SALES REPORT
-   =========================== */
+/* SALES REPORT - scoped under .report-wrapper */
 .report-wrapper { max-width: 1100px; margin: 0 auto; }
 
-/* Period Tabs */
-.period-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-.period-btn {
-    padding: 8px 20px;
-    border-radius: 20px;
-    border: 1px solid #ddd;
-    background: #fff;
-    font-weight: 600;
-    font-size: .85rem;
-    cursor: pointer;
-    text-decoration: none;
-    color: #555;
-    transition: .2s;
-}
-.period-btn:hover, .period-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+.report-wrapper .period-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+.report-wrapper .period-btn { padding: 8px 20px; border-radius: 20px; border: 1px solid #ddd; background: #fff; font-weight: 600; font-size: .85rem; cursor: pointer; text-decoration: none; color: #555; transition: .2s; }
+.report-wrapper .period-btn:hover,
+.report-wrapper .period-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
 
-/* KPI Bar */
-.kpi-bar { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
-.report-wrapper .kpi-card {
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #eee;
-    padding: 20px 24px;
-    flex: 1;
-    min-width: 180px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.04);
-    position: relative;
-    overflow: hidden;
-}
-.report-wrapper .kpi-val { font-size: 2rem; font-weight: 700; color: #1a1a1a; }
-.report-wrapper .kpi-lbl { font-size: .78rem; color: #adb5bd; text-transform: uppercase; margin-top: 4px; }
+.report-wrapper .kpi-bar { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.report-wrapper .kpi-card { background: #fff; border-radius: 12px; border: 1px solid #eee; padding: 20px 24px; flex: 1; min-width: 180px; box-shadow: 0 2px 8px rgba(0,0,0,.04); position: relative; overflow: hidden; }
+.report-wrapper .kpi-val  { font-size: 2rem; font-weight: 700; color: #1a1a1a; }
+.report-wrapper .kpi-lbl  { font-size: .78rem; color: #adb5bd; text-transform: uppercase; margin-top: 4px; }
 .report-wrapper .kpi-icon { font-size: 2.5rem; opacity: .08; position: absolute; right: 16px; top: 16px; }
+.report-wrapper .kpi-revenue { color: #f39c12; }
 
-/* Report Card */
-.report-card {
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #eee;
-    box-shadow: 0 2px 8px rgba(0,0,0,.04);
-    overflow: hidden;
-    margin-bottom: 24px;
-}
-.report-card-header {
-    background: #1a1a1a;
-    color: #fff;
-    padding: 14px 20px;
-    font-weight: 700;
-    font-size: .95rem;
-}
-.report-card th {
-    background: #f8f9fa;
-    padding: 12px 16px;
-    font-size: .82rem;
-    font-weight: 600;
-    color: #6c757d;
-    border-bottom: 2px solid #eee;
-}
-.report-card td {
-    padding: 12px 16px;
-    vertical-align: middle;
-    border-bottom: 1px solid #f5f5f5;
-}
-.report-card tr:last-child td { border-bottom: none; }
+.report-wrapper .report-card { background: #fff; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,.04); overflow: hidden; margin-bottom: 24px; }
+.report-wrapper .report-card-header { background: #1a1a1a; color: #fff; padding: 14px 20px; font-weight: 700; font-size: .95rem; }
+.report-wrapper .report-card th { background: #f8f9fa; padding: 12px 16px; font-size: .82rem; font-weight: 600; color: #6c757d; border-bottom: 2px solid #eee; }
+.report-wrapper .report-card td { padding: 12px 16px; vertical-align: middle; border-bottom: 1px solid #f5f5f5; }
+.report-wrapper .report-card tr:last-child td { border-bottom: none; }
 
-/* Status Badges */
 .report-wrapper .status-badge { padding: 4px 10px; border-radius: 20px; font-size: .75rem; font-weight: 700; }
-.report-wrapper .badge-Pending { background: #fff3cd; color: #856404; }
-.report-wrapper .badge-Paid { background: #d1e7dd; color: #0f5132; }
-.report-wrapper .badge-Shipped { background: #cff4fc; color: #055160; }
+.report-wrapper .badge-Pending  { background: #fff3cd; color: #856404; }
+.report-wrapper .badge-Paid     { background: #d1e7dd; color: #0f5132; }
+.report-wrapper .badge-Shipped  { background: #cff4fc; color: #055160; }
 
-/* Bar Chart */
-.bar-track { background: #f0f0f0; border-radius: 4px; height: 8px; }
-.bar-fill  { background: #1a1a1a; border-radius: 4px; height: 8px; transition: width .5s; }
-
-.kpi-revenue { color: #f39c12; }
-.order-scroll { max-height: 340px; overflow-y: auto; }
+.report-wrapper .bar-track { background: #f0f0f0; border-radius: 4px; height: 8px; }
+.report-wrapper .bar-fill  { background: #1a1a1a; border-radius: 4px; height: 8px; transition: width .5s; }
+.report-wrapper .order-scroll { max-height: 340px; overflow-y: auto; }

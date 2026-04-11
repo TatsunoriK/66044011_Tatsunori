@@ -1,14 +1,8 @@
-/* OrderManagement - scoped styles only */
-.om-status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: .78rem;
-    font-weight: 700;
-}
-.badge-Pending   { background: #fef3c7; color: #92400e; }
-.badge-Paid      { background: #d1fae5; color: #065f46; }
-.badge-Shipped   { background: #dbeafe; color: #1e40af; }
-.badge-Cancelled { background: #fee2e2; color: #991b1b; }
-
-.discount-tag { font-size: .75rem; color: #6b7280; margin-top: 2px; }
+/* ORDER MANAGEMENT - scoped under .om-wrapper */
+.om-wrapper .discount-tag { font-size: .75rem; color: #6b7280; margin-top: 2px; }
+.om-wrapper .om-status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
+.om-wrapper .badge-Pending   { background: #fef3c7; color: #92400e; }
+.om-wrapper .badge-Paid      { background: #d1fae5; color: #065f46; }
+.om-wrapper .badge-Shipped   { background: #dbeafe; color: #1e40af; }
+.om-wrapper .badge-Cancelled { background: #fee2e2; color: #991b1b; }
+.om-wrapper .items-list { font-size: .82rem; color: #374151; line-height: 1.6; }

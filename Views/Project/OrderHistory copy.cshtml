@@ -1,0 +1,114 @@
+@model IEnumerable<_66044011_Tatsunori.Models.Order>
+@{
+    ViewData["Title"] = "ประวัติการสั่งซื้อ";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/orderHistory.css" asp-append-version="true">
+}
+
+<div class="history-wrapper">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0"><i class="fas fa-history me-2"></i>ประวัติการสั่งซื้อ</h2>
+        <a asp-action="ProductList" asp-controller="Project" class="btn btn-outline-dark btn-sm">
+            <i class="fas fa-store me-1"></i>เลือกซื้อสินค้า
+        </a>
+    </div>
+
+    @if (TempData["OrderSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4">
+            <i class="fas fa-check-circle me-1"></i> @TempData["OrderSuccess"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @{
+        var member = Context.Session.GetString("MemberLevel") ?? "Bronze";
+        var points = Context.Session.GetInt32("Points") ?? 0;
+    }
+    <div class="points-bar">
+        <div>
+            <span class="member-badge-sm member-@member.ToLower()">
+                <i class="fas fa-crown me-1"></i>@member
+            </span>
+        </div>
+        <div>
+            <div class="points-val">@points <span style="font-size:.85rem; color:#6b7280;">แต้ม</span></div>
+            <div class="small text-muted">= ส่วนลด ฿@(points/10) (10 แต้ม = ฿1)</div>
+        </div>
+        <div class="small text-muted">
+            @if (member == "Bronze") { <span>สะสม 1,000 แต้ม → <strong>Silver</strong> (-3%)</span> }
+            else if (member == "Silver") { <span>สะสม 5,000 แต้ม → <strong class="text-warning">Gold</strong> (-5%)</span> }
+            else { <span class="text-warning fw-bold"><i class="fas fa-star me-1"></i>Gold Member</span> }
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-history">
+            <i class="fas fa-receipt fa-3x mb-3"></i>
+            <h5>ยังไม่มีประวัติการสั่งซื้อ</h5>
+        </div>
+    }
+    else
+    {
+        @foreach (var order in Model)
+        {
+            <div class="order-card">
+                <div class="order-head">
+                    <div>
+                        <span class="order-id">ออเดอร์ #@order.OrderId</span>
+                        <div class="order-meta">
+                            <span><i class="fas fa-calendar-alt"></i> @order.OrderDate?.ToString("dd/MM/yyyy")</span>
+                            <span><i class="fas fa-clock"></i> @order.OrderDate?.ToString("HH:mm") น.</span>
+                            <span><i class="fas fa-box"></i> @order.Orderdetails.Sum(d => d.Qty) ชิ้น</span>
+                            @if (order.PointsUsed > 0)
+                            {
+                                <span class="text-warning"><i class="fas fa-coins"></i> ใช้ @order.PointsUsed แต้ม</span>
+                            }
+                        </div>
+                    </div>
+                    <span class="status-badge status-@order.Status">@order.Status</span>
+                </div>
+                <div class="order-body">
+                    @foreach (var d in order.Orderdetails)
+                    {
+                        <div class="item-row">
+                            <span>@(d.PidNavigation?.Pname ?? $"สินค้า #{d.Pid}")</span>
+                            <span>x@(d.Qty) &nbsp;<strong class="text-primary">฿@((d.UnitPrice * d.Qty).ToString("N0"))</strong></span>
+                        </div>
+                    }
+
+                    @if (order.DiscountAmount > 0)
+                    {
+                        <div class="discount-row">
+                            <i class="fas fa-tag me-1 text-success"></i>
+                            ส่วนลดรวม: <strong class="text-success">-฿@order.DiscountAmount.ToString("N0")</strong>
+                            @if (!string.IsNullOrEmpty(order.CouponCode))
+                            {
+                                <span class="coupon-chip ms-2">@order.CouponCode</span>
+                            }
+                            @if (order.PointsUsed > 0)
+                            {
+                                <span class="ms-2 text-muted small">(แต้ม @order.PointsUsed)</span>
+                            }
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(order.ShippingAddress))
+                    {
+                        <div class="shipping-address">
+                            <i class="fas fa-map-marker-alt me-1 text-warning"></i>
+                            <strong>ที่อยู่จัดส่ง:</strong> @order.ShippingAddress
+                        </div>
+                    }
+
+                    <div class="total-row">
+                        ยอดสุทธิ: ฿@order.TotalAmount.ToString("N0")
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

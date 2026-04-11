@@ -1,53 +1,33 @@
-/* ===========================
-   CART PAGE
-   =========================== */
-.cart-wrapper { max-width: 960px; margin: 0 auto; }
+/* CART PAGE - scoped */
+.cart-wrapper { max-width: 960px; }
 
-.cart-card {
+.cart-table { display: flex; flex-direction: column; gap: 0; }
+
+.cart-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
     background: #fff;
-    border-radius: 12px;
-    border: 1px solid #eee;
-    box-shadow: 0 2px 8px rgba(0,0,0,.04);
-    overflow: hidden;
+    border-bottom: 1px solid #f0f0f0;
+    border-radius: 0;
 }
-.cart-card th {
-    background: #1a1a1a;
-    color: #fff;
-    padding: 14px 20px;
-    font-size: .85rem;
-    font-weight: 600;
-}
-.cart-card td {
-    padding: 14px 20px;
-    vertical-align: middle;
-    border-bottom: 1px solid #f5f5f5;
-}
-.cart-card tr:last-child td { border-bottom: none; }
+.cart-row:first-child { border-radius: 12px 12px 0 0; }
+.cart-row:last-child  { border-radius: 0 0 12px 12px; border-bottom: none; }
+.cart-row .cart-icon  { color: #dee2e6; }
+.cart-row .cart-info  { flex: 1; }
+
+.cart-table { background: #fff; border-radius: 12px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
 
 .qty-input {
-    width: 75px;
+    width: 70px;
     text-align: center;
     border: 1px solid #ddd;
     border-radius: 8px;
-    padding: 6px;
-    font-weight: 600;
+    padding: 5px 8px;
+    font-weight: 700;
 }
-.qty-input:focus {
-    outline: none;
-    border-color: #1a1a1a;
-    box-shadow: 0 0 0 3px rgba(0,0,0,.06);
-}
-
-.btn-remove {
-    background: none;
-    border: none;
-    color: #dc3545;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: .2s;
-    padding: 4px 8px;
-}
-.btn-remove:hover { color: #a71d2a; transform: scale(1.2); }
+.qty-input:focus { outline: none; border-color: #111; box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
 
 .summary-card {
     background: #fff;
@@ -59,23 +39,13 @@
     top: 80px;
 }
 
-.btn-checkout {
-    background: #1a1a1a;
-    color: #fff;
-    border: none;
-    padding: 14px;
-    border-radius: 10px;
+.member-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: .8rem;
     font-weight: 700;
-    font-size: 1rem;
-    width: 100%;
-    transition: .2s;
-    cursor: pointer;
 }
-.btn-checkout:hover { background: #f39c12; color: #1a1a1a; }
-
-.empty-cart {
-    text-align: center;
-    padding: 80px 20px;
-    color: #adb5bd;
-}
-.empty-cart h5 { color: #6c757d; margin-top: 16px; }
+.member-bronze { background: #f3e8d0; color: #92400e; }
+.member-silver { background: #e5e7eb; color: #374151; }
+.member-gold   { background: #fef3c7; color: #92400e; }
