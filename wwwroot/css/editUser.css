@@ -1,13 +1,7 @@
 /* ===========================
    EDIT USER PAGE
    =========================== */
-:root {
-    --primary-color: #000;
-    --bg-color: #f9fafb;
-    --border-color: #e5e7eb;
-    --text-main: #111827;
-    --text-sub: #6b7280;
-}
+
 
 .edit-wrapper { max-width: 900px; margin: 0 auto; }
 
@@ -47,7 +41,7 @@
     color: var(--text-main);
 }
 
-.form-control {
+.edit-wrapper .form-control {
     padding: 10px 14px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -56,16 +50,16 @@
     font-family: 'Inter', sans-serif;
     width: 100%;
 }
-.form-control:focus {
+.edit-wrapper .form-control:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 4px rgba(0,0,0,.05);
 }
-.form-control[readonly] {
+.edit-wrapper .form-control[readonly] {
     background: #f9fafb;
     cursor: not-allowed;
 }
-textarea.form-control {
+.edit-wrapper textarea.form-control {
     resize: vertical;
     min-height: 100px;
 }

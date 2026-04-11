@@ -1,6 +1,5 @@
 @model IEnumerable<_66044011_Tatsunori.Models.Order>
 @{
-    Layout = "_HeaderFoot";
     ViewData["Title"] = "รายงานยอดขาย";
     DateTime startDate    = (DateTime)ViewBag.Start;
     DateTime endDate      = (DateTime)ViewBag.End;
@@ -51,7 +50,7 @@
         </div>
         <div class="kpi-card">
             <i class="fas fa-dollar-sign kpi-icon"></i>
-            <div class="kpi-val" style="color:#f39c12;">฿@totalRevenue.ToString("N0")</div>
+            <div class="kpi-val"  class="kpi-revenue">฿@totalRevenue.ToString("N0")</div>
             <div class="kpi-lbl">รายได้รวม</div>
         </div>
         <div class="kpi-card">
@@ -100,7 +99,7 @@
                 <div class="report-card-header">
                     <i class="fas fa-list me-2"></i>รายการออเดอร์
                 </div>
-                <div style="max-height:340px; overflow-y:auto;">
+                <div class="order-scroll">
                     <table class="table mb-0">
                         <thead>
                             <tr>

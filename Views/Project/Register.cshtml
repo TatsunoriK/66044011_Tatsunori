@@ -3,76 +3,70 @@
 }
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - STRIKE FORCE BB GUN</title>
+    <title>Sign Up - STRIKE FORCE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/register.css">
+</head>
+<body>
+    <div class="left-side"></div>
+    <div class="divider"></div>
+    <div class="right-side">
+        <div class="register-box">
+            <img src="/images/Logo.png" alt="Strike Force" class="logo">
+            <h1>Sign Up</h1>
 
-    </head>
+            @if (ViewBag.Error != null)
+            {
+                <p class="text-error">@ViewBag.Error</p>
+            }
 
-    <body>
-        <div class="left-side"></div>
-        <div class="divider"></div>
-        <div class="right-side">
-            <div class="register-box">
-                <img src="/images/Logo.png" alt="Strike Force Logo" class="logo">
-
-                <h1>Sign Up</h1>
-                <p class="subtitle">Join the elite Strike Force community</p>
-
-                <form method="post" asp-controller="Project" asp-action="Register">
-                    <div class="form-grid">
-                        <div class="input-group">
-                            <label>Username</label>
-                            <input type="text" name="Username" placeholder="ชื่อผู้ใช้" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Password</label>
-                            <input type="password" name="Password" placeholder="รหัสผ่าน" required>
-                        </div>
-                        <div class="input-group full-width">
-                            <label>Email Address</label>
-                            <input type="email" name="Email" placeholder="example@mail.com" required>
-                        </div>
-                        <div class="input-group full-width">
-                            <label>Full Name</label>
-                            <input type="text" name="FullName" placeholder="ชื่อ-นามสกุลจริง" required>
-                        </div>
-                        <div class="input-group">
-                            <label>Gender</label>
-                            <select name="Gender" required>
-                                <option value="" disabled selected>เลือกเพศ</option>
-                                <option value="Male">ชาย</option>
-                                <option value="Female">หญิง</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>Birthday</label>
-                            <input type="date" name="Birthday" required>
-                        </div>
-                        <div class="input-group full-width">
-                            <label>Shipping Address</label>
-                            <textarea name="Address" placeholder="ระบุที่อยู่สำหรับการจัดส่ง" rows="2"></textarea>
-                        </div>
-                        <div class="input-group full-width">
-                            <label>Phone Number</label>
-                            <input type="tel" name="Phone" placeholder="08X-XXX-XXXX" required>
-                        </div>
+            <form method="post" asp-controller="Project" asp-action="Register">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Username</label>
+                        <input type="text" name="Username" placeholder="ชื่อผู้ใช้" required>
                     </div>
-                    <button type="submit" class="register-btn">Create Account</button>
-                </form>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" name="Password" placeholder="รหัสผ่าน" required>
+                    </div>
+                    <div class="input-group full-width">
+                        <label>Email</label>
+                        <input type="email" name="Email" placeholder="example@mail.com" required>
+                    </div>
+                    <div class="input-group full-width">
+                        <label>Full Name</label>
+                        <input type="text" name="FullName" placeholder="ชื่อ-นามสกุล" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Gender</label>
+                        <select name="Gender" required>
+                            <option value="" disabled selected>เลือกเพศ</option>
+                            <option value="Male">ชาย</option>
+                            <option value="Female">หญิง</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Birthday</label>
+                        <input type="date" name="Birthday" required>
+                    </div>
+                    <div class="input-group full-width">
+                        <label>Address</label>
+                        <textarea name="Address" placeholder="ที่อยู่จัดส่ง" rows="2"></textarea>
+                    </div>
+                    <div class="input-group full-width">
+                        <label>Phone</label>
+                        <input type="tel" name="Phone" placeholder="08X-XXX-XXXX" required>
+                    </div>
+                </div>
+                <button type="submit" class="register-btn">Create Account</button>
+            </form>
 
-                <p class="login-text">Already have an account? <a href="/Project/Login">Login here</a></p>
-                @if (ViewBag.Error != null)
-                {
-                    <p style="color:red">@ViewBag.Error</p>
-                }
-            </div>
+            <p class="login-text">มีบัญชีแล้ว? <a asp-action="Login" asp-controller="Project">Login</a></p>
         </div>
-    </body>
-
+    </div>
+</body>
 </html>

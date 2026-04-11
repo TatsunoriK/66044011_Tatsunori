@@ -34,6 +34,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvamVjdFxDYXJ0UGFnZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Project/CouponManagement.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvamVjdFxDb3Vwb25NYW5hZ2VtZW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Project/Dashboard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvamVjdFxEYXNoYm9hcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -42,12 +46,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvamVjdFxFZGl0VXNlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Project/FlashSaleManagement.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvamVjdFxGbGFzaFNhbGVNYW5hZ2VtZW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Project/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvamVjdFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Project/Management.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvamVjdFxNYW5hZ2VtZW50LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Project/MyProfile.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvamVjdFxNeVByb2ZpbGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Project/OrderHistory.cshtml]
@@ -94,18 +106,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9IZWFkZXJGb290LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Shared/_ProjectMain.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Qcm9qZWN0TWFpbi5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Shared/_TestLayout.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9UZXN0TGF5b3V0LmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Shared/_ValidationScriptsPartial.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
 [c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -113,7 +113,3 @@ build_metadata.AdditionalFiles.CssScope =
 [c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
-
-[c:/Users/tatsu/OneDrive/Desktop/CSI402_L001_66044011_ทัตซึโนริ_คาโต้/66044011/66044011_Tatsunori/Views/Shared/_Layout.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = b-davqdqncie

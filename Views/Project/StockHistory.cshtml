@@ -1,6 +1,5 @@
 @model IEnumerable<_66044011_Tatsunori.Models.Stockhistory>
 @{
-    Layout = "_HeaderFoot";
     ViewData["Title"] = "ประวัติสต็อก";
     int? filterPid = ViewBag.FilterPid;
     var  filterProduct = ViewBag.Product;
@@ -10,7 +9,7 @@
     <link rel="stylesheet" href="~/css/stockList.css" asp-append-version="true">
 }
 
-<div class="history-wrapper">
+<div class="stockhistory-wrapper">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>

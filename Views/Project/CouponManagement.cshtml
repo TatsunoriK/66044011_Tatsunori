@@ -1,0 +1,92 @@
+@model IEnumerable<_66044011_Tatsunori.Models.Coupon>
+@{
+    ViewData["Title"] = "จัดการ Coupon";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0"><i class="fas fa-ticket-alt me-2"></i>จัดการ Coupon</h2>
+    <button class="btn btn-dark fw-bold" data-bs-toggle="modal" data-bs-target="#createCouponModal">
+        <i class="fas fa-plus me-1"></i>สร้าง Coupon ใหม่
+    </button>
+</div>
+
+@if (TempData["CouponSuccess"] != null) { <div class="alert alert-success">@TempData["CouponSuccess"]</div> }
+@if (TempData["CouponError"]   != null) { <div class="alert alert-danger">@TempData["CouponError"]</div> }
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Code</th><th>ส่วนลด</th><th>ยอดขั้นต่ำ</th>
+                <th>ใช้แล้ว/จำกัด</th><th>หมดอายุ</th><th>สถานะ</th><th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td><strong class="text-primary">@c.Code</strong></td>
+                <td>@c.DiscountPct%</td>
+                <td>฿@c.MinAmount.ToString("N0")</td>
+                <td>@c.UsedCount / @c.UsageLimit</td>
+                <td>@(c.ExpireDate?.ToString("dd/MM/yyyy") ?? "ไม่มีวันหมดอายุ")</td>
+                <td>
+                    @if (c.IsActive) { <span class="badge bg-success">Active</span> }
+                    else             { <span class="badge bg-secondary">Inactive</span> }
+                </td>
+                <td>
+                    <form asp-action="ToggleCoupon" method="post" class="d-inline">
+                        <input type="hidden" name="couponId" value="@c.CouponId">
+                        <button class="btn btn-sm btn-outline-@(c.IsActive ? "warning" : "success")">
+                            @(c.IsActive ? "ปิด" : "เปิด")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="createCouponModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-ticket-alt me-2 text-warning"></i>สร้าง Coupon ใหม่</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CreateCoupon" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Code <span class="text-danger">*</span></label>
+                        <input type="text" name="code" class="form-control" placeholder="เช่น SAVE10" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">ส่วนลด (%) <span class="text-danger">*</span></label>
+                            <input type="number" name="discountPct" class="form-control" min="1" max="100" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">ยอดขั้นต่ำ (฿)</label>
+                            <input type="number" name="minAmount" class="form-control" min="0" value="0">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">จำกัดการใช้</label>
+                            <input type="number" name="usageLimit" class="form-control" min="1" value="100">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">วันหมดอายุ</label>
+                            <input type="date" name="expireDate" class="form-control">
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-dark fw-bold">สร้าง Coupon</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

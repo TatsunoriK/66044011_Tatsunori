@@ -1,9 +1,8 @@
 @{
-    Layout = "_HeaderFoot";
     ViewData["Title"] = "Dashboard";
-    var alertStocks = (IEnumerable<_66044011_Tatsunori.Models.Productstock>)ViewBag.AlertStocks;
-    decimal totalRevenue = (decimal)ViewBag.TotalRevenue;
-    decimal monthRevenue = (decimal)ViewBag.MonthRevenue;
+    var alertStocks  = (IEnumerable<_66044011_Tatsunori.Models.Productstock>)ViewBag.AlertStocks;
+    decimal totalRev = (decimal)ViewBag.TotalRevenue;
+    decimal monthRev = (decimal)ViewBag.MonthRevenue;
 }
 
 @section Styles {
@@ -11,11 +10,10 @@
 }
 
 <div class="dash-wrapper">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold mb-0"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h2>
-            <small class="text-muted">ภาพรวมระบบ ณ วันที่ @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+            <small class="text-muted">ภาพรวมระบบ ณ @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
         </div>
     </div>
 
@@ -36,16 +34,14 @@
             <div class="kpi-lbl">ออเดอร์ทั้งหมด</div>
             @if ((int)ViewBag.PendingOrders > 0)
             {
-                <div class="kpi-sub text-warning">
-                    <i class="fas fa-clock me-1"></i>รอดำเนินการ @ViewBag.PendingOrders รายการ
-                </div>
+                <div class="kpi-sub text-warning"><i class="fas fa-clock me-1"></i>รอดำเนินการ @ViewBag.PendingOrders รายการ</div>
             }
         </div>
         <div class="kpi-card">
             <i class="fas fa-dollar-sign kpi-icon"></i>
-            <div class="kpi-val" style="color:#f39c12; font-size:1.6rem;">฿@totalRevenue.ToString("N0")</div>
+            <div class="kpi-val kpi-revenue">฿@totalRev.ToString("N0")</div>
             <div class="kpi-lbl">รายได้รวม</div>
-            <div class="kpi-sub text-success">เดือนนี้: ฿@monthRevenue.ToString("N0")</div>
+            <div class="kpi-sub text-success">เดือนนี้: ฿@monthRev.ToString("N0")</div>
         </div>
         <div class="kpi-card">
             <i class="fas fa-exclamation-triangle kpi-icon"></i>
@@ -63,12 +59,7 @@
                     <a asp-action="OrderManagement" asp-controller="Project">ดูทั้งหมด →</a>
                 </div>
                 <table class="dash-table">
-                    <thead>
-                        <tr>
-                            <th>#</th><th>ลูกค้า</th><th>วันที่</th>
-                            <th class="text-end">ยอด</th><th class="text-center">สถานะ</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>#</th><th>ลูกค้า</th><th>วันที่</th><th class="text-end">ยอด</th><th class="text-center">สถานะ</th></tr></thead>
                     <tbody>
                     @foreach (var o in (dynamic)ViewBag.RecentOrders)
                     {
@@ -120,14 +111,14 @@
                     </div>
                     @foreach (var s in alertStocks)
                     {
-                        var qty = s.Quantity ?? 0;
-                        var dotClass  = qty <= 0 ? "bg-danger" : "bg-warning";
-                        var textClass = qty <= 0 ? "text-danger" : "text-warning";
-                        var qtyText   = qty <= 0 ? "หมด" : $"เหลือ {qty}";
+                        var qty  = s.Quantity ?? 0;
+                        var dot  = qty <= 0 ? "bg-danger" : "bg-warning";
+                        var txt  = qty <= 0 ? "text-danger" : "text-warning";
+                        var lbl  = qty <= 0 ? "หมด" : $"เหลือ {qty}";
                         <div class="alert-item">
-                            <div class="alert-dot @dotClass"></div>
+                            <div class="alert-dot @dot"></div>
                             <span class="flex-grow-1 small">@s.PidNavigation?.Pname</span>
-                            <span class="fw-bold @textClass small">@qtyText</span>
+                            <span class="fw-bold @txt small">@lbl</span>
                         </div>
                     }
                 </div>

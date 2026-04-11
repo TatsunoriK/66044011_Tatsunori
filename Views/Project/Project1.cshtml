@@ -1,6 +1,5 @@
 @model IEnumerable<_66044011_Tatsunori.Models.Product>
 @{
-    Layout = "_HeaderFoot";
     ViewData["Title"] = "สินค้าทั้งหมด";
 }
 
@@ -23,10 +22,7 @@
                         <option value="">-- ทั้งหมด --</option>
                         @foreach (var c in (IEnumerable<_66044011_Tatsunori.Models.Category>)ViewBag.Categories)
                         {
-                            if (ViewBag.CatId != null && (int)ViewBag.CatId == c.CatId)
-                            { <option value="@c.CatId" selected="selected">@c.CatName</option> }
-                            else
-                            { <option value="@c.CatId">@c.CatName</option> }
+                            <option value="@c.CatId" selected="@(ViewBag.CatId != null && (int)ViewBag.CatId == c.CatId)">@c.CatName</option>
                         }
                     </select>
                 </div>
@@ -36,10 +32,7 @@
                         <option value="">-- ทั้งหมด --</option>
                         @foreach (var b in (IEnumerable<_66044011_Tatsunori.Models.Brand>)ViewBag.Brands)
                         {
-                            if (ViewBag.BrandId != null && (int)ViewBag.BrandId == b.BrandId)
-                            { <option value="@b.BrandId" selected="selected">@b.BrandName</option> }
-                            else
-                            { <option value="@b.BrandId">@b.BrandName</option> }
+                            <option value="@b.BrandId" selected="@(ViewBag.BrandId != null && (int)ViewBag.BrandId == b.BrandId)">@b.BrandName</option>
                         }
                     </select>
                 </div>
@@ -54,12 +47,8 @@
                     <span class="filter-label">เรียงโดย</span>
                     <select name="sort" class="form-select form-select-sm">
                         <option value="">ค่าเริ่มต้น</option>
-                        @if (ViewBag.Sort == "price_asc")
-                        { <option value="price_asc" selected="selected">ราคา ต่ำ - สูง</option><option value="price_desc">ราคา สูง - ต่ำ</option> }
-                        else if (ViewBag.Sort == "price_desc")
-                        { <option value="price_asc">ราคา ต่ำ - สูง</option><option value="price_desc" selected="selected">ราคา สูง - ต่ำ</option> }
-                        else
-                        { <option value="price_asc">ราคา ต่ำ - สูง</option><option value="price_desc">ราคา สูง - ต่ำ</option> }
+                        <option value="price_asc"  selected="@(ViewBag.Sort == "price_asc")">ราคา ต่ำ - สูง</option>
+                        <option value="price_desc" selected="@(ViewBag.Sort == "price_desc")">ราคา สูง - ต่ำ</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-dark btn-sm w-100"><i class="fas fa-search me-1"></i>ค้นหา</button>
@@ -76,8 +65,9 @@
 
         @if (TempData["CartMsg"] != null)
         {
-            <div class="alert alert-@(TempData["CartMsg"]!.ToString()!.Contains("เฉพาะ") ? "warning" : "success") alert-dismissible fade show py-2">
-                <i class="fas fa-@(TempData["CartMsg"]!.ToString()!.Contains("เฉพาะ") ? "exclamation-triangle" : "check-circle") me-1"></i> @TempData["CartMsg"]
+            bool isWarn = TempData["CartMsg"]!.ToString()!.Contains("เฉพาะ") || TempData["CartMsg"]!.ToString()!.Contains("สต็อก");
+            <div class="alert alert-@(isWarn ? "warning" : "success") alert-dismissible fade show py-2">
+                <i class="fas fa-@(isWarn ? "exclamation-triangle" : "check-circle") me-1"></i> @TempData["CartMsg"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
@@ -116,10 +106,9 @@
                                 <form asp-action="AddToCart" asp-controller="Project" method="post">
                                     <input type="hidden" name="pid" value="@p.Pid" />
                                     <input type="hidden" name="qty" value="1" />
-                                    @if (inStock <= 0)
-                                    { <button type="submit" class="btn-cart" disabled><i class="fas fa-times me-2"></i>สินค้าหมด</button> }
-                                    else
-                                    { <button type="submit" class="btn-cart"><i class="fas fa-shopping-cart me-2"></i>เพิ่มลงตะกร้า</button> }
+                                    <button type="submit" class="btn-cart" @(inStock <= 0 ? "disabled" : "")>
+                                        <i class="fas fa-@(inStock <= 0 ? "times" : "shopping-cart") me-2"></i>@(inStock <= 0 ? "สินค้าหมด" : "เพิ่มลงตะกร้า")
+                                    </button>
                                 </form>
                             }
                             else if (ViewBag.Username == null)
@@ -130,9 +119,9 @@
                             }
                             else
                             {
-                                <div class="btn-cart text-center" style="background:#6c757d; cursor:default;">
+                                <span class="btn-cart text-center text-muted">
                                     <i class="fas fa-eye me-2"></i>ดูสินค้า
-                                </div>
+                                </span>
                             }
                         </div>
                     </div>

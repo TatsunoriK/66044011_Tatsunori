@@ -155,3 +155,4 @@ textarea { resize: none; }
     margin-top: 10px;
     text-align: center;
 }
+.text-error { color: #e74c3c; margin-bottom: 10px; }

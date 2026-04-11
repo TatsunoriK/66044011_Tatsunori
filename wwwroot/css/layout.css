@@ -1,0 +1,38 @@
+/* layout.css — shared styles extracted from _HeaderFoot */
+body {
+    font-family: 'Krub', sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Top auth bar */
+.top-auth-bar { background: #11181e; padding: 5px 0; border-bottom: 1px solid #333; }
+.top-auth-bar a { color: #adb5bd; text-decoration: none; font-size: .8rem; margin-left: 15px; transition: .3s; }
+.top-auth-bar a:hover { color: #f39c12; }
+
+/* Header */
+header { background: #fff; padding: 15px 0; border-bottom: 4px solid #f39c12; }
+.logo-img { max-height: 140px; width: auto; display: block; margin: 0 auto; transition: transform .3s; filter: drop-shadow(0 0 8px rgba(243,156,18,.3)); }
+.logo-img:hover { transform: scale(1.05); }
+
+/* Nav */
+.main-nav { background: #1a1a1a; box-shadow: 0 4px 10px rgba(0,0,0,.3); }
+.navbar-nav .nav-link { color: #fff !important; font-weight: 600; padding: 14px 20px !important; text-transform: uppercase; font-size: .85rem; transition: .3s; position: relative; }
+.navbar-nav .nav-link::after { content: ""; position: absolute; bottom: 0; left: 50%; width: 0; height: 3px; background: #f39c12; transition: .3s; transform: translateX(-50%); }
+.navbar-nav .nav-link:hover::after { width: 100%; }
+.navbar-nav .nav-link:hover { color: #f39c12 !important; }
+
+/* Content */
+.content-wrapper { flex: 1; padding: 40px 0; }
+
+/* Footer */
+footer { background: #11181e; color: #ecf0f1; padding-top: 50px; border-top: 5px solid #1a1a1a; }
+footer h4 { color: #fff; font-size: 1.1rem; margin-bottom: 20px; padding-bottom: 8px; position: relative; }
+footer h4::after { content: ""; position: absolute; left: 0; bottom: 0; width: 40px; height: 2px; background: #f39c12; }
+.text-muted-custom { color: #95a5a6; text-decoration: none; transition: .3s; display: inline-block; margin-bottom: 6px; }
+.text-muted-custom:hover { color: #f39c12; }
+.copyright-bar { background: #0a0e12; padding: 16px 0; margin-top: 40px; color: #555; font-size: .85rem; }
+
+.nav-user { font-size: .85rem; margin-left: 15px; }

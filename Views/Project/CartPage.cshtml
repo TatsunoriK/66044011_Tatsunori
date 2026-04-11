@@ -1,103 +1,130 @@
 @model IEnumerable<_66044011_Tatsunori.ViewModels.CartItemViewModel>
 @{
-    Layout = "_HeaderFoot";
     ViewData["Title"] = "ตะกร้าสินค้า";
-    var total = Model.Sum(i => i.Subtotal);
+    var subtotal      = Model.Sum(i => i.Subtotal);
+    string member     = ViewBag.MemberLevel ?? "Bronze";
+    decimal memPct    = member == "Gold" ? 5m : member == "Silver" ? 3m : 0m;
+    decimal memDisc   = Math.Round(subtotal * memPct / 100, 2);
+    int userPoints    = (int)(ViewBag.UserPoints ?? 0);
+    string? couponMsg = TempData["CouponMsg"]?.ToString();
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true">
 }
 
-<div class="cart-wrapper">
-    <h2 class="fw-bold mb-4"><i class="fas fa-shopping-cart me-2"></i>ตะกร้าสินค้า</h2>
+<h2 class="fw-bold mb-4"><i class="fas fa-shopping-cart me-2"></i>ตะกร้าสินค้า</h2>
 
-    @if (!Model.Any())
-    {
-        <div class="empty-cart">
-            <i class="fas fa-cart-arrow-down fa-3x mb-3"></i>
-            <h5>ตะกร้าของคุณว่างเปล่า</h5>
-            <a asp-action="ProductList" asp-controller="Project" class="btn btn-dark mt-3">
-                <i class="fas fa-store me-1"></i>เลือกซื้อสินค้า
-            </a>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            <div class="col-lg-8">
-                <div class="cart-card">
-                    <table class="table mb-0">
-                        <thead>
-                            <tr>
-                                <th>สินค้า</th>
-                                <th class="text-center">ราคา/ชิ้น</th>
-                                <th class="text-center">จำนวน</th>
-                                <th class="text-end">รวม</th>
-                                <th class="text-center">ลบ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="fw-semibold">@item.Pname</td>
-                                <td class="text-center">฿@item.Price.ToString("N0")</td>
-                                <td class="text-center">
-                                    <form asp-action="UpdateCart" asp-controller="Project"
-                                          method="post" class="d-inline">
-                                        <input type="hidden" name="pid" value="@item.Pid" />
-                                        <input type="number" name="qty" value="@item.Qty"
-                                               min="1" class="qty-input"
-                                               onchange="this.form.submit()" />
-                                    </form>
-                                </td>
-                                <td class="text-end fw-bold text-primary">
-                                    ฿@item.Subtotal.ToString("N0")
-                                </td>
-                                <td class="text-center">
-                                    <form asp-action="RemoveFromCart" asp-controller="Project"
-                                          method="post" class="d-inline">
-                                        <input type="hidden" name="pid" value="@item.Pid" />
-                                        <button type="submit" class="btn-remove">
-                                            <i class="fas fa-times-circle"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-3">
-                    <a asp-action="ProductList" asp-controller="Project"
-                       class="btn btn-outline-dark btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i>เลือกสินค้าต่อ
-                    </a>
-                </div>
+@if (TempData["CartError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle me-1"></i> @TempData["CartError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="fas fa-cart-arrow-down fa-3x mb-3"></i>
+        <h5>ตะกร้าว่างเปล่า</h5>
+        <a asp-action="ProductList" class="btn btn-dark mt-3">เลือกซื้อสินค้า</a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="cart-table">
+                @foreach (var item in Model)
+                {
+                    <div class="cart-row">
+                        <div class="cart-icon"><i class="fas fa-gun fa-2x opacity-25"></i></div>
+                        <div class="cart-info flex-grow-1">
+                            <div class="fw-bold">@item.Pname</div>
+                            <div class="text-primary fw-semibold">฿@item.Price.ToString("N0") / ชิ้น</div>
+                        </div>
+                        <form asp-action="UpdateCart" method="post" class="d-flex align-items-center gap-2">
+                            <input type="hidden" name="pid" value="@item.Pid" />
+                            <input type="number" name="qty" value="@item.Qty" min="1" class="form-control form-control-sm qty-input"
+                                   onchange="this.form.submit()">
+                        </form>
+                        <div class="fw-bold text-primary mx-3">฿@item.Subtotal.ToString("N0")</div>
+                        <form asp-action="RemoveFromCart" method="post">
+                            <input type="hidden" name="pid" value="@item.Pid" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                }
             </div>
+        </div>
 
-            <div class="col-lg-4">
+        <div class="col-lg-4">
+            <form asp-action="PlaceOrder" method="post">
                 <div class="summary-card">
-                    <h5 class="fw-bold mb-3">สรุปรายการ</h5>
-                    <hr />
-                    <div class="d-flex justify-content-between mb-2 text-muted">
-                        <span>จำนวนสินค้า</span>
-                        <span>@Model.Sum(i => i.Qty) ชิ้น</span>
+                    <h5 class="fw-bold mb-3">สรุปคำสั่งซื้อ</h5>
+
+                    {{* Member badge *}}
+                    <div class="member-badge member-@member.ToLower() mb-3">
+                        <i class="fas fa-crown me-1"></i> @member Member
+                        @if (memPct > 0) { <span class="ms-1">(-@memPct%)</span> }
                     </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="fw-semibold">ยอดรวม</span>
-                        <span class="fw-bold fs-5 text-primary">฿@total.ToString("N0")</span>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>ยอดรวม</span><span>฿@subtotal.ToString("N0")</span>
                     </div>
-                    <hr />
-                    <form asp-action="PlaceOrder" asp-controller="Project" method="post">
-                        <button type="submit" class="btn-checkout"
-                                onclick="return confirm('ยืนยันการสั่งซื้อ?')">
-                            <i class="fas fa-credit-card me-2"></i>สั่งซื้อเลย
-                        </button>
-                    </form>
+                    @if (memDisc > 0)
+                    {
+                        <div class="d-flex justify-content-between mb-1 text-success">
+                            <span>ส่วนลด @member</span><span>-฿@memDisc.ToString("N0")</span>
+                        </div>
+                    }
+
+                    {{* Coupon *}}
+                    <div class="mb-2 mt-2">
+                        <label class="form-label small fw-semibold">Coupon Code</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="couponCode" class="form-control" placeholder="กรอก code...">
+                        </div>
+                        @if (couponMsg != null)
+                        {
+                            <small class="text-danger">@couponMsg</small>
+                        }
+                    </div>
+
+                    {{* Points *}}
+                    @if (userPoints > 0)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">
+                                ใช้แต้ม <span class="text-warning">(มี @userPoints แต้ม = ฿@(userPoints/10))</span>
+                            </label>
+                            <input type="number" name="pointsToRedeem" class="form-control form-control-sm"
+                                   placeholder="0" min="0" max="@userPoints" value="0">
+                            <small class="text-muted">10 แต้ม = ฿1</small>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" name="pointsToRedeem" value="0">
+                    }
+
+                    <hr>
+
+                    {{* Address *}}
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">ที่อยู่จัดส่ง <span class="text-danger">*</span></label>
+                        <textarea name="shippingAddress" class="form-control form-control-sm" rows="2"
+                                  placeholder="ระบุที่อยู่..." required>@ViewBag.SavedAddress</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100 fw-bold">
+                        <i class="fas fa-check-circle me-1"></i>ยืนยันการสั่งซื้อ
+                    </button>
                 </div>
-            </div>
+            </form>
         </div>
-    }
-</div>
+    </div>
+}

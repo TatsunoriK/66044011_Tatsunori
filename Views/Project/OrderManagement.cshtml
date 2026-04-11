@@ -1,61 +1,10 @@
 @model IEnumerable<_66044011_Tatsunori.Models.Order>
 @{
-    Layout = "_HeaderFoot";
     ViewData["Title"] = "จัดการออเดอร์";
 }
 
 @section Styles {
-<style>
-    .om-wrapper { max-width: 1200px; margin: 0 auto; }
-    .tab-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-    .tab-btn {
-        padding: 8px 18px; border-radius: 20px; border: 1px solid #ddd;
-        background: #fff; font-weight: 600; font-size: .85rem;
-        cursor: pointer; text-decoration: none; color: #555; transition: .2s;
-    }
-    .tab-btn:hover, .tab-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-    .tab-btn .count {
-        background: #f39c12; color: #1a1a1a;
-        border-radius: 10px; padding: 1px 7px; font-size: .75rem; margin-left: 6px;
-    }
-    .om-card {
-        background: #fff; border-radius: 12px; border: 1px solid #eee;
-        box-shadow: 0 2px 8px rgba(0,0,0,.04); overflow: hidden;
-    }
-    .om-card th {
-        background: #1a1a1a; color: #fff;
-        padding: 14px 16px; font-size: .85rem; font-weight: 600;
-    }
-    .om-card td {
-        padding: 14px 16px; vertical-align: middle;
-        border-bottom: 1px solid #f5f5f5;
-    }
-    .om-card tr:last-child td { border-bottom: none; }
-    .status-badge { padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
-    .badge-Pending   { background: #fff3cd; color: #856404; }
-    .badge-Paid      { background: #d1e7dd; color: #0f5132; }
-    .badge-Shipped   { background: #cff4fc; color: #055160; }
-    .badge-Cancelled { background: #f8d7da; color: #842029; }
-    .btn-status {
-        padding: 5px 12px; border-radius: 8px; font-size: .8rem;
-        font-weight: 600; border: none; cursor: pointer; transition: .2s;
-    }
-    .btn-approve { background: #d1e7dd; color: #0f5132; }
-    .btn-approve:hover { background: #0f5132; color: #fff; }
-    .btn-ship { background: #cff4fc; color: #055160; }
-    .btn-ship:hover { background: #055160; color: #fff; }
-    .btn-cancel { background: #f8d7da; color: #842029; }
-    .btn-cancel:hover { background: #842029; color: #fff; }
-    .items-list { font-size: .82rem; color: #6c757d; margin-top: 2px; }
-    .summary-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-    .sum-card {
-        background: #fff; border-radius: 10px; border: 1px solid #eee;
-        padding: 12px 18px; flex: 1; min-width: 120px;
-        box-shadow: 0 2px 6px rgba(0,0,0,.04); text-align: center;
-    }
-    .sum-card .val { font-size: 1.6rem; font-weight: 700; }
-    .sum-card .lbl { font-size: .75rem; color: #adb5bd; text-transform: uppercase; }
-</style>
+    <link rel="stylesheet" href="~/css/orderManagement.css" asp-append-version="true">
 }
 
 <div class="om-wrapper">
@@ -74,61 +23,62 @@
         </div>
     }
 
-    <div class="summary-bar">
-        <div class="sum-card">
-            <div class="val">@ViewBag.AllCount</div>
-            <div class="lbl">ทั้งหมด</div>
+    <div class="d-flex flex-row flex-wrap gap-3 mb-4">
+        <div class="bg-white rounded-3 border px-4 py-3 text-center shadow-sm">
+            <div class="fs-3 fw-bold lh-1">@ViewBag.AllCount</div>
+            <div class="small text-muted text-uppercase mt-1">ทั้งหมด</div>
         </div>
-        <div class="sum-card">
-            <div class="val text-warning">@ViewBag.PendingCount</div>
-            <div class="lbl">Pending</div>
+        <div class="bg-white rounded-3 border px-4 py-3 text-center shadow-sm">
+            <div class="fs-3 fw-bold lh-1 text-warning">@ViewBag.PendingCount</div>
+            <div class="small text-muted text-uppercase mt-1">Pending</div>
         </div>
-        <div class="sum-card">
-            <div class="val text-success">@ViewBag.PaidCount</div>
-            <div class="lbl">Paid</div>
+        <div class="bg-white rounded-3 border px-4 py-3 text-center shadow-sm">
+            <div class="fs-3 fw-bold lh-1 text-success">@ViewBag.PaidCount</div>
+            <div class="small text-muted text-uppercase mt-1">Paid</div>
         </div>
-        <div class="sum-card">
-            <div class="val text-info">@ViewBag.ShippedCount</div>
-            <div class="lbl">Shipped</div>
+        <div class="bg-white rounded-3 border px-4 py-3 text-center shadow-sm">
+            <div class="fs-3 fw-bold lh-1 text-info">@ViewBag.ShippedCount</div>
+            <div class="small text-muted text-uppercase mt-1">Shipped</div>
         </div>
-        <div class="sum-card">
-            <div class="val text-danger">@ViewBag.CancelCount</div>
-            <div class="lbl">Cancelled</div>
+        <div class="bg-white rounded-3 border px-4 py-3 text-center shadow-sm">
+            <div class="fs-3 fw-bold lh-1 text-danger">@ViewBag.CancelCount</div>
+            <div class="small text-muted text-uppercase mt-1">Cancelled</div>
         </div>
     </div>
 
-    <div class="tab-filter">
+    <div class="d-flex flex-wrap gap-2 mb-4">
         <a asp-action="OrderManagement" asp-controller="Project"
-           class="tab-btn @(ViewBag.StatusFilter == null ? "active" : "")">
-            ทั้งหมด <span class="count">@ViewBag.AllCount</span>
+           class="btn btn-sm rounded-pill @(ViewBag.StatusFilter == null ? "btn-dark" : "btn-outline-secondary")">
+            ทั้งหมด <span class="badge bg-secondary ms-1 rounded-pill">@ViewBag.AllCount</span>
         </a>
         <a asp-action="OrderManagement" asp-controller="Project" asp-route-status="Pending"
-           class="tab-btn @(ViewBag.StatusFilter == "Pending" ? "active" : "")">
-            Pending <span class="count">@ViewBag.PendingCount</span>
+           class="btn btn-sm rounded-pill @(ViewBag.StatusFilter == "Pending" ? "btn-dark" : "btn-outline-secondary")">
+            Pending <span class="badge bg-secondary ms-1 rounded-pill">@ViewBag.PendingCount</span>
         </a>
         <a asp-action="OrderManagement" asp-controller="Project" asp-route-status="Paid"
-           class="tab-btn @(ViewBag.StatusFilter == "Paid" ? "active" : "")">
-            Paid <span class="count">@ViewBag.PaidCount</span>
+           class="btn btn-sm rounded-pill @(ViewBag.StatusFilter == "Paid" ? "btn-dark" : "btn-outline-secondary")">
+            Paid <span class="badge bg-secondary ms-1 rounded-pill">@ViewBag.PaidCount</span>
         </a>
         <a asp-action="OrderManagement" asp-controller="Project" asp-route-status="Shipped"
-           class="tab-btn @(ViewBag.StatusFilter == "Shipped" ? "active" : "")">
-            Shipped <span class="count">@ViewBag.ShippedCount</span>
+           class="btn btn-sm rounded-pill @(ViewBag.StatusFilter == "Shipped" ? "btn-dark" : "btn-outline-secondary")">
+            Shipped <span class="badge bg-secondary ms-1 rounded-pill">@ViewBag.ShippedCount</span>
         </a>
         <a asp-action="OrderManagement" asp-controller="Project" asp-route-status="Cancelled"
-           class="tab-btn @(ViewBag.StatusFilter == "Cancelled" ? "active" : "")">
-            Cancelled <span class="count">@ViewBag.CancelCount</span>
+           class="btn btn-sm rounded-pill @(ViewBag.StatusFilter == "Cancelled" ? "btn-dark" : "btn-outline-secondary")">
+            Cancelled <span class="badge bg-secondary ms-1 rounded-pill">@ViewBag.CancelCount</span>
         </a>
     </div>
 
-    <div class="om-card">
-        <table class="table mb-0">
-            <thead>
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
                 <tr>
                     <th>#</th>
                     <th>วันที่</th>
                     <th>ลูกค้า</th>
                     <th>รายการสินค้า</th>
-                    <th class="text-end">ยอดรวม</th>
+                    <th>ที่อยู่จัดส่ง</th>
+                    <th class="text-end">ยอด</th>
                     <th class="text-center">สถานะ</th>
                     <th class="text-center">อัปเดต</th>
                 </tr>
@@ -137,7 +87,7 @@
             @foreach (var order in Model)
             {
                 <tr>
-                    <td class="fw-bold">#@order.OrderId</td>
+                    <td class="fw-bold text-muted">#@order.OrderId</td>
                     <td class="text-muted small">@order.OrderDate?.ToString("dd/MM/yy HH:mm")</td>
                     <td>
                         <div class="fw-semibold">@(order.User?.FullName ?? order.User?.Username)</div>
@@ -146,20 +96,40 @@
                     <td>
                         @foreach (var d in order.Orderdetails.Take(2))
                         {
-                            <div class="items-list">• @d.PidNavigation?.Pname x@d.Qty</div>
+                            <div class="items-list">• @d.PidNavigation?.Pname x@(d.Qty)</div>
                         }
                         @if (order.Orderdetails.Count > 2)
                         {
-                            <div class="items-list text-primary">
-                                +@(order.Orderdetails.Count - 2) รายการ
+                            <div class="items-list text-primary small">+@(order.Orderdetails.Count - 2) รายการ</div>
+                        }
+                    </td>
+                    <td class="small text-muted" style="max-width:160px;">
+                        @if (!string.IsNullOrEmpty(order.ShippingAddress))
+                        {
+                            <span title="@order.ShippingAddress">
+                                <i class="fas fa-map-marker-alt me-1 text-warning"></i>
+                                @(order.ShippingAddress.Length > 35
+                                    ? order.ShippingAddress[..35] + "…"
+                                    : order.ShippingAddress)
+                            </span>
+                        }
+                        else { <span>-</span> }
+                    </td>
+                    <td class="text-end">
+                        <div class="fw-bold text-primary">฿@order.TotalAmount.ToString("N0")</div>
+                        @if (order.DiscountAmount > 0)
+                        {
+                            <div class="discount-tag">
+                                <i class="fas fa-tag me-1"></i>-฿@order.DiscountAmount.ToString("N0")
+                                @if (!string.IsNullOrEmpty(order.CouponCode))
+                                {
+                                    <span class="ms-1 badge bg-warning text-dark" style="font-size:.65rem;">@order.CouponCode</span>
+                                }
                             </div>
                         }
                     </td>
-                    <td class="text-end fw-bold text-primary">
-                        ฿@order.TotalAmount.ToString("N0")
-                    </td>
                     <td class="text-center">
-                        <span class="status-badge badge-@order.Status">@order.Status</span>
+                        <span class="om-status-badge badge-@order.Status">@order.Status</span>
                     </td>
                     <td class="text-center">
                         <div class="d-flex gap-1 justify-content-center flex-wrap">
@@ -168,16 +138,16 @@
                             <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
                                 <input type="hidden" name="orderId" value="@order.OrderId" />
                                 <input type="hidden" name="newStatus" value="Paid" />
-                                <button type="submit" class="btn-status btn-approve">
+                                <button type="submit" class="btn btn-sm" style="background:#d1fae5;color:#065f46;border:none;">
                                     <i class="fas fa-check me-1"></i>Paid
                                 </button>
                             </form>
                             <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
                                 <input type="hidden" name="orderId" value="@order.OrderId" />
                                 <input type="hidden" name="newStatus" value="Cancelled" />
-                                <button type="submit" class="btn-status btn-cancel"
-                                        onclick="return confirm('ยกเลิกออเดอร์ #@order.OrderId?')">
-                                    <i class="fas fa-times me-1"></i>ยกเลิก
+                                <button type="submit" class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;"
+                                        onclick="return confirm('ยกเลิกออเดอร์ #@order.OrderId? สต็อกจะถูกคืนกลับอัตโนมัติ')">
+                                    <i class="fas fa-times me-1"></i>Cancel
                                 </button>
                             </form>
                         }
@@ -186,14 +156,22 @@
                             <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
                                 <input type="hidden" name="orderId" value="@order.OrderId" />
                                 <input type="hidden" name="newStatus" value="Shipped" />
-                                <button type="submit" class="btn-status btn-ship">
-                                    <i class="fas fa-truck me-1"></i>Shipped
+                                <button type="submit" class="btn btn-sm" style="background:#dbeafe;color:#1e40af;border:none;">
+                                    <i class="fas fa-truck me-1"></i>Ship
+                                </button>
+                            </form>
+                            <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
+                                <input type="hidden" name="orderId" value="@order.OrderId" />
+                                <input type="hidden" name="newStatus" value="Cancelled" />
+                                <button type="submit" class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;"
+                                        onclick="return confirm('ยกเลิกออเดอร์ #@order.OrderId? สต็อกจะถูกคืนกลับอัตโนมัติ')">
+                                    <i class="fas fa-times me-1"></i>Cancel
                                 </button>
                             </form>
                         }
                         else
                         {
-                            <span class="text-muted small">-</span>
+                            <span class="text-muted small">—</span>
                         }
                         </div>
                     </td>

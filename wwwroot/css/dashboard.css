@@ -111,3 +111,4 @@
 }
 .alert-item:last-child { border: none; }
 .alert-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.kpi-revenue { color: #f39c12; font-size: 1.6rem; }

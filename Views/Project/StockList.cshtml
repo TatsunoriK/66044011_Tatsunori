@@ -1,181 +1,238 @@
 @model IEnumerable<_66044011_Tatsunori.Models.Productstock>
 @{
-    Layout = "_HeaderFoot";
-    ViewData["Title"] = "จัดการสต็อกสินค้า";
+    ViewData["Title"] = "จัดการสต็อก";
+    // เรียงให้หมด/น้อยขึ้นก่อน แล้วค่อยเรียงชื่อ
+    var sorted = Model
+        .OrderBy(s => s.Quantity > 5 ? 2 : s.Quantity > 0 ? 1 : 0)
+        .ThenBy(s => s.PidNavigation?.Pname);
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/stockList.css" asp-append-version="true">
+    <style>
+        .product-name-cell { position: relative; cursor: default; }
+        .product-name-cell .img-tooltip {
+            display: none;
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 999;
+            background: #fff;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,.15);
+            padding: 6px;
+            width: 140px;
+        }
+        .product-name-cell .img-tooltip img {
+            width: 128px;
+            height: 128px;
+            object-fit: contain;
+        }
+        .product-name-cell:hover .img-tooltip { display: block; }
+        .qty-input { max-width: 70px; text-align: center; font-weight: 700; }
+        .save-btn  { font-size: .75rem; padding: 1px 8px; }
+    </style>
 }
 
-@* Confirm Modal *@
-<div class="confirm-modal-overlay" id="confirmModal">
-    <div class="confirm-modal-box">
-        <h5 class="fw-bold mb-1"><i class="fas fa-boxes me-2 text-warning"></i>ยืนยันการอัปเดตสต็อก</h5>
-        <p class="text-muted mb-0" id="modalProductName" style="font-size:.9rem;"></p>
-        <div class="confirm-qty-bar">
-            <div class="text-center">
-                <div class="confirm-qty-val" id="modalOldQty"></div>
-                <div class="confirm-qty-lbl">เดิม</div>
-            </div>
-            <div class="confirm-arrow">→</div>
-            <div class="text-center">
-                <div class="confirm-qty-val text-primary" id="modalNewQty"></div>
-                <div class="confirm-qty-lbl">ใหม่</div>
-            </div>
-            <div class="confirm-diff" id="modalDiff"></div>
-        </div>
-        <div class="d-flex gap-2 justify-content-end">
-            <button onclick="closeModal()" class="btn btn-outline-secondary btn-sm px-4">ยกเลิก</button>
-            <button onclick="submitForm()" class="btn btn-dark btn-sm px-4">
-                <i class="fas fa-save me-1"></i>ยืนยัน
-            </button>
-        </div>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0"><i class="fas fa-boxes me-2"></i>จัดการสต็อก</h2>
+    <button class="btn btn-dark fw-bold" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        <i class="fas fa-plus me-1"></i>เพิ่มสินค้าใหม่
+    </button>
 </div>
 
-<div class="stock-wrapper">
-    <div class="page-header">
-        <div>
-            <h2 class="fw-bold mb-0"><i class="fas fa-boxes me-2"></i>จัดการสต็อกสินค้า</h2>
-            <small class="text-muted">อัปเดตจำนวนสินค้าคงเหลือในคลัง</small>
-        </div>
-        <a asp-action="ProductList" asp-controller="Project" class="btn btn-outline-dark btn-sm">
-            <i class="fas fa-arrow-left me-1"></i>กลับหน้าหลัก
-        </a>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-1"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+}
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show py-2 mb-4">
-            <i class="fas fa-check-circle me-1"></i> @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>สินค้า</th>
+                <th>หมวด</th>
+                <th>ยี่ห้อ</th>
+                <th class="text-center">สถานะ</th>
+                <th class="text-center">คงเหลือ</th>
+                <th>อัปเดตล่าสุด</th>
+                <th class="text-center">ประวัติ</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var s in sorted)
+        {
+            var qty = s.Quantity ?? 0;
+            var img = s.PidNavigation?.ImagePath;
+            <tr>
+                <td class="text-muted small">@s.Pid</td>
+                <td>
+                    <div class="product-name-cell">
+                        <span class="fw-semibold">@(s.PidNavigation?.Pname ?? "-")</span>
+                        @if (!string.IsNullOrEmpty(img))
+                        {
+                            <div class="img-tooltip">
+                                <img src="@img" alt="@s.PidNavigation?.Pname">
+                            </div>
+                        }
+                    </div>
+                </td>
+                <td class="small text-muted">@(s.PidNavigation?.Cat?.CatName ?? "-")</td>
+                <td class="small text-muted">@(s.PidNavigation?.Brand?.BrandName ?? "-")</td>
+                <td class="text-center">
+                    @if (qty <= 0)     { <span class="badge bg-danger">หมด</span> }
+                    else if (qty <= 5) { <span class="badge bg-warning text-dark">เหลือน้อย</span> }
+                    else               { <span class="badge bg-success">มีสินค้า</span> }
+                </td>
+                <td class="text-center">
+                    <form asp-action="UpdateStock" method="post" class="qty-form d-inline-flex flex-column align-items-center gap-1">
+                        <input type="hidden" name="pid" value="@s.Pid">
+                        <input type="number" name="quantity" value="@qty" min="0"
+                               class="form-control form-control-sm qty-input"
+                               data-orig="@qty">
+                        <button type="submit" class="btn btn-dark btn-sm save-btn" style="display:none;">
+                            <i class="fas fa-check me-1"></i>บันทึก
+                        </button>
+                    </form>
+                </td>
+                <td class="small text-muted">@s.LastUpdate?.ToString("dd/MM/yy HH:mm")</td>
+                <td class="text-center">
+                    <a asp-action="StockHistory" asp-route-pid="@s.Pid" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-history"></i>
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
 
-    @{
-        var totalItems  = Model.Count();
-        var outOfStock  = Model.Count(s => (s.Quantity ?? 0) <= 0);
-        var lowStock    = Model.Count(s => (s.Quantity ?? 0) > 0 && (s.Quantity ?? 0) <= 5);
-        var normalStock = Model.Count(s => (s.Quantity ?? 0) > 5);
-    }
-
-    <div class="summary-bar">
-        <div class="summary-item">
-            <div class="val">@totalItems</div>
-            <div class="lbl">สินค้าทั้งหมด</div>
+{{* Add Product Modal *}}
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-plus me-2 text-warning"></i>เพิ่มสินค้าใหม่
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="AddProduct" method="post" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">ชื่อสินค้า <span class="text-danger">*</span></label>
+                            <input type="text" name="pname" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">ราคา (฿) <span class="text-danger">*</span></label>
+                            <input type="number" name="price" class="form-control" min="0" step="0.01" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">จำนวนสต็อก <span class="text-danger">*</span></label>
+                            <input type="number" name="quantity" class="form-control" min="0" value="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">หมวดหมู่</label>
+                            <select name="catId" class="form-select" id="catSelect" onchange="toggleNew(this,'newCatWrap')">
+                                <option value="">-- ไม่ระบุ --</option>
+                                @foreach (var c in (IEnumerable<_66044011_Tatsunori.Models.Category>)ViewBag.Categories)
+                                {
+                                    <option value="@c.CatId">@c.CatName</option>
+                                }
+                                <option value="__new__">➕ เพิ่มหมวดใหม่...</option>
+                            </select>
+                            <div id="newCatWrap" style="display:none;" class="mt-2">
+                                <input type="text" name="newCatName" class="form-control" placeholder="ชื่อหมวดหมู่ใหม่">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">ยี่ห้อ</label>
+                            <select name="brandId" class="form-select" id="brandSelect" onchange="toggleNew(this,'newBrandWrap')">
+                                <option value="">-- ไม่ระบุ --</option>
+                                @foreach (var b in (IEnumerable<_66044011_Tatsunori.Models.Brand>)ViewBag.Brands)
+                                {
+                                    <option value="@b.BrandId">@b.BrandName</option>
+                                }
+                                <option value="__new__">➕ เพิ่มยี่ห้อใหม่...</option>
+                            </select>
+                            <div id="newBrandWrap" style="display:none;" class="mt-2">
+                                <input type="text" name="newBrandName" class="form-control" placeholder="ชื่อยี่ห้อใหม่">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">รูปสินค้า</label>
+                            <input type="file" name="image" class="form-control" accept="image/*"
+                                   onchange="previewImg(this)">
+                            <div class="mt-2 text-center" id="imgPreviewWrap" style="display:none;">
+                                <img id="imgPreview" src="" class="rounded border"
+                                     style="max-height:120px; object-fit:contain;">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">รายละเอียด</label>
+                            <textarea name="description" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-dark fw-bold">เพิ่มสินค้า</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="summary-item">
-            <div class="val text-success">@normalStock</div>
-            <div class="lbl">สต็อกปกติ</div>
-        </div>
-        <div class="summary-item">
-            <div class="val text-warning">@lowStock</div>
-            <div class="lbl">เหลือน้อย (≤5)</div>
-        </div>
-        <div class="summary-item">
-            <div class="val text-danger">@outOfStock</div>
-            <div class="lbl">หมดสต็อก</div>
-        </div>
-    </div>
-
-    <div class="stock-card">
-        <table class="table mb-0">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>ชื่อสินค้า</th>
-                    <th>ประเภท</th>
-                    <th>ยี่ห้อ</th>
-                    <th class="text-center">สถานะ</th>
-                    <th class="text-center">คงเหลือ</th>
-                    <th>อัปเดตล่าสุด</th>
-                    <th class="text-center">แก้ไข</th>
-                    <th class="text-center">ประวัติ</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var s in Model)
-            {
-                var qty     = s.Quantity ?? 0;
-                var isLow   = qty > 0 && qty <= 5;
-                var isEmpty = qty <= 0;
-                <tr class="@(isLow || isEmpty ? "low-row" : "")">
-                    <td class="text-muted small">@s.Pid</td>
-                    <td class="fw-semibold">@s.PidNavigation?.Pname</td>
-                    <td class="text-muted small">@(s.PidNavigation?.Cat?.CatName ?? "-")</td>
-                    <td class="text-muted small">@(s.PidNavigation?.Brand?.BrandName ?? "-")</td>
-                    <td class="text-center">
-                        @if (isEmpty)
-                        { <span class="badge-stock bg-danger text-white">หมดสต็อก</span> }
-                        else if (isLow)
-                        { <span class="badge-stock bg-warning text-dark">เหลือน้อย</span> }
-                        else
-                        { <span class="badge-stock bg-success text-white">ปกติ</span> }
-                    </td>
-                    <td class="text-center fw-bold fs-5">@qty</td>
-                    <td class="text-muted small">@(s.LastUpdate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
-                    <td class="text-center">
-                        <form asp-action="UpdateStock" asp-controller="Project"
-                              method="post" class="d-flex gap-2 justify-content-center"
-                              id="form-@s.Pid" onsubmit="return false;">
-                            <input type="hidden" name="pid" value="@s.Pid" />
-                            <input type="number" name="quantity" value="@qty"
-                                   min="0" class="qty-input" id="input-@s.Pid" />
-                            <button type="button" class="btn-save"
-                                    onclick="showConfirm(@s.Pid, '@(s.PidNavigation?.Pname ?? "สินค้า")', @qty)">
-                                <i class="fas fa-save me-1"></i>บันทึก
-                            </button>
-                        </form>
-                    </td>
-                    <td class="text-center">
-                        <a asp-action="StockHistory" asp-controller="Project"
-                           asp-route-pid="@s.Pid" class="btn-history">
-                            <i class="fas fa-history me-1"></i>ประวัติ
-                        </a>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
     </div>
 </div>
 
 @section Scripts {
 <script>
-    let currentForm = null;
-
-    function showConfirm(pid, name, oldQty) {
-        const newQty = parseInt(document.getElementById('input-' + pid).value);
-        const diff   = newQty - oldQty;
-
-        document.getElementById('modalProductName').textContent = name;
-        document.getElementById('modalOldQty').textContent = oldQty;
-        document.getElementById('modalNewQty').textContent = newQty;
-
-        const diffEl = document.getElementById('modalDiff');
-        if (diff > 0)      { diffEl.textContent = '+' + diff; diffEl.style.color = '#198754'; }
-        else if (diff < 0) { diffEl.textContent = diff;       diffEl.style.color = '#dc3545'; }
-        else               { diffEl.textContent = '±0';       diffEl.style.color = '#adb5bd'; }
-
-        currentForm = document.getElementById('form-' + pid);
-        document.getElementById('confirmModal').classList.add('show');
-    }
-
-    function closeModal() {
-        document.getElementById('confirmModal').classList.remove('show');
-        currentForm = null;
-    }
-
-    function submitForm() {
-        if (currentForm) {
-            currentForm.onsubmit = null;
-            currentForm.submit();
-        }
-    }
-
-    document.getElementById('confirmModal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
+// แสดงปุ่มบันทึกเมื่อค่าเปลี่ยน
+document.querySelectorAll('.qty-form').forEach(function(form) {
+    var input = form.querySelector('.qty-input');
+    var btn   = form.querySelector('.save-btn');
+    var orig  = parseInt(input.dataset.orig);
+    input.addEventListener('input', function() {
+        var v = parseInt(input.value);
+        if (isNaN(v) || v < 0) input.value = 0;
+        btn.style.display = parseInt(input.value) !== orig ? 'inline-block' : 'none';
     });
+});
+
+// toggle input ใหม่เมื่อเลือก "เพิ่มใหม่"
+function toggleNew(sel, wrapId) {
+    var wrap = document.getElementById(wrapId);
+    var input = wrap.querySelector('input');
+    if (sel.value === '__new__') {
+        wrap.style.display = 'block';
+        input.required = true;
+        sel.value = '';  // clear ค่า select ให้ส่ง null
+    } else {
+        wrap.style.display = 'none';
+        input.required = false;
+        input.value = '';
+    }
+}
+
+// preview รูปก่อนอัปโหลด
+function previewImg(input) {
+    var wrap = document.getElementById('imgPreviewWrap');
+    var img  = document.getElementById('imgPreview');
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            wrap.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        wrap.style.display = 'none';
+    }
+}
 </script>
 }

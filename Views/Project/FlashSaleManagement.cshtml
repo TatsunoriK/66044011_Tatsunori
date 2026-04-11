@@ -1,0 +1,92 @@
+@model IEnumerable<_66044011_Tatsunori.Models.Flashsale>
+@{
+    ViewData["Title"] = "Flash Sale";
+    var now = (DateTime)ViewBag.Now;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0"><i class="fas fa-bolt me-2 text-warning"></i>Flash Sale</h2>
+    <button class="btn btn-warning fw-bold text-dark" data-bs-toggle="modal" data-bs-target="#createFlashModal">
+        <i class="fas fa-plus me-1"></i>สร้าง Flash Sale
+    </button>
+</div>
+
+@if (TempData["FlashSuccess"] != null) { <div class="alert alert-success">@TempData["FlashSuccess"]</div> }
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+            <tr><th>สินค้า</th><th>ราคาปกติ</th><th>ราคา Flash</th><th>เริ่ม</th><th>สิ้นสุด</th><th>สถานะ</th><th></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var f in Model)
+        {
+            bool live = f.IsActive && f.StartTime <= now && f.EndTime >= now;
+            <tr>
+                <td class="fw-semibold">@(f.PidNavigation?.Pname ?? "-")</td>
+                <td>฿@(f.PidNavigation?.Price.ToString("N0") ?? "-")</td>
+                <td class="text-danger fw-bold">฿@f.SalePrice.ToString("N0")</td>
+                <td class="small">@f.StartTime.ToString("dd/MM/yy HH:mm")</td>
+                <td class="small">@f.EndTime.ToString("dd/MM/yy HH:mm")</td>
+                <td>
+                    @if (live)                  { <span class="badge bg-danger">🔴 LIVE</span> }
+                    else if (!f.IsActive)       { <span class="badge bg-secondary">ปิด</span> }
+                    else if (f.StartTime > now) { <span class="badge bg-warning text-dark">รอเริ่ม</span> }
+                    else                        { <span class="badge bg-dark">สิ้นสุด</span> }
+                </td>
+                <td>
+                    <form asp-action="ToggleFlashSale" method="post" class="d-inline">
+                        <input type="hidden" name="flashSaleId" value="@f.FlashSaleId">
+                        <button class="btn btn-sm btn-outline-@(f.IsActive ? "warning" : "success")">
+                            @(f.IsActive ? "ปิด" : "เปิด")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="createFlashModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-bolt me-2 text-warning"></i>สร้าง Flash Sale</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CreateFlashSale" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">สินค้า <span class="text-danger">*</span></label>
+                        <select name="pid" class="form-select" required>
+                            <option value="">-- เลือกสินค้า --</option>
+                            @foreach (var p in (IEnumerable<_66044011_Tatsunori.Models.Product>)ViewBag.Products)
+                            {
+                                <option value="@p.Pid">@p.Pname (฿@p.Price.ToString("N0"))</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">ราคา Flash Sale <span class="text-danger">*</span></label>
+                        <input type="number" name="salePrice" class="form-control" min="1" step="0.01" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">เริ่ม <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="startTime" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">สิ้นสุด <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="endTime" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-warning fw-bold text-dark">สร้าง Flash Sale</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

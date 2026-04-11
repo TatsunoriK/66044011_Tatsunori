@@ -1,29 +1,49 @@
 @model IEnumerable<_66044011_Tatsunori.Models.Order>
 @{
-    Layout = "_HeaderFoot";
     ViewData["Title"] = "ประวัติการสั่งซื้อ";
 }
 
 @section Styles {
-<style>
-    .history-wrapper { max-width: 900px; margin: 0 auto; }
-    .order-card { background: #fff; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
-    .order-head { background: #f8f9fa; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
-    .order-id { font-weight: 700; color: #1a1a1a; }
-    .order-date { font-size: .85rem; color: #6c757d; }
-    .status-badge { padding: 5px 14px; border-radius: 20px; font-size: .8rem; font-weight: 700; }
-    .status-Pending   { background: #fff3cd; color: #856404; }
-    .status-Paid      { background: #d1e7dd; color: #0f5132; }
-    .status-Shipped   { background: #cff4fc; color: #055160; }
-    .status-Cancelled { background: #f8d7da; color: #842029; }
-    .order-body { padding: 16px 20px; }
-    .item-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #f0f0f0; font-size: .9rem; }
-    .item-row:last-child { border: none; }
-    .total-row { font-weight: 700; font-size: 1rem; color: #0d6efd; padding-top: 12px; text-align: right; }
-    .empty-history { text-align: center; padding: 80px 20px; color: #adb5bd; }
-    .order-meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: .82rem; color: #6c757d; margin-top: 8px; }
-    .order-meta span { display: flex; align-items: center; gap: 4px; }
-</style>
+    <link rel="stylesheet" href="~/css/orderHistory.css" asp-append-version="true">
+    <style>
+        .member-badge-sm {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+        .member-bronze { background: #f3e8d0; color: #92400e; }
+        .member-silver { background: #e5e7eb; color: #374151; }
+        .member-gold   { background: #fef3c7; color: #92400e; }
+        .points-bar {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .points-val { font-size: 1.4rem; font-weight: 800; color: #f39c12; }
+        .discount-row {
+            font-size: .82rem;
+            color: #6b7280;
+            padding: 6px 0;
+            border-top: 1px dashed #f0f0f0;
+            margin-top: 4px;
+        }
+        .coupon-chip {
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 8px;
+            padding: 1px 8px;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+    </style>
 }
 
 <div class="history-wrapper">
@@ -41,6 +61,27 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
+
+    @{
+        var member = Context.Session.GetString("MemberLevel") ?? "Bronze";
+        var points = Context.Session.GetInt32("Points") ?? 0;
+    }
+    <div class="points-bar">
+        <div>
+            <span class="member-badge-sm member-@member.ToLower()">
+                <i class="fas fa-crown me-1"></i>@member
+            </span>
+        </div>
+        <div>
+            <div class="points-val">@points <span style="font-size:.85rem; color:#6b7280;">แต้ม</span></div>
+            <div class="small text-muted">= ส่วนลด ฿@(points/10) (10 แต้ม = ฿1)</div>
+        </div>
+        <div class="small text-muted">
+            @if (member == "Bronze") { <span>สะสม 1,000 แต้ม → <strong>Silver</strong> (-3%)</span> }
+            else if (member == "Silver") { <span>สะสม 5,000 แต้ม → <strong class="text-warning">Gold</strong> (-5%)</span> }
+            else { <span class="text-warning fw-bold"><i class="fas fa-star me-1"></i>Gold Member</span> }
+        </div>
+    </div>
 
     @if (!Model.Any())
     {
@@ -61,6 +102,10 @@
                             <span><i class="fas fa-calendar-alt"></i> @order.OrderDate?.ToString("dd/MM/yyyy")</span>
                             <span><i class="fas fa-clock"></i> @order.OrderDate?.ToString("HH:mm") น.</span>
                             <span><i class="fas fa-box"></i> @order.Orderdetails.Sum(d => d.Qty) ชิ้น</span>
+                            @if (order.PointsUsed > 0)
+                            {
+                                <span class="text-warning"><i class="fas fa-coins"></i> ใช้ @order.PointsUsed แต้ม</span>
+                            }
                         </div>
                     </div>
                     <span class="status-badge status-@order.Status">@order.Status</span>
@@ -70,10 +115,37 @@
                     {
                         <div class="item-row">
                             <span>@(d.PidNavigation?.Pname ?? $"สินค้า #{d.Pid}")</span>
-                            <span>x@d.Qty &nbsp;<strong class="text-primary">฿@((d.UnitPrice * d.Qty).ToString("N0"))</strong></span>
+                            <span>x@(d.Qty) &nbsp;<strong class="text-primary">฿@((d.UnitPrice * d.Qty).ToString("N0"))</strong></span>
                         </div>
                     }
-                    <div class="total-row">ยอดรวมทั้งสิ้น: ฿@order.TotalAmount.ToString("N0")</div>
+
+                    @if (order.DiscountAmount > 0)
+                    {
+                        <div class="discount-row">
+                            <i class="fas fa-tag me-1 text-success"></i>
+                            ส่วนลดรวม: <strong class="text-success">-฿@order.DiscountAmount.ToString("N0")</strong>
+                            @if (!string.IsNullOrEmpty(order.CouponCode))
+                            {
+                                <span class="coupon-chip ms-2">@order.CouponCode</span>
+                            }
+                            @if (order.PointsUsed > 0)
+                            {
+                                <span class="ms-2 text-muted small">(แต้ม @order.PointsUsed)</span>
+                            }
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(order.ShippingAddress))
+                    {
+                        <div class="shipping-address">
+                            <i class="fas fa-map-marker-alt me-1 text-warning"></i>
+                            <strong>ที่อยู่จัดส่ง:</strong> @order.ShippingAddress
+                        </div>
+                    }
+
+                    <div class="total-row">
+                        ยอดสุทธิ: ฿@order.TotalAmount.ToString("N0")
+                    </div>
                 </div>
             </div>
         }
