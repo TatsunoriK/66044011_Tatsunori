@@ -585,7 +585,7 @@ public class ProjectController : Controller
                         stock.LastUpdate = DateTime.Now;
                         _db.Stockhistories.Add(new Stockhistory
                         {
-                            Pid = detail.Pid ?? 0,
+                            Pid       = detail.Pid,
                             OldQty    = before,
                             NewQty    = Convert.ToInt32(stock.Quantity),
                             ChangedBy = SessionUser,
