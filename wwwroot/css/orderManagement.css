@@ -1,8 +1,8 @@
-/* ORDER MANAGEMENT - scoped under .om-wrapper */
-.om-wrapper .discount-tag { font-size: .75rem; color: #6b7280; margin-top: 2px; }
+/* ORDER MANAGEMENT */
+.om-wrapper .discount-tag { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
 .om-wrapper .om-status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
-.om-wrapper .badge-Pending   { background: #fef3c7; color: #92400e; }
-.om-wrapper .badge-Paid      { background: #d1fae5; color: #065f46; }
-.om-wrapper .badge-Shipped   { background: #dbeafe; color: #1e40af; }
-.om-wrapper .badge-Cancelled { background: #fee2e2; color: #991b1b; }
-.om-wrapper .items-list { font-size: .82rem; color: #374151; line-height: 1.6; }
+.om-wrapper .badge-Pending   { background: rgba(244,196,48,.15); color: var(--gold);   border: 1px solid rgba(244,196,48,.3); }
+.om-wrapper .badge-Paid      { background: rgba(0,200,100,.15);  color: #00e87a;        border: 1px solid rgba(0,200,100,.3); }
+.om-wrapper .badge-Done      { background: rgba(0,170,255,.15);  color: var(--blue);    border: 1px solid var(--border); }
+.om-wrapper .badge-Cancelled { background: rgba(255,80,80,.15);  color: #ff6060;        border: 1px solid rgba(255,80,80,.3); }
+.om-wrapper .items-list { font-size: .82rem; color: var(--text); line-height: 1.6; }

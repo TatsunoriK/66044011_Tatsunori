@@ -8,64 +8,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - STRIKE FORCE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="~/css/register.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height: 100vh; background: #f4f5f7; font-family: 'Segoe UI', sans-serif; display: flex; align-items: flex-start; justify-content: center; padding: 30px 20px; }
+        .register-container { background: #fff; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,.10); width: 100%; max-width: 560px; overflow: hidden; }
+        .register-header { background: #111; padding: 24px 32px 20px; text-align: center; }
+        .register-header img { height: 52px; margin-bottom: 8px; }
+        .register-header h2 { color: #fff; font-size: 1.3rem; font-weight: 800; }
+        .register-header p  { color: #f39c12; font-size: .8rem; margin-top: 3px; }
+        .register-body { padding: 28px 32px 32px; }
+        .text-error { background: #fee2e2; color: #991b1b; border-radius: 8px; padding: 10px 14px; font-size: .88rem; margin-bottom: 18px; }
+        .section-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #9ca3af; margin: 18px 0 10px; }
+        .section-label:first-of-type { margin-top: 0; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .full { grid-column: 1 / -1; }
+        .field label { display: block; font-size: .8rem; font-weight: 600; color: #374151; margin-bottom: 5px; }
+        .field label .req { color: #ef4444; margin-left: 2px; }
+        .field input, .field select, .field textarea { width: 100%; padding: 9px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: .9rem; font-family: inherit; background: #fafafa; transition: border-color .2s; }
+        .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #111; background: #fff; }
+        .field textarea { resize: vertical; min-height: 70px; }
+        .bronze-note { background: #fdf6ee; border: 1px solid #f0d9b5; border-radius: 10px; padding: 10px 14px; margin-bottom: 18px; font-size: .82rem; color: #92400e; }
+        .bronze-note i { margin-right: 5px; }
+        .register-btn { width: 100%; padding: 13px; background: #111; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 22px; transition: background .2s; }
+        .register-btn:hover { background: #f39c12; color: #111; }
+        .login-link { text-align: center; margin-top: 16px; font-size: .85rem; color: #6b7280; }
+        .login-link a { color: #111; font-weight: 700; text-decoration: none; }
+        .login-link a:hover { color: #f39c12; }
+    </style>
 </head>
 <body>
-    <div class="left-side"></div>
-    <div class="divider"></div>
-    <div class="right-side">
-        <div class="register-box">
-            <img src="/images/Logo.png" alt="Strike Force" class="logo">
-            <h1>Sign Up</h1>
+    <div class="register-container">
+        <div class="register-header">
+            <img src="/images/Logo.png" alt="Strike Force">
+            <h2>สมัครสมาชิก</h2>
+            <p><i class="fas fa-crosshairs"></i> STRIKE FORCE BB GUN & GEAR</p>
+        </div>
+        <div class="register-body">
+            <div class="bronze-note">
+                <i class="fas fa-crown"></i>
+                <strong>สมัครได้เลย — เริ่มต้นที่ระดับ Bronze ฟรี!</strong><br>
+                เมื่อสมัครแล้วสามารถกด <strong>Upgrade</strong> ที่ navbar เพื่อเลื่อนระดับเป็น Silver หรือ Gold ได้
+            </div>
 
             @if (ViewBag.Error != null)
             {
-                <p class="text-error">@ViewBag.Error</p>
+                <p class="text-error"><i class="fas fa-exclamation-circle me-1"></i>@ViewBag.Error</p>
             }
 
             <form method="post" asp-controller="Project" asp-action="Register">
+                <p class="section-label"><i class="fas fa-lock me-1"></i>ข้อมูลบัญชี</p>
                 <div class="form-grid">
-                    <div class="input-group">
-                        <label>Username</label>
+                    <div class="field">
+                        <label>Username <span class="req">*</span></label>
                         <input type="text" name="Username" placeholder="ชื่อผู้ใช้" required>
                     </div>
-                    <div class="input-group">
-                        <label>Password</label>
+                    <div class="field">
+                        <label>Password <span class="req">*</span></label>
                         <input type="password" name="Password" placeholder="รหัสผ่าน" required>
                     </div>
-                    <div class="input-group full-width">
-                        <label>Email</label>
+                    <div class="field full">
+                        <label>Email <span class="req">*</span></label>
                         <input type="email" name="Email" placeholder="example@mail.com" required>
                     </div>
-                    <div class="input-group full-width">
-                        <label>Full Name</label>
+                </div>
+
+                <p class="section-label"><i class="fas fa-user me-1"></i>ข้อมูลส่วนตัว</p>
+                <div class="form-grid">
+                    <div class="field full">
+                        <label>ชื่อ-นามสกุล <span class="req">*</span></label>
                         <input type="text" name="FullName" placeholder="ชื่อ-นามสกุล" required>
                     </div>
-                    <div class="input-group">
-                        <label>Gender</label>
+                    <div class="field">
+                        <label>เพศ <span class="req">*</span></label>
                         <select name="Gender" required>
                             <option value="" disabled selected>เลือกเพศ</option>
                             <option value="Male">ชาย</option>
                             <option value="Female">หญิง</option>
                         </select>
                     </div>
-                    <div class="input-group">
-                        <label>Birthday</label>
+                    <div class="field">
+                        <label>วันเกิด <span class="req">*</span></label>
                         <input type="date" name="Birthday" required>
                     </div>
-                    <div class="input-group full-width">
-                        <label>Address</label>
-                        <textarea name="Address" placeholder="ที่อยู่จัดส่ง" rows="2"></textarea>
-                    </div>
-                    <div class="input-group full-width">
-                        <label>Phone</label>
+                    <div class="field full">
+                        <label>เบอร์โทรศัพท์ <span class="req">*</span></label>
                         <input type="tel" name="Phone" placeholder="08X-XXX-XXXX" required>
                     </div>
+                    <div class="field full">
+                        <label>ที่อยู่จัดส่ง</label>
+                        <textarea name="Address" placeholder="บ้านเลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+                    </div>
                 </div>
-                <button type="submit" class="register-btn">Create Account</button>
-            </form>
 
-            <p class="login-text">มีบัญชีแล้ว? <a asp-action="Login" asp-controller="Project">Login</a></p>
+                <button type="submit" class="register-btn">
+                    <i class="fas fa-user-plus me-1"></i>สมัครสมาชิก
+                </button>
+            </form>
+            <p class="login-link">มีบัญชีแล้ว? <a asp-action="Login" asp-controller="Project">เข้าสู่ระบบ</a></p>
         </div>
     </div>
 </body>

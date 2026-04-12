@@ -121,6 +121,8 @@ public partial class Csi402dbContext : DbContext
             entity.Property(e => e.Username).HasMaxLength(30);
             entity.Property(e => e.Points).HasDefaultValue(0);
             entity.Property(e => e.MemberLevel).HasMaxLength(10).HasDefaultValue("Bronze");
+            entity.Property(e => e.IsMember).HasDefaultValue(false);
+            entity.Property(e => e.MemberExpiry).HasColumnType("datetime");
             entity.HasOne(d => d.Role).WithMany(p => p.Users).HasForeignKey(d => d.RoleId).HasConstraintName("users_ibfk_1");
         });
 
@@ -161,6 +163,7 @@ public partial class Csi402dbContext : DbContext
             entity.HasIndex(e => e.Code, "Code").IsUnique();
             entity.Property(e => e.Code).HasMaxLength(50);
             entity.Property(e => e.DiscountPct).HasPrecision(5, 2);
+            entity.Property(e => e.DiscountAmt).HasPrecision(10, 2).HasDefaultValue(0m);
             entity.Property(e => e.MinAmount).HasPrecision(10, 2);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").HasColumnType("datetime");
         });

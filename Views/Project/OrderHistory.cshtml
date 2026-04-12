@@ -1,4 +1,5 @@
 @model IEnumerable<_66044011_Tatsunori.Models.Order>
+@using Microsoft.AspNetCore.Http
 @{
     ViewData["Title"] = "ประวัติการสั่งซื้อ";
 }
@@ -6,43 +7,16 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/orderHistory.css" asp-append-version="true">
     <style>
-        .member-badge-sm {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: .72rem;
-            font-weight: 700;
+        .status-Done { background: #d1fae5; color: #065f46; }
+        .btn-confirm-received {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #065f46; color: #fff;
+            border: none; border-radius: 8px;
+            padding: 7px 16px; font-size: .85rem; font-weight: 700;
+            cursor: pointer; transition: background .2s;
         }
-        .member-bronze { background: #f3e8d0; color: #92400e; }
-        .member-silver { background: #e5e7eb; color: #374151; }
-        .member-gold   { background: #fef3c7; color: #92400e; }
-        .points-bar {
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 14px 20px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .points-val { font-size: 1.4rem; font-weight: 800; color: #f39c12; }
-        .discount-row {
-            font-size: .82rem;
-            color: #6b7280;
-            padding: 6px 0;
-            border-top: 1px dashed #f0f0f0;
-            margin-top: 4px;
-        }
-        .coupon-chip {
-            background: #fef3c7;
-            color: #92400e;
-            border-radius: 8px;
-            padding: 1px 8px;
-            font-size: .72rem;
-            font-weight: 700;
-        }
+        .btn-confirm-received:hover { background: #047857; }
+        .done-note { font-size: .8rem; color: #059669; margin-top: 6px; }
     </style>
 }
 
@@ -62,27 +36,6 @@
         </div>
     }
 
-    @{
-        var member = Context.Session.GetString("MemberLevel") ?? "Bronze";
-        var points = Context.Session.GetInt32("Points") ?? 0;
-    }
-    <div class="points-bar">
-        <div>
-            <span class="member-badge-sm member-@member.ToLower()">
-                <i class="fas fa-crown me-1"></i>@member
-            </span>
-        </div>
-        <div>
-            <div class="points-val">@points <span style="font-size:.85rem; color:#6b7280;">แต้ม</span></div>
-            <div class="small text-muted">= ส่วนลด ฿@(points/10) (10 แต้ม = ฿1)</div>
-        </div>
-        <div class="small text-muted">
-            @if (member == "Bronze") { <span>สะสม 1,000 แต้ม → <strong>Silver</strong> (-3%)</span> }
-            else if (member == "Silver") { <span>สะสม 5,000 แต้ม → <strong class="text-warning">Gold</strong> (-5%)</span> }
-            else { <span class="text-warning fw-bold"><i class="fas fa-star me-1"></i>Gold Member</span> }
-        </div>
-    </div>
-
     @if (!Model.Any())
     {
         <div class="empty-history">
@@ -94,6 +47,23 @@
     {
         @foreach (var order in Model)
         {
+            @* คำนวณแต้มของออเดอร์นี้ *@
+            int earnedPts    = 0;
+            int redeemedPts  = 0;
+            int cancelledPts = 0;
+            if (ViewBag.PointMap is Dictionary<int, List<(int pts, string type)>> pm && pm.ContainsKey(order.OrderId))
+            {
+                foreach (var (pts, type) in pm[order.OrderId])
+                {
+                    if (type == "earn")   earnedPts    += pts;
+                    if (type == "redeem") redeemedPts  += Math.Abs(pts);
+                    if (type == "cancel") cancelledPts += Math.Abs(pts);
+                }
+            }
+            bool hasMemberDisc = order.CouponCode != null && order.CouponCode.Contains("__MEMBER__");
+            string? displayCoupon = order.CouponCode?.Replace("__MEMBER__", "").Replace("+", "").Trim();
+            if (string.IsNullOrEmpty(displayCoupon)) displayCoupon = null;
+
             <div class="order-card">
                 <div class="order-head">
                     <div>
@@ -102,9 +72,17 @@
                             <span><i class="fas fa-calendar-alt"></i> @order.OrderDate?.ToString("dd/MM/yyyy")</span>
                             <span><i class="fas fa-clock"></i> @order.OrderDate?.ToString("HH:mm") น.</span>
                             <span><i class="fas fa-box"></i> @order.Orderdetails.Sum(d => d.Qty) ชิ้น</span>
-                            @if (order.PointsUsed > 0)
+                            @if (earnedPts > 0)
                             {
-                                <span class="text-warning"><i class="fas fa-coins"></i> ใช้ @order.PointsUsed แต้ม</span>
+                                <span class="text-warning"><i class="fas fa-coins"></i> +@earnedPts แต้ม</span>
+                            }
+                            @if (redeemedPts > 0)
+                            {
+                                <span class="text-muted"><i class="fas fa-coins"></i> ใช้ @redeemedPts แต้ม</span>
+                            }
+                            @if (cancelledPts > 0)
+                            {
+                                <span class="text-danger"><i class="fas fa-coins"></i> คืน @cancelledPts แต้ม</span>
                             }
                         </div>
                     </div>
@@ -124,13 +102,21 @@
                         <div class="discount-row">
                             <i class="fas fa-tag me-1 text-success"></i>
                             ส่วนลดรวม: <strong class="text-success">-฿@order.DiscountAmount.ToString("N0")</strong>
-                            @if (!string.IsNullOrEmpty(order.CouponCode))
+                            @if (hasMemberDisc)
                             {
-                                <span class="coupon-chip ms-2">@order.CouponCode</span>
+                                <span class="ms-2" style="background:#fef3c7;color:#92400e;border-radius:6px;padding:1px 7px;font-size:.72rem;font-weight:700;">
+                                    <i class="fas fa-crown me-1"></i>Member -฿100
+                                </span>
+                            }
+                            @if (displayCoupon != null)
+                            {
+                                <span class="ms-1" style="background:#dbeafe;color:#1e40af;border-radius:6px;padding:1px 7px;font-size:.72rem;font-weight:700;">
+                                    @displayCoupon
+                                </span>
                             }
                             @if (order.PointsUsed > 0)
                             {
-                                <span class="ms-2 text-muted small">(แต้ม @order.PointsUsed)</span>
+                                <span class="ms-1 text-muted small">(แต้ม @order.PointsUsed)</span>
                             }
                         </div>
                     }
@@ -143,9 +129,27 @@
                         </div>
                     }
 
-                    <div class="total-row">
-                        ยอดสุทธิ: ฿@order.TotalAmount.ToString("N0")
-                    </div>
+                    <div class="total-row">ยอดสุทธิ: ฿@order.TotalAmount.ToString("N0")</div>
+
+                    @if (order.Status == "Paid")
+                    {
+                        <div class="mt-3 pt-2" style="border-top:1px dashed #f0f0f0;">
+                            <form asp-action="ConfirmReceived" asp-controller="Project" method="post"
+                                  onsubmit="return confirm('ยืนยันว่าได้รับสินค้าออเดอร์ #@order.OrderId แล้ว?')">
+                                <input type="hidden" name="orderId" value="@order.OrderId">
+                                <button type="submit" class="btn-confirm-received">
+                                    <i class="fas fa-box-check"></i> ยืนยันรับสินค้าแล้ว
+                                </button>
+                            </form>
+                            <div class="done-note"><i class="fas fa-info-circle me-1"></i>กดเมื่อได้รับสินค้าเรียบร้อยแล้ว</div>
+                        </div>
+                    }
+                    @if (order.Status == "Done")
+                    {
+                        <div class="mt-2 pt-2" style="border-top:1px dashed #f0f0f0;">
+                            <span class="done-note fw-bold"><i class="fas fa-check-circle me-1 text-success"></i>ได้รับสินค้าแล้ว</span>
+                        </div>
+                    }
                 </div>
             </div>
         }

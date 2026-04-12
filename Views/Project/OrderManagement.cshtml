@@ -15,6 +15,13 @@
         </div>
     </div>
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show py-2 mb-3">
+            <i class="fas fa-check-circle me-1"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
     <div class="d-flex flex-row flex-wrap gap-3 mb-4">
         <div class="bg-white rounded-3 border px-4 py-3 text-center shadow-sm">
@@ -29,10 +36,7 @@
             <div class="fs-3 fw-bold lh-1 text-success">@ViewBag.PaidCount</div>
             <div class="small text-muted text-uppercase mt-1">Paid</div>
         </div>
-        <div class="bg-white rounded-3 border px-4 py-3 text-center shadow-sm">
-            <div class="fs-3 fw-bold lh-1 text-info">@ViewBag.ShippedCount</div>
-            <div class="small text-muted text-uppercase mt-1">Shipped</div>
-        </div>
+        
         <div class="bg-white rounded-3 border px-4 py-3 text-center shadow-sm">
             <div class="fs-3 fw-bold lh-1 text-danger">@ViewBag.CancelCount</div>
             <div class="small text-muted text-uppercase mt-1">Cancelled</div>
@@ -52,10 +56,7 @@
            class="btn btn-sm rounded-pill @(ViewBag.StatusFilter == "Paid" ? "btn-dark" : "btn-outline-secondary")">
             Paid <span class="badge bg-secondary ms-1 rounded-pill">@ViewBag.PaidCount</span>
         </a>
-        <a asp-action="OrderManagement" asp-controller="Project" asp-route-status="Shipped"
-           class="btn btn-sm rounded-pill @(ViewBag.StatusFilter == "Shipped" ? "btn-dark" : "btn-outline-secondary")">
-            Shipped <span class="badge bg-secondary ms-1 rounded-pill">@ViewBag.ShippedCount</span>
-        </a>
+
         <a asp-action="OrderManagement" asp-controller="Project" asp-route-status="Cancelled"
            class="btn btn-sm rounded-pill @(ViewBag.StatusFilter == "Cancelled" ? "btn-dark" : "btn-outline-secondary")">
             Cancelled <span class="badge bg-secondary ms-1 rounded-pill">@ViewBag.CancelCount</span>
@@ -131,15 +132,15 @@
                             <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
                                 <input type="hidden" name="orderId" value="@order.OrderId" />
                                 <input type="hidden" name="newStatus" value="Paid" />
-                                <button type="submit" class="btn btn-sm" style="background:#d1fae5;color:#065f46;border:none;">
+                                <button type="submit" class="btn btn-sm fw-semibold" style="background:#d1fae5;color:#065f46;border:none;border-radius:8px;">
                                     <i class="fas fa-check me-1"></i>Paid
                                 </button>
                             </form>
                             <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
                                 <input type="hidden" name="orderId" value="@order.OrderId" />
                                 <input type="hidden" name="newStatus" value="Cancelled" />
-                                <button type="submit" class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;"
-                                        onclick="return confirm('ยกเลิกออเดอร์ #@order.OrderId? สต็อกจะถูกคืนกลับอัตโนมัติ')">
+                                <button type="submit" class="btn btn-sm fw-semibold" style="background:#fee2e2;color:#991b1b;border:none;border-radius:8px;"
+                                        onclick="return confirm('ยกเลิกออเดอร์ #@order.OrderId?')">
                                     <i class="fas fa-times me-1"></i>Cancel
                                 </button>
                             </form>
@@ -148,16 +149,16 @@
                         {
                             <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
                                 <input type="hidden" name="orderId" value="@order.OrderId" />
-                                <input type="hidden" name="newStatus" value="Shipped" />
-                                <button type="submit" class="btn btn-sm" style="background:#dbeafe;color:#1e40af;border:none;">
-                                    <i class="fas fa-truck me-1"></i>Ship
+                                <input type="hidden" name="newStatus" value="Done" />
+                                <button type="submit" class="btn btn-sm fw-semibold" style="background:#d1fae5;color:#065f46;border:none;border-radius:8px;">
+                                    <i class="fas fa-check-double me-1"></i>Done
                                 </button>
                             </form>
                             <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
                                 <input type="hidden" name="orderId" value="@order.OrderId" />
                                 <input type="hidden" name="newStatus" value="Cancelled" />
-                                <button type="submit" class="btn btn-sm" style="background:#fee2e2;color:#991b1b;border:none;"
-                                        onclick="return confirm('ยกเลิกออเดอร์ #@order.OrderId? สต็อกจะถูกคืนกลับอัตโนมัติ')">
+                                <button type="submit" class="btn btn-sm fw-semibold" style="background:#fee2e2;color:#991b1b;border:none;border-radius:8px;"
+                                        onclick="return confirm('ยกเลิกออเดอร์ #@order.OrderId?')">
                                     <i class="fas fa-times me-1"></i>Cancel
                                 </button>
                             </form>

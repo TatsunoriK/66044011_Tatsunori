@@ -67,8 +67,10 @@ public class ProjectController : Controller
             HttpContext.Session.SetInt32 ("UserId",      user.Id);
             HttpContext.Session.SetInt32 ("RoleId",      user.RoleId ?? 4);
             HttpContext.Session.SetString("FullName",    user.FullName ?? user.Username);
-            HttpContext.Session.SetString("MemberLevel", user.MemberLevel);
-            HttpContext.Session.SetInt32 ("Points",      user.Points);
+            HttpContext.Session.SetString("MemberLevel",   user.MemberLevel);
+            HttpContext.Session.SetInt32 ("Points",        user.Points);
+            HttpContext.Session.SetString("IsMember",      user.IsMember ? "1" : "0");
+            HttpContext.Session.SetString("MemberExpiry",  user.MemberExpiry?.ToString("o") ?? "");
             return RedirectToAction("ProductList");
         }
         ViewBag.Error = "Username หรือ Password ไม่ถูกต้อง";
@@ -106,6 +108,41 @@ public class ProjectController : Controller
         return RedirectToAction("Login");
     }
 
+    // ─── UPGRADE / MEMBER ──────────────────────────────────────────────────
+    public IActionResult Upgrade()
+    {
+        if (SessionUser == null) return RedirectToAction("Login");
+        if (!IsCustomer)         return RedirectToAction("ProductList");
+        var user = _db.Users.Find(SessionUserId);
+        ViewBag.UserData = user;
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult UpgradePlan()
+    {
+        if (SessionUser == null) return RedirectToAction("Login");
+        var user = _db.Users.Find(SessionUserId);
+        if (user == null) return RedirectToAction("Login");
+
+        var now = DateTime.Now;
+        // ต่ออายุ: ถ้าหมดแล้วหรือยังไม่เคยสมัคร = เริ่มใหม่, ถ้ายังไม่หมด = ต่อจากวันหมด
+        if (!user.IsMember || user.MemberExpiry == null || user.MemberExpiry < now)
+            user.MemberExpiry = now.AddDays(30);
+        else
+            user.MemberExpiry = user.MemberExpiry.Value.AddDays(30);
+
+        user.IsMember    = true;
+        user.MemberLevel = "Member";
+
+        _db.SaveChanges();
+        HttpContext.Session.SetString("IsMember",     "1");
+        HttpContext.Session.SetString("MemberExpiry", user.MemberExpiry?.ToString("o") ?? "");
+        HttpContext.Session.SetString("MemberLevel",  user.MemberLevel);
+        TempData["UpgradeSuccess"] = "สมัคร Member สำเร็จ! รับส่วนลด ฿100 ครั้งแรกของทุกเดือน 🎉";
+        return RedirectToAction("Upgrade");
+    }
+
     // ─── PRODUCT LIST ───────────────────────────────────────────────────────
     public IActionResult ProductList(string? search, int? catId, int? brandId,
         decimal? minPrice, decimal? maxPrice, string? sort)
@@ -126,6 +163,31 @@ public class ProjectController : Controller
             "price_desc" => query.OrderByDescending(p => p.Price),
             _            => query.OrderBy(p => p.Pid)
         };
+
+        // Flash sale ขึ้นก่อนเสมอ (ถ้าไม่ได้เรียงราคา)
+        if (string.IsNullOrEmpty(sort))
+        {
+            var flashPidsForSort = _db.Flashsales
+                .Where(f => f.IsActive && f.StartTime <= DateTime.Now && f.EndTime >= DateTime.Now)
+                .Select(f => f.Pid).ToHashSet();
+            var products = query.ToList();
+            products = products
+                .OrderByDescending(p => flashPidsForSort.Contains(p.Pid))
+                .ThenBy(p => p.Pid)
+                .ToList();
+            // จัด flashPids และ Flashsales ViewBag
+            var now2 = DateTime.Now;
+            ViewBag.Categories = _db.Categories.ToList();
+            ViewBag.Brands     = _db.Brands.ToList();
+            ViewBag.Search     = search; ViewBag.CatId = catId; ViewBag.BrandId = brandId;
+            ViewBag.MinPrice   = minPrice; ViewBag.MaxPrice = maxPrice; ViewBag.Sort = sort;
+            ViewBag.Username   = SessionUser; ViewBag.RoleId = SessionRoleId;
+            ViewBag.FlashPids  = flashPidsForSort;
+            ViewBag.Flashsales = _db.Flashsales
+                .Where(f => f.IsActive && f.StartTime <= now2 && f.EndTime >= now2)
+                .ToDictionary(f => f.Pid, f => f.SalePrice);
+            return View("Project1", products);
+        }
 
         var now        = DateTime.Now;
         var flashPids  = _db.Flashsales
@@ -171,6 +233,56 @@ public class ProjectController : Controller
         ViewBag.SavedAddress = profile?.Address ?? "";
         ViewBag.UserPoints   = user?.Points ?? 0;
         ViewBag.MemberLevel  = user?.MemberLevel ?? "Bronze";
+
+        // เช็ค member quota เดือนนี้
+        bool memberActive = user?.IsMember == true &&
+                            user.MemberExpiry != null &&
+                            user.MemberExpiry >= DateTime.Now;
+        bool memberDiscAvailable = false;
+        if (memberActive)
+        {
+            var monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            bool usedThisMonth = _db.Orders.Any(o =>
+                o.UserId == SessionUserId &&
+                o.OrderDate >= monthStart &&
+                o.CouponCode != null &&
+                o.CouponCode.Contains("__MEMBER__") &&
+                o.Status == "Paid");
+            memberDiscAvailable = !usedThisMonth;
+        }
+        ViewBag.MemberDiscAvailable = memberDiscAvailable;
+
+        // สร้าง member coupon ถ้า user เป็น member
+        var userForCoupon = _db.Users.Find(SessionUserId);
+        if (userForCoupon?.IsMember == true &&
+            userForCoupon.MemberExpiry != null &&
+            userForCoupon.MemberExpiry >= DateTime.Now)
+        {
+            EnsureMemberCoupon(SessionUserId!.Value);
+        }
+
+        // Coupons ที่ user นี้ยังใช้ได้
+        var today = DateOnly.FromDateTime(DateTime.Now);
+        var usedCountPerCoupon = _db.Couponusages
+            .Where(u => u.UserId == SessionUserId!.Value)
+            .GroupBy(u => u.CouponId)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var myCouponCode = GetMemberCouponCode(SessionUserId!.Value);
+        var availableCoupons = _db.Coupons
+            .Where(c => c.IsActive &&
+                (c.ExpireDate == null || c.ExpireDate >= today))
+            .ToList()
+            .Where(c => {
+                // ซ่อน MBR coupon ของ user อื่น
+                if (c.Code.StartsWith("MBR") && c.Code != myCouponCode) return false;
+                int userUsed = usedCountPerCoupon.ContainsKey(c.CouponId) ? usedCountPerCoupon[c.CouponId] : 0;
+                return userUsed < c.UsageLimit;
+            })
+            .ToList();
+
+        ViewBag.AvailableCoupons = availableCoupons;
+        ViewBag.MemberCouponCode = userForCoupon?.IsMember == true ? GetMemberCouponCode(SessionUserId!.Value) : null;
         return View(items);
     }
 
@@ -265,13 +377,8 @@ public class ProjectController : Controller
         var products  = _db.Products.Where(p => pids.Contains(p.Pid)).ToList();
         decimal subtotal = products.Sum(p => (flashMap.ContainsKey(p.Pid) ? flashMap[p.Pid] : p.Price) * cart[p.Pid]);
 
-        // คำนวณส่วนลด member
-        decimal memberDiscount = user.MemberLevel switch
-        {
-            "Silver" => Math.Round(subtotal * 0.03m, 2),
-            "Gold"   => Math.Round(subtotal * 0.05m, 2),
-            _        => 0m
-        };
+        // Member discount — จะหักตอน Paid ไม่ใช่ Pending
+        decimal memberDiscount = 0m;
 
         // คำนวณ coupon
         decimal couponDiscount = 0m;
@@ -294,13 +401,16 @@ public class ProjectController : Controller
                 TempData["CartError"] = $"ยอดซื้อขั้นต่ำสำหรับ Coupon นี้คือ ฿{coupon.MinAmount:N0}";
                 return RedirectToAction("CartPage");
             }
-            bool alreadyUsed = _db.Couponusages.Any(u => u.CouponId == coupon.CouponId && u.UserId == user.Id);
-            if (alreadyUsed)
+            int userUsedCount = _db.Couponusages.Count(u => u.CouponId == coupon.CouponId && u.UserId == user.Id);
+            if (userUsedCount >= coupon.UsageLimit)
             {
-                TempData["CartError"] = "คุณใช้ Coupon นี้ไปแล้ว";
+                TempData["CartError"] = $"คุณใช้ Coupon นี้ครบ {coupon.UsageLimit} ครั้งแล้ว";
                 return RedirectToAction("CartPage");
             }
-            couponDiscount = Math.Round(subtotal * (coupon.DiscountPct / 100m), 2);
+            if (coupon.DiscountAmt > 0)
+                couponDiscount = coupon.DiscountAmt;
+            else
+                couponDiscount = Math.Round(subtotal * (coupon.DiscountPct / 100m), 2);
         }
 
         // คำนวณแลกแต้ม (10 แต้ม = ฿1)
@@ -374,8 +484,13 @@ public class ProjectController : Controller
             _db.Pointhistories.Add(new Pointhistory { UserId = user.Id, OrderId = order.OrderId, Points = earnedPoints, Type = "earn", CreatedAt = now });
         }
 
-        // อัปเดต member level
-        user.MemberLevel = CalcMemberLevel(user.Points);
+        // อัปเดต member expiry check (ไม่ต้อง calc level แล้ว)
+        if (user.IsMember && user.MemberExpiry != null && user.MemberExpiry < now)
+        {
+            user.IsMember    = false;
+            user.MemberLevel = "Bronze";
+            HttpContext.Session.SetString("IsMember", "0");
+        }
 
         // อัปเดต address
         var prof = _db.Userprofiles.FirstOrDefault(p => p.UserId == user.Id);
@@ -384,11 +499,27 @@ public class ProjectController : Controller
         _db.SaveChanges();
 
         // อัปเดต session
-        HttpContext.Session.SetString("MemberLevel", user.MemberLevel);
-        HttpContext.Session.SetInt32 ("Points",      user.Points);
+        HttpContext.Session.SetString("MemberLevel",  user.MemberLevel);
+        HttpContext.Session.SetInt32 ("Points",       user.Points);
+        HttpContext.Session.SetString("IsMember",     user.IsMember ? "1" : "0");
+        HttpContext.Session.SetString("MemberExpiry", user.MemberExpiry?.ToString("o") ?? "");
         HttpContext.Session.Remove("Cart");
 
         TempData["OrderSuccess"] = $"สั่งซื้อสำเร็จ! ออเดอร์ #{order.OrderId} | ได้รับ {earnedPoints} แต้ม";
+        return RedirectToAction("OrderHistory");
+    }
+
+    [HttpPost]
+    public IActionResult ConfirmReceived(int orderId)
+    {
+        if (SessionUser == null) return RedirectToAction("Login");
+        var order = _db.Orders.FirstOrDefault(o => o.OrderId == orderId && o.UserId == SessionUserId);
+        if (order != null && order.Status == "Paid")
+        {
+            order.Status = "Done";
+            _db.SaveChanges();
+            TempData["OrderSuccess"] = $"ยืนยันรับสินค้าออเดอร์ #{orderId} เรียบร้อย ขอบคุณที่ใช้บริการ 🎉";
+        }
         return RedirectToAction("OrderHistory");
     }
 
@@ -399,6 +530,17 @@ public class ProjectController : Controller
             .Include(o => o.Orderdetails).ThenInclude(d => d.PidNavigation)
             .Where(o => o.UserId == SessionUserId)
             .OrderByDescending(o => o.OrderDate).ToList();
+
+        // แต้มแต่ละออเดอร์
+        var pointMap = _db.Pointhistories
+            .Where(p => p.UserId == SessionUserId && p.OrderId != null)
+            .ToList()
+            .GroupBy(p => p.OrderId!.Value)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(p => (p.Points, p.Type)).ToList()
+            );
+        ViewBag.PointMap = pointMap;
         return View(orders);
     }
 
@@ -556,7 +698,7 @@ public class ProjectController : Controller
         ViewBag.AllCount     = _db.Orders.Count();
         ViewBag.PendingCount = _db.Orders.Count(o => o.Status == "Pending");
         ViewBag.PaidCount    = _db.Orders.Count(o => o.Status == "Paid");
-        ViewBag.ShippedCount = _db.Orders.Count(o => o.Status == "Shipped");
+        ViewBag.ShippedCount = 0;
         ViewBag.CancelCount  = _db.Orders.Count(o => o.Status == "Cancelled");
         return View(query.OrderByDescending(o => o.OrderDate).ToList());
     }
@@ -569,11 +711,23 @@ public class ProjectController : Controller
         if (order != null)
         {
             var prevStatus = order.Status;
-            order.Status   = newStatus;
+            // อนุญาตเฉพาะ Pending→Paid, Pending→Cancelled, Paid→Cancelled, Paid→Done
+            if (!((prevStatus == "Pending" && newStatus == "Paid") ||
+                  (prevStatus == "Pending" && newStatus == "Cancelled") ||
+                  (prevStatus == "Paid"    && newStatus == "Cancelled") ||
+                  (prevStatus == "Paid"    && newStatus == "Done")))
+            {
+                TempData["Success"] = "ไม่สามารถเปลี่ยนสถานะนี้ได้";
+                return RedirectToAction("OrderManagement");
+            }
 
-            // ถ้า Cancel — คืน stock กลับ
+            order.Status = newStatus;
+            var now = DateTime.Now;
+
+            // ── Cancel: คืน stock + คืน points ──
             if (newStatus == "Cancelled" && prevStatus != "Cancelled")
             {
+                // คืน stock
                 foreach (var detail in order.Orderdetails)
                 {
                     var stock = _db.Productstocks.Find(detail.Pid);
@@ -582,19 +736,43 @@ public class ProjectController : Controller
                         int before    = Convert.ToInt32(stock.Quantity);
                         int detailQty = Convert.ToInt32(detail.Qty);
                         stock.Quantity   = before + detailQty;
-                        stock.LastUpdate = DateTime.Now;
+                        stock.LastUpdate = now;
                         _db.Stockhistories.Add(new Stockhistory
                         {
-                            Pid       = detail.Pid,
+                            Pid       = detail.Pid ?? 0,
                             OldQty    = before,
                             NewQty    = Convert.ToInt32(stock.Quantity),
                             ChangedBy = SessionUser,
-                            ChangedAt = DateTime.Now,
+                            ChangedAt = now,
                             Note      = $"คืน stock จากออเดอร์ #{order.OrderId} (Cancelled)"
                         });
                     }
                 }
+
+                // คืน points ที่เคยได้
+                var earnedHist = _db.Pointhistories
+                    .Where(p => p.OrderId == order.OrderId && p.Type == "earn")
+                    .ToList();
+                if (earnedHist.Any())
+                {
+                    var orderUser = _db.Users.Find(order.UserId);
+                    if (orderUser != null)
+                    {
+                        int totalEarned = earnedHist.Sum(p => p.Points);
+                        orderUser.Points = Math.Max(0, orderUser.Points - totalEarned);
+                        _db.Pointhistories.Add(new Pointhistory
+                        {
+                            UserId    = orderUser.Id,
+                            OrderId   = order.OrderId,
+                            Points    = -totalEarned,
+                            Type      = "cancel",
+                            CreatedAt = now
+                        });
+                        HttpContext.Session.SetInt32("Points", orderUser.Points);
+                    }
+                }
             }
+
             _db.SaveChanges();
             TempData["Success"] = $"อัปเดตสถานะออเดอร์ #{orderId} เป็น {newStatus} เรียบร้อย";
         }
@@ -686,6 +864,38 @@ public class ProjectController : Controller
     }
 
 
+    // ─── MEMBER COUPON ─────────────────────────────────────────────────────────
+    // สร้าง/ดึง coupon code สำหรับ member เดือนนี้
+    private string GetMemberCouponCode(int userId)
+    {
+        var now   = DateTime.Now;
+        var month = now.ToString("MMMyyyy").ToUpper(); // e.g. APR2025
+        return $"MEMBER-{month}-{userId}";
+    }
+
+    private void EnsureMemberCoupon(int userId)
+    {
+        var code      = GetMemberCouponCode(userId);
+        var now       = DateTime.Now;
+        var monthEnd  = new DateOnly(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month));
+        if (!_db.Coupons.Any(c => c.Code == code))
+        {
+            _db.Coupons.Add(new Coupon
+            {
+                Code        = code,
+                DiscountPct = 0,
+                DiscountAmt = 100m,    // ลด ฿100 fixed
+                MinAmount   = 0,
+                UsageLimit  = 1,       // 1 ครั้งต่อเดือน
+                UsedCount   = 0,
+                ExpireDate  = monthEnd,
+                IsActive    = true,
+                CreatedAt   = now
+            });
+            _db.SaveChanges();
+        }
+    }
+
     // ─── ADD CATEGORY / BRAND ───────────────────────────────────────────────
     [HttpPost]
     public IActionResult CreateCategory(string catName)
@@ -758,7 +968,10 @@ public class ProjectController : Controller
     public IActionResult CouponManagement()
     {
         if (!IsAdmin) return RedirectToAction("ProductList");
-        var coupons = _db.Coupons.OrderByDescending(c => c.CreatedAt).ToList();
+        // ซ่อน MEMBER- coupons (auto-generated) จากรายการ
+        var coupons = _db.Coupons
+            .Where(c => !c.Code.StartsWith("MEMBER-"))
+            .OrderByDescending(c => c.CreatedAt).ToList();
         return View(coupons);
     }
 
@@ -775,6 +988,38 @@ public class ProjectController : Controller
         _db.Coupons.Add(new Coupon { Code = code, DiscountPct = discountPct, MinAmount = minAmount, UsageLimit = usageLimit, ExpireDate = expireDate, IsActive = true, CreatedAt = DateTime.Now });
         _db.SaveChanges();
         TempData["CouponSuccess"] = $"สร้าง Coupon '{code}' เรียบร้อยแล้ว";
+        return RedirectToAction("CouponManagement");
+    }
+
+    public IActionResult EditCoupon(int couponId)
+    {
+        if (!IsAdmin) return RedirectToAction("ProductList");
+        var c = _db.Coupons.Find(couponId);
+        if (c == null) return RedirectToAction("CouponManagement");
+        return View(c);
+    }
+
+    [HttpPost]
+    public IActionResult EditCoupon(int couponId, string code, decimal discountPct, decimal discountAmt,
+        decimal minAmount, int usageLimit, DateOnly? expireDate)
+    {
+        if (!IsAdmin) return RedirectToAction("ProductList");
+        var c = _db.Coupons.Find(couponId);
+        if (c == null) return RedirectToAction("CouponManagement");
+        // เช็ค code ซ้ำ
+        if (_db.Coupons.Any(x => x.Code == code.Trim().ToUpper() && x.CouponId != couponId))
+        {
+            TempData["CouponError"] = "Code นี้มีอยู่แล้ว";
+            return RedirectToAction("CouponManagement");
+        }
+        c.Code        = code.Trim().ToUpper();
+        c.DiscountPct = discountPct;
+        c.DiscountAmt = discountAmt;
+        c.MinAmount   = minAmount;
+        c.UsageLimit  = usageLimit;
+        c.ExpireDate  = expireDate;
+        _db.SaveChanges();
+        TempData["CouponSuccess"] = $"แก้ไข Coupon '{c.Code}' เรียบร้อย";
         return RedirectToAction("CouponManagement");
     }
 

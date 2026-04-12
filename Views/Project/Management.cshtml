@@ -10,19 +10,20 @@
 <div class="manage-wrapper">
 
     <div class="manage-header">
-        <div>
-            <h2 class="fw-bold mb-0">Employee List</h2>
-            <p class="text-muted small">จัดการข้อมูลและสิทธิ์การเข้าถึงของพนักงานทั้งหมด</p>
-        </div>
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-4">
             <div class="emp-count-box">
                 <span class="emp-count-label">Total Employees</span>
                 <span class="emp-count-val">@Model.Count()</span>
             </div>
-            <button class="btn btn-dark px-4 py-2 fw-bold" data-bs-toggle="modal" data-bs-target="#addStaffModal">
-                <i class="fas fa-user-plus me-2"></i>เพิ่มพนักงาน
-            </button>
+            <div class="emp-divider"></div>
+            <div>
+                <h2 class="emp-title mb-1">Employee List</h2>
+                <p class="emp-sub mb-0">จัดการข้อมูลและสิทธิ์การเข้าถึงของพนักงานทั้งหมด</p>
+            </div>
         </div>
+        <button class="btn-add-staff" data-bs-toggle="modal" data-bs-target="#addStaffModal">
+            <i class="fas fa-user-plus me-2"></i>เพิ่มพนักงาน
+        </button>
     </div>
 
     @if (TempData["Success"] != null)

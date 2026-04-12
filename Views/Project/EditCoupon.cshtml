@@ -1,0 +1,74 @@
+@model _66044011_Tatsunori.Models.Coupon
+@{
+    ViewData["Title"] = "แก้ไข Coupon";
+}
+
+<div style="max-width:560px; margin:0 auto;">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a asp-action="CouponManagement" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>กลับ
+        </a>
+        <h2 class="fw-bold mb-0"><i class="fas fa-ticket-alt me-2 text-warning"></i>แก้ไข Coupon</h2>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+            <form asp-action="EditCoupon" asp-controller="Project" method="post">
+                <input type="hidden" name="couponId" value="@Model.CouponId">
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Code <span class="text-danger">*</span></label>
+                    <input type="text" name="code" class="form-control"
+                           value="@Model.Code" required>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-semibold">ส่วนลดแบบ % </label>
+                        <div class="input-group">
+                            <input type="number" name="discountPct" class="form-control"
+                                   value="@Model.DiscountPct" min="0" max="100" step="0.01">
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <small class="text-muted">ถ้าใส่ % จะไม่ใช้ ฿</small>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-semibold">ส่วนลดแบบ ฿ (Fixed)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">฿</span>
+                            <input type="number" name="discountAmt" class="form-control"
+                                   value="@Model.DiscountAmt" min="0" step="1">
+                        </div>
+                        <small class="text-muted">ถ้าใส่ ฿ จะใช้ค่านี้ก่อน</small>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label fw-semibold">ยอดขั้นต่ำ (฿)</label>
+                        <input type="number" name="minAmount" class="form-control"
+                               value="@Model.MinAmount" min="0">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-semibold">จำกัดครั้ง/คน</label>
+                        <input type="number" name="usageLimit" class="form-control"
+                               value="@Model.UsageLimit" min="1">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">วันหมดอายุ</label>
+                    <input type="date" name="expireDate" class="form-control"
+                           value="@Model.ExpireDate?.ToString("yyyy-MM-dd")">
+                </div>
+
+                <div class="d-flex gap-2 justify-content-end">
+                    <a asp-action="CouponManagement" class="btn btn-outline-secondary px-4">ยกเลิก</a>
+                    <button type="submit" class="btn btn-dark fw-bold px-4">
+                        <i class="fas fa-save me-1"></i>บันทึก
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

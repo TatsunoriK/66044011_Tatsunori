@@ -9,6 +9,29 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/stockList.css" asp-append-version="true">
+    <style>
+        .product-name-cell { position: relative; cursor: default; }
+        .product-name-cell .img-tooltip {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            background: #fff;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,.2);
+            padding: 6px;
+            width: 120px;
+            pointer-events: none;
+        }
+        .product-name-cell .img-tooltip img {
+            width: 108px;
+            height: 108px;
+            object-fit: contain;
+        }
+        .product-name-cell:hover .img-tooltip { display: block; }
+        .qty-input { max-width: 70px; text-align: center; font-weight: 700; }
+        .save-btn  { font-size: .75rem; padding: 1px 8px; }
+    </style>
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -88,7 +111,7 @@
     </table>
 </div>
 
-{{* Add Product Modal *}}
+@* Add Product Modal *@
 <div class="modal fade" id="addProductModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -166,6 +189,17 @@
 </div>
 
 @section Scripts {
+<script>
+// Tooltip follow mouse
+document.querySelectorAll('.product-name-cell').forEach(function(cell) {
+    var tooltip = cell.querySelector('.img-tooltip');
+    if (!tooltip) return;
+    cell.addEventListener('mousemove', function(e) {
+        tooltip.style.left = (e.clientX + 12) + 'px';
+        tooltip.style.top  = (e.clientY - 60) + 'px';
+    });
+});
+</script>
 <script>
 // แสดงปุ่มบันทึกเมื่อค่าเปลี่ยน
 document.querySelectorAll('.qty-form').forEach(function(form) {

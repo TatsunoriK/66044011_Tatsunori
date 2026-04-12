@@ -1,51 +1,19 @@
-/* CART PAGE - scoped */
+/* CART PAGE */
 .cart-wrapper { max-width: 960px; }
-
-.cart-table { display: flex; flex-direction: column; gap: 0; }
-
-.cart-row {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
-    background: #fff;
-    border-bottom: 1px solid #f0f0f0;
-    border-radius: 0;
-}
-.cart-row:first-child { border-radius: 12px 12px 0 0; }
-.cart-row:last-child  { border-radius: 0 0 12px 12px; border-bottom: none; }
-.cart-row .cart-icon  { color: #dee2e6; }
-.cart-row .cart-info  { flex: 1; }
-
-.cart-table { background: #fff; border-radius: 12px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
-
-.qty-input {
-    width: 70px;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 5px 8px;
-    font-weight: 700;
-}
-.qty-input:focus { outline: none; border-color: #111; box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
-
-.summary-card {
-    background: #fff;
-    border-radius: 12px;
-    border: 1px solid #eee;
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.04);
-    position: sticky;
-    top: 80px;
-}
-
-.member-badge {
-    display: inline-block;
-    padding: 4px 14px;
-    border-radius: 20px;
-    font-size: .8rem;
-    font-weight: 700;
-}
-.member-bronze { background: #f3e8d0; color: #92400e; }
-.member-silver { background: #e5e7eb; color: #374151; }
-.member-gold   { background: #fef3c7; color: #92400e; }
+.cart-table { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+.cart-row { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--border); transition: background .15s; }
+.cart-row:last-child { border-bottom: none; }
+.cart-row:hover { background: var(--blue-dim); }
+.cart-row .cart-icon { color: #1a2a3a; }
+.cart-row .cart-info { flex: 1; }
+.qty-input { width: 70px; text-align: center; border: 1px solid var(--border) !important; border-radius: 8px; padding: 5px 8px; font-weight: 700; background: #0a1020 !important; color: var(--text) !important; }
+.qty-input:focus { border-color: var(--blue) !important; box-shadow: 0 0 0 2px var(--blue-glow) !important; }
+.summary-card { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); padding: 24px; position: sticky; top: 80px; }
+.member-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: .8rem; font-weight: 700; }
+.member-bronze { background: rgba(180,100,20,.15); color: #e8a020; border: 1px solid rgba(180,100,20,.3); }
+.member-silver { background: rgba(150,160,180,.15); color: #a0b0c8; border: 1px solid rgba(150,160,180,.3); }
+.member-gold   { background: rgba(244,196,48,.15);  color: var(--gold); border: 1px solid rgba(244,196,48,.3); }
+.points-info-box { background: rgba(244,196,48,.08); border: 1px solid rgba(244,196,48,.2); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
+.points-current { font-size: 1.1rem; font-weight: 800; color: var(--gold); font-family: 'Rajdhani', sans-serif; }
+.points-current small { font-size: .72rem; font-weight: 400; color: rgba(244,196,48,.6); margin-left: 2px; }
+.points-eq { font-size: .8rem; color: rgba(244,196,48,.7); font-weight: 600; }

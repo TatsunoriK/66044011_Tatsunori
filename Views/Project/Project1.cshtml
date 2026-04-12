@@ -1,6 +1,8 @@
 @model IEnumerable<_66044011_Tatsunori.Models.Product>
 @{
     ViewData["Title"] = "สินค้าทั้งหมด";
+    var flashMap  = ViewBag.Flashsales  as Dictionary<int, decimal> ?? new Dictionary<int, decimal>();
+    var flashPids = ViewBag.FlashPids   as HashSet<int>             ?? new HashSet<int>();
 }
 
 @section Styles {
@@ -8,13 +10,15 @@
 }
 
 <div class="row g-4">
+    @* ── Sidebar Filter ── *@
     <aside class="col-lg-3">
         <div class="filter-sidebar">
             <h5><i class="fas fa-filter me-2"></i>กรองสินค้า</h5>
             <form method="get" asp-action="ProductList" asp-controller="Project">
                 <div class="mb-3">
                     <span class="filter-label">ค้นหา</span>
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="ชื่อสินค้า..." value="@ViewBag.Search" />
+                    <input type="text" name="search" class="form-control form-control-sm"
+                           placeholder="ชื่อสินค้า..." value="@ViewBag.Search" />
                 </div>
                 <div class="mb-3">
                     <span class="filter-label">ประเภทสินค้า</span>
@@ -47,27 +51,52 @@
                     <span class="filter-label">เรียงโดย</span>
                     <select name="sort" class="form-select form-select-sm">
                         <option value="">ค่าเริ่มต้น</option>
-                        <option value="price_asc"  selected="@(ViewBag.Sort == "price_asc")">ราคา ต่ำ - สูง</option>
-                        <option value="price_desc" selected="@(ViewBag.Sort == "price_desc")">ราคา สูง - ต่ำ</option>
+                        <option value="price_asc"  selected="@(ViewBag.Sort == "price_asc")">ราคา ต่ำ → สูง</option>
+                        <option value="price_desc" selected="@(ViewBag.Sort == "price_desc")">ราคา สูง → ต่ำ</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-dark btn-sm w-100"><i class="fas fa-search me-1"></i>ค้นหา</button>
-                <a asp-action="ProductList" asp-controller="Project" class="btn btn-outline-secondary btn-sm w-100 mt-2"><i class="fas fa-undo me-1"></i>ล้างตัวกรอง</a>
+                <button type="submit" class="btn btn-dark btn-sm w-100">
+                    <i class="fas fa-search me-1"></i>ค้นหา
+                </button>
+                <a asp-action="ProductList" asp-controller="Project"
+                   class="btn btn-outline-secondary btn-sm w-100 mt-2">
+                    <i class="fas fa-undo me-1"></i>ล้างตัวกรอง
+                </a>
             </form>
         </div>
     </aside>
 
+    @* ── Main Content ── *@
     <section class="col-lg-9">
-        <div class="mb-4">
-            <h2 class="fw-bold mb-0">สินค้าทั้งหมด</h2>
-            <small class="text-muted">พบ @Model.Count() รายการ</small>
+
+        @* Flash Sale Banner *@
+        @if (flashPids.Any())
+        {
+            <div class="flash-banner mb-4">
+                <div class="flash-banner-inner">
+                    <span class="flash-title">
+                        <i class="fas fa-bolt me-2"></i>FLASH SALE
+                    </span>
+                    <span class="flash-sub">โปรโมชันลดราคาพิเศษ — จำกัดเวลา!</span>
+                    <span class="flash-count">@flashPids.Count รายการ</span>
+                </div>
+            </div>
+        }
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">สินค้าทั้งหมด</h2>
+                <small class="text-muted">พบ @Model.Count() รายการ</small>
+            </div>
         </div>
 
         @if (TempData["CartMsg"] != null)
         {
-            bool isWarn = TempData["CartMsg"]!.ToString()!.Contains("เฉพาะ") || TempData["CartMsg"]!.ToString()!.Contains("สต็อก");
+            bool isWarn = TempData["CartMsg"]!.ToString()!.Contains("เฉพาะ") ||
+                          TempData["CartMsg"]!.ToString()!.Contains("สต็อก");
             <div class="alert alert-@(isWarn ? "warning" : "success") alert-dismissible fade show py-2">
-                <i class="fas fa-@(isWarn ? "exclamation-triangle" : "check-circle") me-1"></i> @TempData["CartMsg"]
+                <i class="fas fa-@(isWarn ? "exclamation-triangle" : "check-circle") me-1"></i>
+                @TempData["CartMsg"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }
@@ -84,30 +113,61 @@
             <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
             @foreach (var p in Model)
             {
-                var inStock = p.Productstock?.Quantity ?? 0;
+                var inStock   = p.Productstock?.Quantity ?? 0;
+                bool isFlash  = flashPids.Contains(p.Pid);
+                decimal salePrice = isFlash ? flashMap[p.Pid] : p.Price;
+
                 <div class="col">
-                    <div class="product-card">
+                    <div class="product-card @(isFlash ? "flash-card" : "")">
+
+                        @* Product Image *@
                         <div class="product-img-wrap">
-                            @if (inStock <= 0)
-                            { <span class="stock-badge bg-danger text-white">หมด</span> }
-                            else if (inStock <= 5)
-                            { <span class="stock-badge bg-warning text-dark">เหลือน้อย</span> }
+                            @if (inStock <= 0)      { <span class="stock-badge bg-danger text-white">หมด</span> }
+                            else if (inStock <= 5)  { <span class="stock-badge bg-warning text-dark">เหลือน้อย</span> }
+                            else                    { <span class="stock-badge bg-success text-white">มีสินค้า</span> }
+
+                            @if (isFlash) { <span class="flash-badge"><i class="fas fa-bolt me-1"></i>FLASH</span> }
+
+                            @if (!string.IsNullOrEmpty(p.ImagePath))
+                            {
+                                <img src="@p.ImagePath" alt="@p.Pname" class="product-img">
+                            }
                             else
-                            { <span class="stock-badge bg-success text-white">มีสินค้า</span> }
-                            <i class="fas fa-gun fa-4x opacity-25"></i>
+                            {
+                                <i class="fas fa-gun fa-4x opacity-25"></i>
+                            }
                         </div>
+
+                        @* Product Info *@
                         <div class="product-body">
                             <div class="brand-tag">@(p.Brand?.BrandName ?? "—") · @(p.Cat?.CatName ?? "—")</div>
                             <div class="product-name">@p.Pname</div>
-                            <div class="product-price">฿@p.Price.ToString("N0")</div>
 
+                            @* Price *@
+                            @if (isFlash)
+                            {
+                                <div class="product-price text-danger">
+                                    ฿@salePrice.ToString("N0")
+                                    <span class="original-price">฿@p.Price.ToString("N0")</span>
+                                    <span class="discount-pct">
+                                        -@(Math.Round((p.Price - salePrice) / p.Price * 100, 0))%
+                                    </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="product-price">฿@p.Price.ToString("N0")</div>
+                            }
+
+                            @* Add to Cart *@
                             @if (ViewBag.Username != null && (int)(ViewBag.RoleId ?? 5) == 4)
                             {
                                 <form asp-action="AddToCart" asp-controller="Project" method="post">
                                     <input type="hidden" name="pid" value="@p.Pid" />
                                     <input type="hidden" name="qty" value="1" />
                                     <button type="submit" class="btn-cart" @(inStock <= 0 ? "disabled" : "")>
-                                        <i class="fas fa-@(inStock <= 0 ? "times" : "shopping-cart") me-2"></i>@(inStock <= 0 ? "สินค้าหมด" : "เพิ่มลงตะกร้า")
+                                        <i class="fas fa-@(inStock <= 0 ? "times" : "shopping-cart") me-2"></i>
+                                        @(inStock <= 0 ? "สินค้าหมด" : "เพิ่มลงตะกร้า")
                                     </button>
                                 </form>
                             }
@@ -119,9 +179,10 @@
                             }
                             else
                             {
-                                <span class="btn-cart text-center text-muted">
+                                <button type="button" class="btn-cart"
+                                        onclick="openProductModal(@p.Pid, '@p.Pname.Replace("'","\'")', @p.Price, @salePrice, '@(p.Brand?.BrandName ?? "-")', '@(p.Cat?.CatName ?? "-")', @inStock, '@(isFlash ? "flash" : "normal")', '@(p.ImagePath ?? "")', '@(p.Description ?? "")')">
                                     <i class="fas fa-eye me-2"></i>ดูสินค้า
-                                </span>
+                                </button>
                             }
                         </div>
                     </div>
@@ -131,3 +192,107 @@
         }
     </section>
 </div>
+
+@* ── Product Detail Modal ── *@
+<div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom:1px solid var(--border);">
+                <h5 class="modal-title fw-bold" id="modalProductName" style="color:var(--text);font-family:'Rajdhani',sans-serif;letter-spacing:.04em;"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <div class="col-md-5" style="background:#070e20;display:flex;align-items:center;justify-content:center;min-height:280px;border-right:1px solid var(--border);">
+                        <img id="modalProductImg" src="" alt="" style="max-height:260px;max-width:100%;object-fit:contain;padding:16px;">
+                        <i id="modalProductIcon" class="fas fa-gun fa-5x" style="color:#1a2a3a;display:none;"></i>
+                    </div>
+                    <div class="col-md-7 p-4">
+                        <div id="modalBrandCat" class="mb-2" style="font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;"></div>
+
+                        <div id="modalPriceWrap" class="mb-3"></div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <div style="background:var(--blue-dim);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
+                                    <div style="font-size:.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">สต็อกคงเหลือ</div>
+                                    <div id="modalStock" style="font-size:1.3rem;font-weight:800;font-family:'Rajdhani',sans-serif;"></div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div style="background:var(--blue-dim);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
+                                    <div style="font-size:.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">สถานะ</div>
+                                    <div id="modalStatus" style="font-size:.9rem;font-weight:700;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="modalDescWrap" style="font-size:.88rem;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:12px;display:none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function openProductModal(pid, name, price, salePrice, brand, cat, stock, type, imgPath, desc) {
+    // ชื่อและ brand/cat
+    document.getElementById('modalProductName').textContent = name;
+    document.getElementById('modalBrandCat').textContent = brand + ' · ' + cat;
+
+    // รูปภาพ
+    var img  = document.getElementById('modalProductImg');
+    var icon = document.getElementById('modalProductIcon');
+    if (imgPath) {
+        img.src = imgPath; img.style.display = 'block';
+        icon.style.display = 'none';
+    } else {
+        img.style.display = 'none';
+        icon.style.display = 'block';
+    }
+
+    // ราคา
+    var priceWrap = document.getElementById('modalPriceWrap');
+    if (type === 'flash' && salePrice < price) {
+        var pct = Math.round((price - salePrice) / price * 100);
+        priceWrap.innerHTML =
+            '<span style="font-size:2rem;font-weight:800;color:var(--blue);font-family:Rajdhani,sans-serif;">฿' + salePrice.toLocaleString() + '</span>' +
+            '<span style="font-size:1rem;color:var(--text-muted);text-decoration:line-through;margin-left:10px;">฿' + price.toLocaleString() + '</span>' +
+            '<span style="font-size:.78rem;background:rgba(244,196,48,.15);color:var(--gold);border:1px solid rgba(244,196,48,.3);border-radius:6px;padding:2px 8px;margin-left:8px;font-weight:700;">-' + pct + '%</span>' +
+            '<div style="font-size:.72rem;color:var(--blue);margin-top:4px;"><i class="fas fa-bolt me-1"></i>FLASH SALE</div>';
+    } else {
+        priceWrap.innerHTML =
+            '<span style="font-size:2rem;font-weight:800;color:var(--blue);font-family:Rajdhani,sans-serif;">฿' + price.toLocaleString() + '</span>';
+    }
+
+    // สต็อก
+    var stockEl  = document.getElementById('modalStock');
+    var statusEl = document.getElementById('modalStatus');
+    stockEl.textContent = stock + ' ชิ้น';
+    if (stock <= 0) {
+        stockEl.style.color = '#ff6060';
+        statusEl.innerHTML = '<span style="color:#ff6060;"><i class="fas fa-times-circle me-1"></i>หมด</span>';
+    } else if (stock <= 5) {
+        stockEl.style.color = 'var(--gold)';
+        statusEl.innerHTML = '<span style="color:var(--gold);"><i class="fas fa-exclamation-circle me-1"></i>เหลือน้อย</span>';
+    } else {
+        stockEl.style.color = '#00e87a';
+        statusEl.innerHTML = '<span style="color:#00e87a;"><i class="fas fa-check-circle me-1"></i>มีสินค้า</span>';
+    }
+
+    // รายละเอียด
+    var descWrap = document.getElementById('modalDescWrap');
+    if (desc && desc.trim()) {
+        descWrap.style.display = 'block';
+        descWrap.innerHTML = '<div style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">รายละเอียด</div>' + desc;
+    } else {
+        descWrap.style.display = 'none';
+    }
+
+    var modal = new bootstrap.Modal(document.getElementById('productModal'));
+    modal.show();
+}
+</script>
+}

@@ -1,20 +1,95 @@
-/* MANAGEMENT - scoped under .manage-wrapper */
-.manage-wrapper { padding: 0; }
-
+/* MANAGEMENT */
 .manage-wrapper .manage-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
-
-.manage-wrapper .emp-count-box { background: #fff; padding: 15px 25px; border-radius: 12px; border: 2px solid #000; text-align: right; }
-.manage-wrapper .emp-count-label { font-size: 11px; font-weight: 700; color: gray; text-transform: uppercase; display: block; }
-.manage-wrapper .emp-count-val   { font-size: 28px; font-weight: bold; display: block; }
-
-.manage-wrapper .table-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #eee; }
-
+.manage-wrapper .emp-count-box { background: var(--bg-card); padding: 14px 24px; border-radius: 12px; border: 1px solid var(--blue); text-align: right; box-shadow: 0 0 16px var(--blue-glow); }
+.manage-wrapper .emp-count-label { font-size: .7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; display: block; }
+.manage-wrapper .emp-count-val   { font-size: 2rem; font-weight: 800; display: block; color: var(--blue); font-family: 'Rajdhani', sans-serif; }
+.manage-wrapper .table-card { background: var(--bg-card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
 .manage-wrapper .manage-table { width: 100%; border-collapse: collapse; }
-.manage-wrapper .manage-table th { background: #f9fafb; padding: 15px; text-align: left; font-size: 12px; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #e5e7eb; color: #6b7280; }
-.manage-wrapper .manage-table td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: middle; }
+.manage-wrapper .manage-table th { background: #060d1f; padding: 14px 16px; text-align: left; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; border-bottom: 1px solid var(--border); color: var(--text-muted); }
+.manage-wrapper .manage-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: .9rem; vertical-align: middle; color: var(--text); }
 .manage-wrapper .manage-table tr:last-child td { border-bottom: none; }
-.manage-wrapper .manage-table tr:hover td { background: #f0f7ff; }
-
+.manage-wrapper .manage-table tr:hover td { background: var(--blue-dim); }
 .manage-wrapper .user-cell { display: flex; gap: 10px; align-items: center; }
-.manage-wrapper .avatar { width: 40px; height: 40px; border-radius: 50%; }
-.manage-wrapper .action-cell a { font-size: 18px; text-decoration: none; margin-right: 5px; }
+.manage-wrapper .avatar { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--border); }
+.manage-wrapper .action-cell a { font-size: 16px; text-decoration: none; margin-right: 5px; }
+
+/* ── Improved header ── */
+.manage-wrapper .manage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #060d1f, #030810);
+    border: 1px solid rgba(0,170,255,.2);
+    border-radius: 16px;
+    box-shadow: 0 0 30px rgba(0,170,255,.06), inset 0 0 60px rgba(0,0,0,.3);
+}
+
+.manage-wrapper .emp-count-box {
+    background: rgba(0,170,255,.08);
+    border: 1px solid rgba(0,170,255,.3);
+    border-radius: 12px;
+    padding: 12px 20px;
+    text-align: center;
+    min-width: 110px;
+    box-shadow: 0 0 16px rgba(0,170,255,.12);
+}
+.manage-wrapper .emp-count-label {
+    font-size: .62rem;
+    font-weight: 700;
+    color: rgba(0,170,255,.6);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    display: block;
+    margin-bottom: 4px;
+    font-family: 'Rajdhani', sans-serif;
+}
+.manage-wrapper .emp-count-val {
+    font-size: 2.2rem;
+    font-weight: 800;
+    display: block;
+    color: #00aaff;
+    font-family: 'Rajdhani', sans-serif;
+    line-height: 1;
+    text-shadow: 0 0 16px rgba(0,170,255,.5);
+}
+
+.manage-wrapper .emp-divider {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(180deg, transparent, rgba(0,170,255,.3), transparent);
+}
+
+.manage-wrapper .emp-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: .05em;
+    color: #e0e8f8;
+    line-height: 1.1;
+}
+.manage-wrapper .emp-sub {
+    font-size: .8rem;
+    color: rgba(90,112,144,.7);
+}
+
+.manage-wrapper .btn-add-staff {
+    background: rgba(0,170,255,.1);
+    color: #00aaff;
+    border: 1px solid rgba(0,170,255,.35);
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: .9rem;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: .05em;
+    transition: .2s;
+    white-space: nowrap;
+}
+.manage-wrapper .btn-add-staff:hover {
+    background: #00aaff;
+    color: #000;
+    box-shadow: 0 0 20px rgba(0,170,255,.35);
+}

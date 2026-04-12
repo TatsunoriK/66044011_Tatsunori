@@ -1,0 +1,57 @@
+/* UPGRADE PAGE - scoped under .upgrade-wrapper */
+.upgrade-wrapper { max-width: 680px; margin: 0 auto; }
+
+.upgrade-wrapper .member-status { border-radius: 16px; padding: 24px 28px; margin-bottom: 24px; }
+.upgrade-wrapper .member-status.inactive { background: #0a0f1e; border: 1px dashed rgba(0,170,255,.2); }
+.upgrade-wrapper .member-status.active   { background: linear-gradient(135deg, #020a1a, #05142e); border: 1px solid rgba(0,170,255,.3); box-shadow: 0 0 30px rgba(0,170,255,.1); }
+.upgrade-wrapper .ms-icon  { font-size: 2.5rem; margin-bottom: 8px; }
+.upgrade-wrapper .ms-title { font-size: 1.2rem; font-weight: 800; font-family: 'Rajdhani', sans-serif; letter-spacing: .08em; color: #00aaff; }
+.upgrade-wrapper .ms-expiry { font-size: .82rem; background: rgba(0,170,255,.1); border: 1px solid rgba(0,170,255,.2); border-radius: 8px; padding: 5px 12px; display: inline-block; margin-top: 8px; color: #e0e8f8; }
+.upgrade-wrapper .member-status.inactive .ms-expiry { background: #0a1020; color: rgba(90,112,144,.8); }
+.upgrade-wrapper .days-num { font-size: 1.4rem; font-weight: 800; color: #f4c430; font-family: 'Rajdhani', sans-serif; }
+
+.upgrade-wrapper .plan-detail { background: #0a0f1e; border: 1px solid rgba(0,170,255,.2); border-radius: 16px; padding: 24px 28px; margin-bottom: 24px; }
+.upgrade-wrapper .plan-detail h5 { font-weight: 800; margin-bottom: 16px; font-family: 'Rajdhani', sans-serif; letter-spacing: .05em; color: #00aaff; font-size: 1.1rem; }
+
+.upgrade-wrapper .perks-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+.upgrade-wrapper .perks-table td { padding: 9px 0; border-bottom: 1px solid rgba(0,170,255,.08); font-size: .9rem; vertical-align: middle; color: #e0e8f8; }
+.upgrade-wrapper .perks-table tr:last-child td { border: none; }
+.upgrade-wrapper .perk-icon { width: 28px; height: 28px; border-radius: 50%; background: rgba(0,170,255,.1); color: #00aaff; display: inline-flex; align-items: center; justify-content: center; font-size: .78rem; margin-right: 10px; border: 1px solid rgba(0,170,255,.2); }
+.upgrade-wrapper .perk-val  { text-align: right; font-weight: 700; color: #00aaff; font-family: 'Rajdhani', sans-serif; white-space: nowrap; }
+
+.upgrade-wrapper .points-rate-box { background: rgba(244,196,48,.06); border: 1px solid rgba(244,196,48,.2); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: .85rem; }
+.upgrade-wrapper .points-rate-box .rate-title { font-weight: 800; font-size: .9rem; margin-bottom: 6px; color: #f4c430; font-family: 'Rajdhani', sans-serif; }
+.upgrade-wrapper .points-rate-box .rate-row   { display: flex; justify-content: space-between; padding: 3px 0; color: #e0e8f8; }
+.upgrade-wrapper .points-rate-box .rate-row strong { color: #f4c430; }
+
+.upgrade-wrapper .btn-buy  { width: 100%; padding: 13px; background: rgba(244,196,48,.15); color: #f4c430; border: 1px solid rgba(244,196,48,.4); border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: .2s; font-family: 'Rajdhani', sans-serif; letter-spacing: .05em; }
+.upgrade-wrapper .btn-buy:hover  { background: #f4c430; color: #000; box-shadow: 0 0 20px rgba(244,196,48,.3); }
+.upgrade-wrapper .btn-renew { width: 100%; padding: 13px; background: transparent; color: #00aaff; border: 1px solid rgba(0,170,255,.4); border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: .2s; font-family: 'Rajdhani', sans-serif; letter-spacing: .05em; }
+.upgrade-wrapper .btn-renew:hover { background: rgba(0,170,255,.1); box-shadow: 0 0 16px rgba(0,170,255,.2); }
+
+/* modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.modal-overlay.show { display: flex; }
+.confirm-modal { background: #070c1a; border-radius: 20px; padding: 28px; max-width: 420px; width: 94%; border: 1px solid rgba(0,170,255,.25); box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 40px rgba(0,170,255,.1); }
+.confirm-modal h5 { font-weight: 800; font-size: 1.1rem; margin-bottom: 16px; font-family: 'Rajdhani', sans-serif; color: #00aaff; letter-spacing: .05em; }
+
+.order-summary { background: #050810; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; border: 1px solid rgba(0,170,255,.1); }
+.sum-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: .88rem; border-bottom: 1px solid rgba(0,170,255,.08); color: #e0e8f8; }
+.sum-row:last-child { border: none; font-weight: 800; font-size: 1rem; }
+.sum-row.discount { color: #00e87a; }
+.sum-total { color: #00aaff !important; font-family: 'Rajdhani', sans-serif; }
+.sum-earn  { color: #f4c430 !important; font-size: .82rem; }
+
+.pay-title  { font-size: .72rem; font-weight: 700; color: rgba(90,112,144,.8); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; font-family: 'Rajdhani', sans-serif; }
+.pay-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.pay-option { border: 1px solid rgba(0,170,255,.2); border-radius: 10px; padding: 10px; text-align: center; cursor: pointer; transition: .15s; font-size: .85rem; font-weight: 600; background: rgba(0,170,255,.05); color: #e0e8f8; }
+.pay-option:hover, .pay-option.picked { border-color: #00aaff; background: rgba(0,170,255,.15); color: #00aaff; box-shadow: 0 0 12px rgba(0,170,255,.2); }
+.pay-option i { display: block; font-size: 1.3rem; margin-bottom: 4px; }
+
+.pay-confirm-msg { background: rgba(0,200,100,.1); border: 1px solid rgba(0,200,100,.25); color: #00e87a; border-radius: 8px; padding: 9px 12px; font-size: .83rem; margin-bottom: 12px; display: none; }
+.pay-confirm-msg.show { display: block; }
+
+.btn-confirm { width: 100%; padding: 13px; background: rgba(0,170,255,.15); color: #00aaff; border: 1px solid rgba(0,170,255,.4); border-radius: 10px; font-weight: 800; font-size: .95rem; cursor: pointer; transition: .2s; font-family: 'Rajdhani', sans-serif; letter-spacing: .05em; }
+.btn-confirm:disabled { opacity: .3; cursor: not-allowed; }
+.btn-confirm:not(:disabled):hover { background: #00aaff; color: #000; box-shadow: 0 0 20px rgba(0,170,255,.4); }
+.btn-modal-cancel { width: 100%; padding: 9px; background: transparent; border: none; color: rgba(90,112,144,.7); font-size: .85rem; cursor: pointer; margin-top: 6px; }

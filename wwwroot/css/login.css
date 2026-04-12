@@ -1,198 +1,272 @@
-/* ===========================
-   LOGIN PAGE
-   =========================== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Sarabun:wght@300;400;600&display=swap');
 
-body, html {
-    height: 100%;
-    width: 100%;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    min-height: 100vh;
+    background: #050810;
+    font-family: 'Sarabun', sans-serif;
+    display: flex;
     overflow: hidden;
-    background-color: #000;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-body { display: flex; }
-
-/* Left Side */
+/* ── Left Side ── */
 .left-side {
-    flex: 7;
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)),
-                url('/images/bbgun_armory.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-/* Divider */
-.divider {
-    width: 3px;
-    background-color: #f39c12;
-    box-shadow: 0 0 15px rgba(243,156,18,.5);
-    z-index: 10;
-}
-
-/* Right Side */
-.right-side {
-    flex: 3;
+    flex: 1;
+    background: linear-gradient(135deg, #020610 0%, #040e28 40%, #020610 100%);
+    position: relative;
     display: flex;
     flex-direction: column;
-    background-color: #fff;
-    padding: 20px 40px;
-    min-width: 480px;
-    overflow-y: auto;
-}
-.right-side::-webkit-scrollbar { width: 6px; }
-.right-side::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
-
-/* Login Box */
-.login-box {
-    width: 100%;
-    max-width: 400px;
-    margin: auto;
-    text-align: center;
-    padding: 20px 0;
+    justify-content: space-between;
+    padding: 48px;
+    overflow: hidden;
 }
 
-.logo {
-    width: 160px;
-    height: auto;
-    margin-bottom: 5px;
-    mix-blend-mode: multiply;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,.1));
+/* Grid overlay */
+.grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(0,170,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,170,255,.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
 }
 
-.login-box h1 {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 20px;
-    color: #1a1a1a;
-    text-transform: uppercase;
-    letter-spacing: -1px;
-}
-
-/* Input Group */
-.input-group { margin-bottom: 14px; }
-.input-group input {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1.5px solid #eee;
-    border-radius: 12px;
-    font-size: 14px;
-    background-color: #f9f9f9;
-    outline: none;
-    transition: all .3s ease;
-    font-family: inherit;
-}
-.input-group input:focus {
-    border-color: #f39c12;
-    background-color: #fff;
-    box-shadow: 0 4px 12px rgba(243,156,18,.1);
-}
-.input-group input::placeholder { color: #adb5bd; }
-
-/* Forgot Password */
-.forget-pwd {
-    display: block;
-    text-align: right;
-    font-size: 13px;
-    color: #888;
-    text-decoration: none;
-    margin-bottom: 20px;
-    transition: .3s;
-}
-.forget-pwd:hover { color: #f39c12; }
-
-/* Login Button */
-.login-btn {
-    width: 100%;
-    padding: 16px;
-    background-color: #1a1a1a;
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    margin-top: 5px;
-    transition: all .3s;
-    box-shadow: 0 4px 15px rgba(0,0,0,.2);
-}
-.login-btn:hover {
-    background-color: #f39c12;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(243,156,18,.3);
-}
-.login-btn:active { transform: scale(.98); }
-
-/* Social Login */
-.social-text {
-    text-align: center;
-    color: #adb5bd;
-    font-size: 14px;
-    margin: 22px 0 14px;
-    position: relative;
-}
-.social-text::before,
-.social-text::after {
-    content: "";
+/* Animated glow orbs */
+.orb {
     position: absolute;
-    top: 50%;
-    width: 35%;
-    height: 1px;
-    background: #eee;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    animation: orbPulse 6s ease-in-out infinite;
 }
-.social-text::before { left: 0; }
-.social-text::after  { right: 0; }
+.orb-1 { width: 400px; height: 400px; background: rgba(0,170,255,.12); top: 10%; left: 20%; animation-delay: 0s; }
+.orb-2 { width: 300px; height: 300px; background: rgba(244,196,48,.07); bottom: 20%; right: 10%; animation-delay: 2s; }
+.orb-3 { width: 250px; height: 250px; background: rgba(0,170,255,.07); bottom: 40%; left: 50%; animation-delay: 4s; }
+@keyframes orbPulse {
+    0%, 100% { transform: scale(1);   opacity: .6; }
+    50%       { transform: scale(1.2); opacity: 1;  }
+}
 
-.social-icons {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 24px;
+/* Animated beams */
+.beam {
+    position: absolute;
+    width: 1px;
+    pointer-events: none;
+    animation: beamMove 5s ease-in-out infinite;
 }
-.icon-btn {
-    width: 44px;
-    height: 44px;
+.beam-1 { height: 70%; left: 15%; top: 15%; background: linear-gradient(180deg, transparent, rgba(0,170,255,.5), transparent); animation-delay: 0s; }
+.beam-2 { height: 50%; left: 30%; top: 30%; background: linear-gradient(180deg, transparent, rgba(0,170,255,.3), transparent); animation-delay: 1s; }
+.beam-3 { height: 80%; left: 45%; top: 10%; background: linear-gradient(180deg, transparent, rgba(244,196,48,.2), transparent); animation-delay: 2s; }
+.beam-4 { height: 55%; left: 60%; top: 25%; background: linear-gradient(180deg, transparent, rgba(0,170,255,.4), transparent); animation-delay: 1.5s; }
+.beam-5 { height: 65%; left: 75%; top: 20%; background: linear-gradient(180deg, transparent, rgba(0,170,255,.25), transparent); animation-delay: 3s; }
+.beam-6 { height: 45%; left: 88%; top: 35%; background: linear-gradient(180deg, transparent, rgba(244,196,48,.15), transparent); animation-delay: 0.5s; }
+@keyframes beamMove {
+    0%, 100% { opacity: 0; transform: scaleY(0.2) translateY(10%); }
+    50%       { opacity: 1; transform: scaleY(1)   translateY(0); }
+}
+
+/* Horizontal scan line */
+.left-side::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,170,255,.4), rgba(244,196,48,.2), transparent);
+    animation: scanLine 8s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+@keyframes scanLine {
+    0%   { top: -1%; opacity: 0; }
+    5%   { opacity: 1; }
+    95%  { opacity: 1; }
+    100% { top: 101%; opacity: 0; }
+}
+
+/* Brand content */
+.left-content { position: relative; z-index: 2; }
+
+.brand-logo img {
+    height: 90px;
+    filter: drop-shadow(0 0 24px rgba(0,170,255,.5));
+    margin-bottom: 20px;
+    display: block;
+}
+
+.brand-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: .15em;
+    background: linear-gradient(135deg, #00aaff, #f4c430);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+    text-shadow: none;
+}
+
+.brand-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: .9rem;
+    letter-spacing: .3em;
+    color: rgba(0,170,255,.5);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+}
+
+.brand-divider {
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg, #00aaff, #f4c430);
+    box-shadow: 0 0 8px rgba(0,170,255,.5);
+    margin-bottom: 32px;
+}
+
+/* Features */
+.feature-list { display: flex; flex-direction: column; gap: 18px; }
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    background: rgba(0,170,255,.04);
+    border: 1px solid rgba(0,170,255,.12);
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+    transition: border-color .2s, background .2s;
+}
+.feature-item:hover {
+    border-color: rgba(0,170,255,.3);
+    background: rgba(0,170,255,.08);
+}
+.feat-icon {
+    width: 40px; height: 40px;
+    background: rgba(0,170,255,.1);
+    border: 1px solid rgba(0,170,255,.25);
     border-radius: 10px;
-    border: 1.5px solid #eee;
+    display: flex; align-items: center; justify-content: center;
+    color: #00aaff; font-size: 1rem;
+    flex-shrink: 0;
+    box-shadow: 0 0 10px rgba(0,170,255,.15);
+}
+.feat-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: .95rem; color: #e0e8f8; letter-spacing: .04em; }
+.feat-desc  { font-size: .78rem; color: rgba(90,112,144,.8); margin-top: 1px; }
+
+
+
+/* ── Divider ── */
+.divider {
+    width: 1px;
+    background: linear-gradient(180deg, transparent 5%, rgba(0,170,255,.35) 30%, rgba(244,196,48,.2) 70%, transparent 95%);
+    flex-shrink: 0;
+}
+
+/* ── Right Side ── */
+.right-side {
+    width: 420px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
-    text-decoration: none;
-    transition: all .2s;
-    color: #555;
-    background: #fff;
+    background: linear-gradient(135deg, #06091a, #030610);
+    padding: 40px 48px;
+    flex-shrink: 0;
 }
-.icon-btn:hover { border-color: #1a1a1a; color: #1a1a1a; background: #f9fafb; }
-.icon-btn.google:hover   { border-color: #ea4335; color: #ea4335; }
-.icon-btn.facebook:hover { border-color: #1877f2; color: #1877f2; }
-.icon-btn.x-twitter:hover { border-color: #000; color: #000; }
 
-/* Sign Up Link */
-.signup-text {
+.login-box { width: 100%; }
+
+.logo {
+    height: 72px;
+    display: block;
+    margin: 0 auto 20px;
+    filter: drop-shadow(0 0 16px rgba(0,170,255,.4));
+}
+
+.login-box h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2rem; font-weight: 700;
     text-align: center;
-    font-size: 14px;
-    color: #666;
+    margin-bottom: 28px;
+    letter-spacing: .12em;
+    background: linear-gradient(90deg, #00aaff, #f4c430);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
-.signup-text a {
-    color: #f39c12;
-    font-weight: 700;
-    text-decoration: none;
-    transition: .3s;
-}
-.signup-text a:hover { color: #e67e22; text-decoration: underline; }
 
-/* Error */
-.error-msg {
-    background: #fff5f5;
-    border: 1px solid #fecaca;
+.text-error {
+    background: rgba(255,80,80,.1);
+    border: 1px solid rgba(255,80,80,.3);
+    color: #ff6060;
     border-radius: 8px;
     padding: 10px 14px;
-    color: #dc2626;
-    font-size: 13px;
-    margin-bottom: 16px;
-    text-align: left;
+    font-size: .85rem;
+    margin-bottom: 18px;
+    text-align: center;
 }
-.text-error { color: #ff6b6b; font-size: .9rem; margin-bottom: 10px; }
+
+/* Input */
+.input-group {
+    position: relative;
+    margin-bottom: 14px;
+}
+.input-icon {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: rgba(0,170,255,.4);
+    font-size: .85rem;
+    pointer-events: none;
+    transition: color .2s;
+}
+.input-group:focus-within .input-icon { color: #00aaff; }
+.input-group input {
+    width: 100%;
+    padding: 12px 16px 12px 40px;
+    background: rgba(0,170,255,.05);
+    border: 1px solid rgba(0,170,255,.18);
+    border-radius: 10px;
+    color: #e0e8f8;
+    font-size: .95rem;
+    font-family: 'Sarabun', sans-serif;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+}
+.input-group input:focus {
+    outline: none;
+    border-color: #00aaff;
+    background: rgba(0,170,255,.08);
+    box-shadow: 0 0 0 3px rgba(0,170,255,.12);
+}
+.input-group input::placeholder { color: rgba(90,112,144,.6); }
+
+/* Button */
+.login-btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #001a33, #00254d);
+    border: 1px solid #00aaff;
+    color: #00aaff;
+    font-size: 1rem; font-weight: 700;
+    border-radius: 10px; cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    margin-top: 8px;
+    transition: .2s;
+    display: flex; align-items: center; justify-content: center;
+}
+.login-btn:hover {
+    background: #00aaff;
+    color: #000;
+    box-shadow: 0 0 24px rgba(0,170,255,.45);
+    letter-spacing: .2em;
+}
+
+.signup-text {
+    text-align: center;
+    margin-top: 20px;
+    font-size: .85rem;
+    color: rgba(90,112,144,.7);
+}
+.signup-text a { color: #f4c430; font-weight: 700; text-decoration: none; }
+.signup-text a:hover { text-shadow: 0 0 8px rgba(244,196,48,.5); }

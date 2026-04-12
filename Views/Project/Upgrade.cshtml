@@ -1,0 +1,250 @@
+@{
+    ViewData["Title"] = "Member Plan";
+    var user       = ViewBag.UserData as _66044011_Tatsunori.Models.User;
+    bool active    = user?.IsMember == true && user.MemberExpiry != null && user.MemberExpiry >= DateTime.Now;
+    int  daysLeft  = active ? (int)(user!.MemberExpiry!.Value - DateTime.Now).TotalDays + 1 : 0;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/upgrade.css" asp-append-version="true">
+}
+.member-status.inactive { background: #f8f9fa; border: 2px dashed #dee2e6; }
+.member-status.active   { background: linear-gradient(135deg, #1a1a1a, #2d2d2d); color: #fff; }
+.ms-icon   { font-size: 2.5rem; margin-bottom: 8px; }
+.ms-title  { font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; }
+.ms-expiry { font-size: .85rem; background: rgba(255,255,255,.12); border-radius: 8px; padding: 5px 12px; display: inline-block; margin-top: 8px; }
+.member-status.inactive .ms-expiry { background: #e9ecef; color: #6c757d; }
+.days-num { font-size: 1.4rem; font-weight: 800; color: #f39c12; }
+
+/* ── Plan Detail Card ── */
+.plan-detail {
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+}
+.plan-detail h5 { font-weight: 800; margin-bottom: 16px; }
+
+.perks-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+.perks-table td { padding: 9px 0; border-bottom: 1px solid #f3f4f6; font-size: .9rem; vertical-align: middle; }
+.perks-table tr:last-child td { border: none; }
+.perk-icon { width: 30px; height: 30px; border-radius: 50%; background: #fef3c7; color: #f39c12; display: inline-flex; align-items: center; justify-content: center; font-size: .78rem; margin-right: 10px; flex-shrink: 0; }
+.perk-label { color: #374151; }
+.perk-val   { text-align: right; font-weight: 700; color: #111; white-space: nowrap; }
+
+.points-rate-box {
+    background: linear-gradient(135deg, #fffbf0, #fef3c7);
+    border: 1px solid #f0d9b5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: .85rem;
+    color: #92400e;
+}
+.points-rate-box .rate-title { font-weight: 800; font-size: .9rem; margin-bottom: 6px; }
+.points-rate-box .rate-row   { display: flex; justify-content: space-between; padding: 3px 0; }
+
+.btn-buy { width: 100%; padding: 13px; background: #f39c12; color: #111; border: none; border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: .2s; }
+.btn-buy:hover { background: #e67e22; }
+.btn-renew { width: 100%; padding: 13px; background: transparent; color: #f39c12; border: 2px solid #f39c12; border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: .2s; }
+.btn-renew:hover { background: #fef3c7; }
+
+/* ── Confirm Modal ── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 9999; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.confirm-modal { background: #fff; border-radius: 20px; padding: 28px; max-width: 420px; width: 94%; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+.confirm-modal h5 { font-weight: 800; font-size: 1.1rem; margin-bottom: 16px; }
+
+.order-summary { background: #f8f9fa; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+.sum-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: .88rem; border-bottom: 1px solid #e9ecef; }
+.sum-row:last-child { border: none; font-weight: 800; font-size: 1rem; }
+.sum-row.discount { color: #059669; }
+.sum-total { color: #111; }
+
+.pay-title  { font-size: .8rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+.pay-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.pay-option {
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: .15s;
+    font-size: .85rem;
+    font-weight: 600;
+    background: #fff;
+}
+.pay-option:hover, .pay-option.picked { border-color: #111; background: #111; color: #fff; }
+.pay-option i { display: block; font-size: 1.3rem; margin-bottom: 4px; }
+
+.pay-confirm-msg { background: #d1fae5; color: #065f46; border-radius: 8px; padding: 9px 12px; font-size: .83rem; margin-bottom: 14px; display: none; }
+.pay-confirm-msg.show { display: block; }
+
+.btn-confirm { width: 100%; padding: 13px; background: #111; color: #fff; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; transition: .2s; }
+.btn-confirm:disabled { opacity: .35; cursor: not-allowed; }
+.btn-confirm:not(:disabled):hover { background: #f39c12; color: #111; }
+.btn-modal-cancel { width: 100%; padding: 9px; background: transparent; border: none; color: #9ca3af; font-size: .85rem; cursor: pointer; margin-top: 6px; }
+</style>
+}
+
+<div class="upgrade-wrapper">
+    <h2 class="fw-bold mb-1"><i class="fas fa-crown me-2 text-warning"></i>Member Plan</h2>
+    <p class="text-muted mb-4">สมัคร/ต่ออายุ Membership รับสิทธิประโยชน์พิเศษ</p>
+
+    @if (TempData["UpgradeSuccess"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4">
+            <i class="fas fa-check-circle me-1"></i> @TempData["UpgradeSuccess"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @* ── สถานะปัจจุบัน ── *@
+    <div class="member-status @(active ? "active" : "inactive")">
+        <div class="d-flex align-items-center gap-3">
+            <div class="ms-icon">@(active ? "👑" : "🎖️")</div>
+            <div>
+                <div class="ms-title">@(active ? "MEMBER ACTIVE" : "ยังไม่ได้เป็นสมาชิก")</div>
+                @if (active)
+                {
+                    <div class="small" style="opacity:.75;">หมดอายุ @user!.MemberExpiry!.Value.ToString("dd MMM yyyy")</div>
+                    <div class="ms-expiry">เหลือ <span class="days-num">@daysLeft</span> วัน</div>
+                }
+                else
+                {
+                    <div class="small text-muted">สมัครวันนี้ รับสิทธิ์ทันที 30 วัน</div>
+                    <div class="ms-expiry">Bronze Member (ฟรี)</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @* ── รายละเอียด Plan ── *@
+    <div class="plan-detail">
+        <h5><i class="fas fa-star me-2 text-warning"></i>STRIKE FORCE MEMBER — ฿199 / 30 วัน</h5>
+
+        <table class="perks-table">
+            <tr>
+                <td><span class="perk-icon"><i class="fas fa-tag"></i></span><span class="perk-label">ส่วนลดพิเศษ</span></td>
+                <td class="perk-val">฿100 / 1 ออเดอร์ต่อเดือน</td>
+            </tr>
+            <tr>
+                <td><span class="perk-icon"><i class="fas fa-coins"></i></span><span class="perk-label">สะสมแต้ม</span></td>
+                <td class="perk-val">1 แต้ม / ทุก ฿10</td>
+            </tr>
+            <tr>
+                <td><span class="perk-icon"><i class="fas fa-exchange-alt"></i></span><span class="perk-label">แลกแต้ม</span></td>
+                <td class="perk-val">10 แต้ม = ฿1</td>
+            </tr>
+            <tr>
+                <td><span class="perk-icon"><i class="fas fa-bolt"></i></span><span class="perk-label">Flash Sale</span></td>
+                <td class="perk-val">เข้าถึงก่อนใคร</td>
+            </tr>
+            <tr>
+                <td><span class="perk-icon"><i class="fas fa-sync"></i></span><span class="perk-label">ต่ออายุ</span></td>
+                <td class="perk-val">ต่อได้ไม่จำกัด</td>
+            </tr>
+        </table>
+
+        <div class="points-rate-box">
+            <div class="rate-title"><i class="fas fa-coins me-1"></i>อัตราการได้รับแต้ม</div>
+            <div class="rate-row"><span>ทุก ฿10 ที่ใช้จ่าย</span><span><strong>+1 แต้ม</strong></span></div>
+            <div class="rate-row"><span>ออเดอร์ ฿500</span><span><strong>+50 แต้ม</strong></span></div>
+            <div class="rate-row"><span>ออเดอร์ ฿1,000</span><span><strong>+100 แต้ม</strong></span></div>
+            <div class="rate-row"><span>ออเดอร์ ฿5,000</span><span><strong>+500 แต้ม</strong></span></div>
+            <div class="rate-row" style="border-top:1px dashed #f0d9b5; margin-top:6px; padding-top:6px;">
+                <span>แลกใช้</span><span><strong>10 แต้ม = ลด ฿1</strong></span>
+            </div>
+        </div>
+
+        @if (!active)
+        {
+            <button class="btn-buy" onclick="openConfirm()">
+                <i class="fas fa-crown me-2"></i>สมัคร Member — ฿199
+            </button>
+        }
+        else
+        {
+            <button class="btn-renew" onclick="openConfirm()">
+                <i class="fas fa-sync me-2"></i>ต่ออายุอีก 30 วัน — ฿199
+            </button>
+        }
+    </div>
+</div>
+
+@* ── Confirm & Pay Modal ── *@
+<div class="modal-overlay" id="confirmModal">
+    <div class="confirm-modal">
+        <h5><i class="fas fa-receipt me-2 text-warning"></i>ยืนยันการสั่งซื้อ</h5>
+
+        <div class="order-summary">
+            <div class="sum-row">
+                <span>STRIKE FORCE MEMBER (30 วัน)</span>
+                <span>฿199</span>
+            </div>
+            <div class="sum-row discount">
+                <span><i class="fas fa-tag me-1"></i>ส่วนลดที่จะได้รับ/เดือน</span>
+                <span>-฿100</span>
+            </div>
+            <div class="sum-row">
+                <span>แต้มสะสม (1 แต้ม/฿10)</span>
+                <span>ทุกออเดอร์</span>
+            </div>
+            <div class="sum-row sum-total">
+                <span>ยอดที่ต้องชำระ</span>
+                <span>฿199</span>
+            </div>
+        </div>
+
+        <div class="pay-title"><i class="fas fa-credit-card me-1"></i>เลือกวิธีชำระเงิน</div>
+        <div class="pay-grid">
+            <button type="button" class="pay-option" onclick="pickPay(this)">
+                <i class="fab fa-cc-visa"></i>Visa
+            </button>
+            <button type="button" class="pay-option" onclick="pickPay(this)">
+                <i class="fab fa-cc-mastercard"></i>Mastercard
+            </button>
+            <button type="button" class="pay-option" onclick="pickPay(this)">
+                <i class="fas fa-university"></i>โอนเงิน
+            </button>
+            <button type="button" class="pay-option" onclick="pickPay(this)">
+                <i class="fas fa-qrcode"></i>QR Code
+            </button>
+        </div>
+
+        <div class="pay-confirm-msg" id="payConfirmMsg">
+            <i class="fas fa-check-circle me-1"></i>ชำระเงินสำเร็จ (Mock) — กดยืนยันเพื่อเปิดใช้งาน
+        </div>
+
+        <form asp-action="UpgradePlan" asp-controller="Project" method="post">
+            <button type="submit" class="btn-confirm" id="confirmBtn" disabled>
+                <i class="fas fa-crown me-1"></i>ยืนยัน — เปิดใช้งาน Member
+            </button>
+        </form>
+        <button type="button" class="btn-modal-cancel" onclick="closeModal()">ยกเลิก</button>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function openConfirm() {
+    document.getElementById('payConfirmMsg').classList.remove('show');
+    document.getElementById('confirmBtn').disabled = true;
+    document.querySelectorAll('.pay-option').forEach(b => b.classList.remove('picked'));
+    document.getElementById('confirmModal').classList.add('show');
+}
+function closeModal() {
+    document.getElementById('confirmModal').classList.remove('show');
+}
+function pickPay(btn) {
+    document.querySelectorAll('.pay-option').forEach(b => b.classList.remove('picked'));
+    btn.classList.add('picked');
+    document.getElementById('payConfirmMsg').classList.add('show');
+    document.getElementById('confirmBtn').disabled = false;
+}
+document.getElementById('confirmModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+</script>
+}

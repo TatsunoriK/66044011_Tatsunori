@@ -5,6 +5,7 @@ public partial class Coupon
     public int      CouponId    { get; set; }
     public string   Code        { get; set; } = null!;
     public decimal  DiscountPct { get; set; }
+    public decimal  DiscountAmt { get; set; }  // fixed amount discount (e.g. 100)
     public decimal  MinAmount   { get; set; }
     public int      UsageLimit  { get; set; }
     public int      UsedCount   { get; set; }

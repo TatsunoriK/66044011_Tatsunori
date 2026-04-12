@@ -1,32 +1,22 @@
-/* STOCK LIST + STOCK HISTORY - scoped */
-.stock-wrapper       { max-width: 1100px; margin: 0 auto; }
+/* STOCK LIST */
+.stock-wrapper        { max-width: 1100px; margin: 0 auto; }
 .stockhistory-wrapper { max-width: 900px; margin: 0 auto; }
 
-/* stock table uses Bootstrap table classes directly - only custom overrides needed */
 .stock-wrapper .product-name-cell { position: relative; cursor: default; }
 .stock-wrapper .product-name-cell .img-tooltip {
-    display: none;
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 999;
-    background: #fff;
-    border: 2px solid #dee2e6;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0,0,0,.15);
-    padding: 6px;
-    width: 140px;
+    display: none; position: fixed; z-index: 9999;
+    background: var(--bg-card); border: 1px solid var(--blue);
+    border-radius: 8px; box-shadow: 0 4px 20px var(--blue-glow);
+    padding: 6px; width: 120px; pointer-events: none;
 }
-.stock-wrapper .product-name-cell .img-tooltip img { width: 128px; height: 128px; object-fit: contain; }
+.stock-wrapper .product-name-cell .img-tooltip img { width: 108px; height: 108px; object-fit: contain; }
 .stock-wrapper .product-name-cell:hover .img-tooltip { display: block; }
 
 .qty-input  { max-width: 70px; text-align: center; font-weight: 700; }
 .save-btn   { font-size: .75rem; padding: 1px 8px; }
 
-/* stock history */
-.stockhistory-wrapper .history-card { background: #fff; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,.04); overflow: hidden; }
-.stockhistory-wrapper .arrow-badge { display: inline-flex; align-items: center; gap: 8px; background: #f8f9fa; padding: 4px 12px; border-radius: 20px; font-size: .85rem; font-weight: 600; }
-.stockhistory-wrapper .change-up   { color: #198754; font-weight: 700; }
-.stockhistory-wrapper .change-down { color: #dc3545; font-weight: 700; }
-.stockhistory-wrapper .change-none { color: #adb5bd; }
+.stockhistory-wrapper .history-card { background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+.stockhistory-wrapper .arrow-badge { display: inline-flex; align-items: center; gap: 6px; background: #0a1020; border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px; font-size: .82rem; font-weight: 600; }
+.stockhistory-wrapper .change-up   { color: #00e87a; font-weight: 700; }
+.stockhistory-wrapper .change-down { color: #ff6060; font-weight: 700; }
+.stockhistory-wrapper .change-none { color: var(--text-muted); }

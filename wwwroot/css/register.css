@@ -1,158 +1,76 @@
-/* ===========================
-   REGISTER PAGE
-   =========================== */
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-
-body, html {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    background-color: #000;
+/* REGISTER PAGE */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    min-height: 100vh;
+    background: #050810;
+    background-image:
+        linear-gradient(rgba(0,170,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,170,255,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    font-family: 'Sarabun', sans-serif;
+    display: flex; align-items: flex-start;
+    justify-content: center; padding: 30px 20px;
 }
 
-body { display: flex; }
-
-/* Left Side */
-.left-side {
-    flex: 7;
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5)),
-                url('/images/bbgun_armory.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+.register-container {
+    background: #070c1a; border-radius: 20px;
+    border: 1px solid rgba(0,170,255,.2);
+    box-shadow: 0 0 40px rgba(0,170,255,.1);
+    width: 100%; max-width: 560px; overflow: hidden;
 }
-
-/* Divider */
-.divider {
-    width: 3px;
-    background-color: #f39c12;
-    box-shadow: 0 0 15px rgba(243,156,18,.5);
-    z-index: 10;
+.register-header {
+    background: linear-gradient(135deg, #020610, #050d25);
+    padding: 24px 32px 20px; text-align: center;
+    border-bottom: 1px solid rgba(0,170,255,.2);
+    position: relative;
 }
-
-/* Right Side */
-.right-side {
-    flex: 3;
-    display: flex;
-    flex-direction: column;
-    background-color: #fff;
-    padding: 20px 40px;
-    min-width: 480px;
-    overflow-y: auto;
+.register-header::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #00aaff, #f4c430, transparent);
 }
-.right-side::-webkit-scrollbar { width: 6px; }
-.right-side::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
-
-/* Register Box */
-.register-box {
-    width: 100%;
-    max-width: 400px;
-    margin: auto;
-    text-align: center;
-    padding: 20px 0;
+.register-header img { height: 52px; margin-bottom: 8px; filter: drop-shadow(0 0 12px rgba(0,170,255,.4)); }
+.register-header h2 {
+    font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 800;
+    background: linear-gradient(90deg, #00aaff, #f4c430);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
+.register-header p { color: rgba(0,170,255,.7); font-size: .8rem; margin-top: 3px; }
 
-.logo {
-    width: 160px;
-    height: auto;
-    margin-bottom: 5px;
-    mix-blend-mode: multiply;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,.1));
-}
+.register-body { padding: 28px 32px 32px; }
 
-h1 {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 5px;
-    color: #1a1a1a;
-    text-transform: uppercase;
-    letter-spacing: -1px;
-}
+.text-error { background: rgba(255,80,80,.1); border: 1px solid rgba(255,80,80,.3); color: #ff6060; border-radius: 8px; padding: 10px 14px; font-size: .88rem; margin-bottom: 18px; }
+.bronze-note { background: rgba(244,196,48,.08); border: 1px solid rgba(244,196,48,.2); border-radius: 10px; padding: 10px 14px; margin-bottom: 18px; font-size: .82rem; color: rgba(244,196,48,.8); }
 
-.subtitle {
-    font-size: 14px;
-    color: #888;
-    margin-bottom: 25px;
+.section-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #00aaff; margin: 18px 0 10px; font-family: 'Rajdhani', sans-serif; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.full { grid-column: 1 / -1; }
+.field label { display: block; font-size: .78rem; font-weight: 600; color: rgba(90,112,144,.9); margin-bottom: 5px; }
+.field label .req { color: #ff6060; margin-left: 2px; }
+.field input, .field select, .field textarea {
+    width: 100%; padding: 9px 12px;
+    background: rgba(0,170,255,.05); border: 1px solid rgba(0,170,255,.15);
+    border-radius: 8px; font-size: .9rem; font-family: 'Sarabun', sans-serif;
+    color: #e0e8f8; transition: border-color .2s;
 }
+.field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: #00aaff;
+    box-shadow: 0 0 0 3px rgba(0,170,255,.12); background: rgba(0,170,255,.08);
+}
+.field input::placeholder, .field textarea::placeholder { color: rgba(90,112,144,.6); }
+.field select option { background: #070c1a; color: #e0e8f8; }
+.field textarea { resize: vertical; min-height: 70px; }
 
-/* Form Grid */
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    text-align: left;
-}
-.full-width { grid-column: span 2; }
-
-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: #555;
-    margin-bottom: 6px;
-    display: block;
-    text-transform: uppercase;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1.5px solid #eee;
-    border-radius: 12px;
-    font-size: 14px;
-    background-color: #f9f9f9;
-    outline: none;
-    transition: all .3s ease;
-    font-family: inherit;
-}
-input:focus, select:focus, textarea:focus {
-    border-color: #f39c12;
-    background-color: #fff;
-    box-shadow: 0 4px 12px rgba(243,156,18,.1);
-}
-textarea { resize: none; }
-
-/* Register Button */
 .register-btn {
-    width: 100%;
-    padding: 16px;
-    background-color: #1a1a1a;
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 25px;
-    transition: all .3s;
-    box-shadow: 0 4px 15px rgba(0,0,0,.2);
-    font-family: inherit;
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, #001a33, #003366);
+    border: 1px solid #00aaff; color: #00aaff;
+    border-radius: 10px; font-size: 1rem; font-weight: 700;
+    cursor: pointer; margin-top: 22px;
+    font-family: 'Rajdhani', sans-serif; letter-spacing: .08em;
+    text-transform: uppercase; transition: .2s;
 }
-.register-btn:hover {
-    background-color: #f39c12;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(243,156,18,.3);
-}
-
-/* Login Link */
-.login-text {
-    margin-top: 25px;
-    font-size: 14px;
-    color: #666;
-    padding-bottom: 20px;
-}
-.login-text a {
-    color: #f39c12;
-    font-weight: 700;
-    text-decoration: none;
-    transition: .3s;
-}
-.login-text a:hover { color: #e67e22; text-decoration: underline; }
-
-/* Error */
-.error-msg {
-    color: #dc2626;
-    font-size: 13px;
-    margin-top: 10px;
-    text-align: center;
-}
-.text-error { color: #e74c3c; margin-bottom: 10px; }
+.register-btn:hover { background: #00aaff; color: #000; box-shadow: 0 0 20px rgba(0,170,255,.4); }
+.login-link { text-align: center; margin-top: 16px; font-size: .85rem; color: rgba(90,112,144,.8); }
+.login-link a { color: #f4c430; font-weight: 700; text-decoration: none; }
+.login-link a:hover { text-shadow: 0 0 8px rgba(244,196,48,.5); }
