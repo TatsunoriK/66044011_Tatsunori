@@ -35,12 +35,21 @@
                     else                        { <span class="badge bg-dark">สิ้นสุด</span> }
                 </td>
                 <td>
-                    <form asp-action="ToggleFlashSale" method="post" class="d-inline">
-                        <input type="hidden" name="flashSaleId" value="@f.FlashSaleId">
-                        <button class="btn btn-sm btn-outline-@(f.IsActive ? "warning" : "success")">
-                            @(f.IsActive ? "ปิด" : "เปิด")
-                        </button>
-                    </form>
+                    <div class="d-flex gap-1">
+                        <form asp-action="ToggleFlashSale" method="post" class="d-inline">
+                            <input type="hidden" name="flashSaleId" value="@f.FlashSaleId">
+                            <button class="btn btn-sm btn-outline-@(f.IsActive ? "secondary" : "success")">
+                                @(f.IsActive ? "ปิด" : "เปิด")
+                            </button>
+                        </form>
+                        <form asp-action="DeleteFlashSale" method="post" class="d-inline"
+                              onsubmit="return confirm('ลบ Flash Sale ของ @(f.PidNavigation?.Pname ?? "") ?')">
+                            <input type="hidden" name="flashSaleId" value="@f.FlashSaleId">
+                            <button class="btn btn-sm btn-outline-danger" title="ลบ">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 </td>
             </tr>
         }

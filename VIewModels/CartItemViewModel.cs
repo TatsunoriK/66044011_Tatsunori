@@ -7,4 +7,5 @@ public class CartItemViewModel
     public decimal Price    { get; set; }
     public int     Qty      { get; set; }
     public decimal Subtotal { get; set; }
+    public int     Stock    { get; set; }  // ★ จำนวนคงเหลือใน stock
 }

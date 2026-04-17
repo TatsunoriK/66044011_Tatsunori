@@ -36,7 +36,6 @@
             <div class="fs-3 fw-bold lh-1 text-success">@ViewBag.PaidCount</div>
             <div class="small text-muted text-uppercase mt-1">Paid</div>
         </div>
-        
         <div class="bg-white rounded-3 border px-4 py-3 text-center shadow-sm">
             <div class="fs-3 fw-bold lh-1 text-danger">@ViewBag.CancelCount</div>
             <div class="small text-muted text-uppercase mt-1">Cancelled</div>
@@ -56,7 +55,6 @@
            class="btn btn-sm rounded-pill @(ViewBag.StatusFilter == "Paid" ? "btn-dark" : "btn-outline-secondary")">
             Paid <span class="badge bg-secondary ms-1 rounded-pill">@ViewBag.PaidCount</span>
         </a>
-
         <a asp-action="OrderManagement" asp-controller="Project" asp-route-status="Cancelled"
            class="btn btn-sm rounded-pill @(ViewBag.StatusFilter == "Cancelled" ? "btn-dark" : "btn-outline-secondary")">
             Cancelled <span class="badge bg-secondary ms-1 rounded-pill">@ViewBag.CancelCount</span>
@@ -113,11 +111,24 @@
                         <div class="fw-bold text-primary">฿@order.TotalAmount.ToString("N0")</div>
                         @if (order.DiscountAmount > 0)
                         {
+                            bool hasMemberDisc = order.CouponCode != null && order.CouponCode.Contains("__MEMBER__");
+                            // ★ ระบบใหม่: DiscountAmount > 0 แต่ไม่มี CouponCode = Member discount
+                            if (!hasMemberDisc && string.IsNullOrEmpty(order.CouponCode))
+                                hasMemberDisc = true;
+                            string? cleanCode = order.CouponCode?
+                                .Replace("__MEMBER__", "").Replace("+", "").Trim();
+                            if (string.IsNullOrEmpty(cleanCode)) cleanCode = null;
                             <div class="discount-tag">
                                 <i class="fas fa-tag me-1"></i>-฿@order.DiscountAmount.ToString("N0")
-                                @if (!string.IsNullOrEmpty(order.CouponCode))
+                                @if (hasMemberDisc)
                                 {
-                                    <span class="ms-1 badge bg-warning text-dark" style="font-size:.65rem;">@order.CouponCode</span>
+                                    <span class="ms-1 badge bg-warning text-dark" style="font-size:.65rem;">
+                                        <i class="fas fa-crown me-1"></i>Member
+                                    </span>
+                                }
+                                @if (cleanCode != null)
+                                {
+                                    <span class="ms-1 badge bg-warning text-dark" style="font-size:.65rem;">@cleanCode</span>
                                 }
                             </div>
                         }
@@ -129,17 +140,24 @@
                         <div class="d-flex gap-1 justify-content-center flex-wrap">
                         @if (order.Status == "Pending")
                         {
-                            <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
-                                <input type="hidden" name="orderId" value="@order.OrderId" />
-                                <input type="hidden" name="newStatus" value="Paid" />
-                                <button type="submit" class="btn btn-sm fw-semibold" style="background:#d1fae5;color:#065f46;border:none;border-radius:8px;">
-                                    <i class="fas fa-check me-1"></i>Paid
-                                </button>
-                            </form>
+                            <button type="button"
+                                    class="btn btn-sm fw-semibold px-3"
+                                    style="background:#059669;color:#fff;border:none;border-radius:8px;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#slipModal"
+                                    data-order-id="@order.OrderId"
+                                    data-order-amount="฿@order.TotalAmount.ToString("N0")"
+                                    data-customer="@(order.User?.FullName ?? order.User?.Username)"
+                                    data-slip="@(order.SlipImagePath ?? "")">
+                                <i class="fas fa-receipt me-1"></i>Paid
+                            </button>
+
                             <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
                                 <input type="hidden" name="orderId" value="@order.OrderId" />
                                 <input type="hidden" name="newStatus" value="Cancelled" />
-                                <button type="submit" class="btn btn-sm fw-semibold" style="background:#fee2e2;color:#991b1b;border:none;border-radius:8px;"
+                                <button type="submit"
+                                        class="btn btn-sm fw-semibold px-3"
+                                        style="background:#dc2626;color:#fff;border:none;border-radius:8px;"
                                         onclick="return confirm('ยกเลิกออเดอร์ #@order.OrderId?')">
                                     <i class="fas fa-times me-1"></i>Cancel
                                 </button>
@@ -150,14 +168,18 @@
                             <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
                                 <input type="hidden" name="orderId" value="@order.OrderId" />
                                 <input type="hidden" name="newStatus" value="Done" />
-                                <button type="submit" class="btn btn-sm fw-semibold" style="background:#d1fae5;color:#065f46;border:none;border-radius:8px;">
+                                <button type="submit"
+                                        class="btn btn-sm fw-semibold px-3"
+                                        style="background:#059669;color:#fff;border:none;border-radius:8px;">
                                     <i class="fas fa-check-double me-1"></i>Done
                                 </button>
                             </form>
                             <form asp-action="UpdateOrderStatus" asp-controller="Project" method="post">
                                 <input type="hidden" name="orderId" value="@order.OrderId" />
                                 <input type="hidden" name="newStatus" value="Cancelled" />
-                                <button type="submit" class="btn btn-sm fw-semibold" style="background:#fee2e2;color:#991b1b;border:none;border-radius:8px;"
+                                <button type="submit"
+                                        class="btn btn-sm fw-semibold px-3"
+                                        style="background:#dc2626;color:#fff;border:none;border-radius:8px;"
                                         onclick="return confirm('ยกเลิกออเดอร์ #@order.OrderId?')">
                                     <i class="fas fa-times me-1"></i>Cancel
                                 </button>
@@ -175,3 +197,115 @@
         </table>
     </div>
 </div>
+
+@* ===== SLIP CHECK MODAL ===== *@
+<div class="modal fade" id="slipModal" tabindex="-1" aria-labelledby="slipModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px;overflow:hidden;">
+
+            <div class="modal-header" style="background:#111;color:#fff;border:none;">
+                <h5 class="modal-title fw-bold" id="slipModalLabel">
+                    <i class="fas fa-receipt me-2 text-warning"></i>ตรวจสอบสลิป
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-4">
+
+                @* รูปสลิปจากลูกค้า *@
+                <div id="slipImgContainer" class="mb-3 text-center" style="display:none;">
+                    <div class="text-muted small mb-2">
+                        <i class="fas fa-image me-1 text-primary"></i>สลิปที่ลูกค้าแนบมา
+                    </div>
+                    <img id="slipImgEl" src="" alt="slip"
+                         class="img-fluid rounded-3 border" style="max-height:260px;">
+                </div>
+                <div id="noSlipMsg" class="mb-3 text-center text-muted small" style="display:none;">
+                    <i class="fas fa-exclamation-circle me-1 text-warning"></i>ลูกค้าไม่ได้แนบสลิป
+                </div>
+
+                @* ข้อมูลออเดอร์ *@
+                <div class="rounded-3 p-3 mb-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted small">ออเดอร์</span>
+                        <span class="fw-bold" id="modal-order-id">—</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted small">ลูกค้า</span>
+                        <span class="fw-semibold" id="modal-customer">—</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted small">ยอดชำระ</span>
+                        <span class="fw-bold text-success fs-6" id="modal-amount">—</span>
+                    </div>
+                </div>
+
+                @* Checkbox ยืนยันสลิป *@
+                <div class="form-check mb-3 p-3 rounded-3"
+                     style="background:#fefce8;border:1px solid #fde68a;">
+                    <input class="form-check-input" type="checkbox" id="slipConfirmCheck"
+                           style="width:1.2rem;height:1.2rem;margin-top:.1rem;">
+                    <label class="form-check-label fw-semibold ms-2"
+                           for="slipConfirmCheck" style="color:#92400e;">
+                        <i class="fas fa-check-circle me-1 text-warning"></i>
+                        ตรวจสอบสลิปการโอนเงินแล้ว ยอดถูกต้อง
+                    </label>
+                </div>
+
+                @* ปุ่ม *@
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-secondary px-4"
+                            data-bs-dismiss="modal">ยกเลิก</button>
+                    <form id="confirmPaidForm"
+                          asp-action="UpdateOrderStatus"
+                          asp-controller="Project"
+                          method="post">
+                        <input type="hidden" name="orderId" id="modal-order-id-input" value="" />
+                        <input type="hidden" name="newStatus" value="Paid" />
+                        <button type="submit" id="confirmPaidBtn"
+                                class="btn fw-bold px-4"
+                                style="background:#059669;color:#fff;border:none;"
+                                disabled>
+                            <i class="fas fa-check me-1"></i>ยืนยัน Paid
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.getElementById('slipModal').addEventListener('show.bs.modal', function (e) {
+        var btn      = e.relatedTarget;
+        var orderId  = btn.getAttribute('data-order-id');
+        var amount   = btn.getAttribute('data-order-amount');
+        var customer = btn.getAttribute('data-customer');
+        var slip     = btn.getAttribute('data-slip');
+
+        document.getElementById('modal-order-id').textContent  = '#' + orderId;
+        document.getElementById('modal-amount').textContent    = amount;
+        document.getElementById('modal-customer').textContent  = customer;
+        document.getElementById('modal-order-id-input').value  = orderId;
+
+        if (slip) {
+            document.getElementById('slipImgEl').src               = slip;
+            document.getElementById('slipImgContainer').style.display = 'block';
+            document.getElementById('noSlipMsg').style.display        = 'none';
+        } else {
+            document.getElementById('slipImgContainer').style.display = 'none';
+            document.getElementById('noSlipMsg').style.display        = 'block';
+        }
+
+        var cb = document.getElementById('slipConfirmCheck');
+        cb.checked = false;
+        document.getElementById('confirmPaidBtn').disabled = true;
+    });
+
+    document.getElementById('slipConfirmCheck').addEventListener('change', function () {
+        document.getElementById('confirmPaidBtn').disabled = !this.checked;
+    });
+</script>
+}

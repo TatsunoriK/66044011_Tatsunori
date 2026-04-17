@@ -1,7 +1,6 @@
 @model IEnumerable<_66044011_Tatsunori.Models.Productstock>
 @{
     ViewData["Title"] = "จัดการสต็อก";
-    // เรียงให้หมด/น้อยขึ้นก่อน แล้วค่อยเรียงชื่อ
     var sorted = Model
         .OrderBy(s => s.Quantity > 5 ? 2 : s.Quantity > 0 ? 1 : 0)
         .ThenBy(s => s.PidNavigation?.Pname);
@@ -10,27 +9,19 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/stockList.css" asp-append-version="true">
     <style>
-        .product-name-cell { position: relative; cursor: default; }
+        .product-name-cell { position:relative; cursor:default; }
         .product-name-cell .img-tooltip {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            background: #fff;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            box-shadow: 0 4px 16px rgba(0,0,0,.2);
-            padding: 6px;
-            width: 120px;
-            pointer-events: none;
+            display:none; position:fixed; z-index:9999;
+            background:#fff; border:2px solid #dee2e6; border-radius:8px;
+            box-shadow:0 4px 16px rgba(0,0,0,.2); padding:6px; width:120px; pointer-events:none;
         }
-        .product-name-cell .img-tooltip img {
-            width: 108px;
-            height: 108px;
-            object-fit: contain;
-        }
-        .product-name-cell:hover .img-tooltip { display: block; }
-        .qty-input { max-width: 70px; text-align: center; font-weight: 700; }
-        .save-btn  { font-size: .75rem; padding: 1px 8px; }
+        .product-name-cell .img-tooltip img { width:108px; height:108px; object-fit:contain; }
+        .product-name-cell:hover .img-tooltip { display:block; }
+        .qty-input { max-width:70px; text-align:center; font-weight:700; }
+        .save-btn  { font-size:.75rem; padding:1px 8px; }
+
+        /* Edit Modal */
+        .edit-img-preview { max-height:100px; object-fit:contain; border-radius:6px; }
     </style>
 }
 
@@ -48,6 +39,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 }
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-1"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
 <div class="table-responsive">
     <table class="table table-hover align-middle">
@@ -60,7 +58,7 @@
                 <th class="text-center">สถานะ</th>
                 <th class="text-center">คงเหลือ</th>
                 <th>อัปเดตล่าสุด</th>
-                <th class="text-center">ประวัติ</th>
+                <th class="text-center">จัดการ</th>
             </tr>
         </thead>
         <tbody>
@@ -80,6 +78,10 @@
                             </div>
                         }
                     </div>
+                    @if (!string.IsNullOrEmpty(s.PidNavigation?.Description))
+                    {
+                        <div class="text-muted small">@s.PidNavigation!.Description</div>
+                    }
                 </td>
                 <td class="small text-muted">@(s.PidNavigation?.Cat?.CatName ?? "-")</td>
                 <td class="small text-muted">@(s.PidNavigation?.Brand?.BrandName ?? "-")</td>
@@ -101,9 +103,32 @@
                 </td>
                 <td class="small text-muted">@s.LastUpdate?.ToString("dd/MM/yy HH:mm")</td>
                 <td class="text-center">
-                    <a asp-action="StockHistory" asp-route-pid="@s.Pid" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-history"></i>
-                    </a>
+                    <div class="d-flex gap-1 justify-content-center">
+                        @* ประวัติ *@
+                        <a asp-action="StockHistory" asp-route-pid="@s.Pid"
+                           class="btn btn-sm btn-outline-secondary" title="ประวัติ">
+                            <i class="fas fa-history"></i>
+                        </a>
+                        @* Edit *@
+                        <button type="button" class="btn btn-sm btn-outline-warning" title="แก้ไข"
+                                onclick="openEdit(@s.Pid,
+                                    '@Html.Raw(s.PidNavigation?.Pname?.Replace("'","\\'")??"")' ,
+                                    @(s.PidNavigation?.Price ?? 0),
+                                    '@Html.Raw(s.PidNavigation?.Description?.Replace("'","\\'")??"")' ,
+                                    @(s.PidNavigation?.CatId?.ToString() ?? "null"),
+                                    @(s.PidNavigation?.BrandId?.ToString() ?? "null"),
+                                    '@(s.PidNavigation?.ImagePath ?? "")')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        @* Delete *@
+                        <form asp-action="DeleteProduct" method="post" style="display:inline;"
+                              onsubmit="return confirm('ลบสินค้า \'@(s.PidNavigation?.Pname ?? s.Pid.ToString())\' ออกจากระบบ?')">
+                            <input type="hidden" name="pid" value="@s.Pid">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="ลบ">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 </td>
             </tr>
         }
@@ -111,7 +136,7 @@
     </table>
 </div>
 
-@* Add Product Modal *@
+@* ── Add Product Modal ── *@
 <div class="modal fade" id="addProductModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -166,11 +191,9 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold">รูปสินค้า</label>
-                            <input type="file" name="image" class="form-control" accept="image/*"
-                                   onchange="previewImg(this)">
+                            <input type="file" name="image" class="form-control" accept="image/*" onchange="previewImg(this,'imgPreview','imgPreviewWrap')">
                             <div class="mt-2 text-center" id="imgPreviewWrap" style="display:none;">
-                                <img id="imgPreview" src="" class="rounded border"
-                                     style="max-height:120px; object-fit:contain;">
+                                <img id="imgPreview" src="" class="rounded border edit-img-preview">
                             </div>
                         </div>
                         <div class="col-12">
@@ -181,6 +204,77 @@
                     <div class="d-flex justify-content-end gap-2 mt-3">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
                         <button type="submit" class="btn btn-dark fw-bold">เพิ่มสินค้า</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ── Edit Product Modal ── *@
+<div class="modal fade" id="editProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-edit me-2 text-warning"></i>แก้ไขสินค้า
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="EditProduct" method="post" enctype="multipart/form-data" id="editProductForm">
+                    <input type="hidden" name="pid" id="editPid">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">ชื่อสินค้า <span class="text-danger">*</span></label>
+                            <input type="text" name="pname" id="editPname" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">ราคา (฿) <span class="text-danger">*</span></label>
+                            <input type="number" name="price" id="editPrice" class="form-control" min="0" step="0.01" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">หมวดหมู่</label>
+                            <select name="catId" id="editCatId" class="form-select">
+                                <option value="">-- ไม่ระบุ --</option>
+                                @foreach (var c in (IEnumerable<_66044011_Tatsunori.Models.Category>)ViewBag.Categories)
+                                {
+                                    <option value="@c.CatId">@c.CatName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">ยี่ห้อ</label>
+                            <select name="brandId" id="editBrandId" class="form-select">
+                                <option value="">-- ไม่ระบุ --</option>
+                                @foreach (var b in (IEnumerable<_66044011_Tatsunori.Models.Brand>)ViewBag.Brands)
+                                {
+                                    <option value="@b.BrandId">@b.BrandName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">รูปสินค้า</label>
+                            <div id="editCurrentImg" class="mb-2" style="display:none;">
+                                <img id="editCurrentImgEl" src="" class="rounded border edit-img-preview">
+                                <div class="small text-muted mt-1">รูปปัจจุบัน — อัปโหลดรูปใหม่เพื่อเปลี่ยน</div>
+                            </div>
+                            <input type="file" name="image" class="form-control" accept="image/*"
+                                   onchange="previewImg(this,'editNewPreview','editNewPreviewWrap')">
+                            <div class="mt-2 text-center" id="editNewPreviewWrap" style="display:none;">
+                                <img id="editNewPreview" src="" class="rounded border edit-img-preview">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">รายละเอียด</label>
+                            <textarea name="description" id="editDescription" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-warning fw-bold text-dark">
+                            <i class="fas fa-save me-1"></i>บันทึกการแก้ไข
+                        </button>
                     </div>
                 </form>
             </div>
@@ -199,8 +293,7 @@ document.querySelectorAll('.product-name-cell').forEach(function(cell) {
         tooltip.style.top  = (e.clientY - 60) + 'px';
     });
 });
-</script>
-<script>
+
 // แสดงปุ่มบันทึกเมื่อค่าเปลี่ยน
 document.querySelectorAll('.qty-form').forEach(function(form) {
     var input = form.querySelector('.qty-input');
@@ -213,35 +306,55 @@ document.querySelectorAll('.qty-form').forEach(function(form) {
     });
 });
 
-// toggle input ใหม่เมื่อเลือก "เพิ่มใหม่"
+// toggle input ใหม่
 function toggleNew(sel, wrapId) {
-    var wrap = document.getElementById(wrapId);
+    var wrap  = document.getElementById(wrapId);
     var input = wrap.querySelector('input');
     if (sel.value === '__new__') {
-        wrap.style.display = 'block';
-        input.required = true;
-        sel.value = '';  // clear ค่า select ให้ส่ง null
+        wrap.style.display = 'block'; input.required = true; sel.value = '';
     } else {
-        wrap.style.display = 'none';
-        input.required = false;
-        input.value = '';
+        wrap.style.display = 'none'; input.required = false; input.value = '';
     }
 }
 
-// preview รูปก่อนอัปโหลด
-function previewImg(input) {
-    var wrap = document.getElementById('imgPreviewWrap');
-    var img  = document.getElementById('imgPreview');
+// preview รูป
+function previewImg(input, imgId, wrapId) {
+    var wrap = document.getElementById(wrapId);
+    var img  = document.getElementById(imgId);
     if (input.files && input.files[0]) {
         var reader = new FileReader();
-        reader.onload = function(e) {
-            img.src = e.target.result;
-            wrap.style.display = 'block';
-        };
+        reader.onload = function(e) { img.src = e.target.result; wrap.style.display = 'block'; };
         reader.readAsDataURL(input.files[0]);
     } else {
         wrap.style.display = 'none';
     }
+}
+
+// เปิด Edit Modal พร้อมข้อมูล
+function openEdit(pid, pname, price, description, catId, brandId, imagePath) {
+    document.getElementById('editPid').value         = pid;
+    document.getElementById('editPname').value       = pname;
+    document.getElementById('editPrice').value       = price;
+    document.getElementById('editDescription').value = description;
+    document.getElementById('editCatId').value       = catId || '';
+    document.getElementById('editBrandId').value     = brandId || '';
+
+    // reset new image preview
+    document.getElementById('editNewPreviewWrap').style.display = 'none';
+    document.getElementById('editProductForm').querySelector('input[type=file]').value = '';
+
+    // แสดงรูปปัจจุบัน
+    var curImgWrap = document.getElementById('editCurrentImg');
+    var curImgEl   = document.getElementById('editCurrentImgEl');
+    if (imagePath) {
+        curImgEl.src = imagePath;
+        curImgWrap.style.display = 'block';
+    } else {
+        curImgWrap.style.display = 'none';
+    }
+
+    var modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+    modal.show();
 }
 </script>
 }

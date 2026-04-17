@@ -40,7 +40,6 @@ public class ProjectController : Controller
         _       => "Bronze"
     };
 
-    // effective price (flash sale หรือราคาปกติ)
     private decimal EffectivePrice(int pid, decimal originalPrice)
     {
         var now  = DateTime.Now;
@@ -115,6 +114,24 @@ public class ProjectController : Controller
         if (!IsCustomer)         return RedirectToAction("ProductList");
         var user = _db.Users.Find(SessionUserId);
         ViewBag.UserData = user;
+
+        // แต้มที่รอยืนยัน = sum ของ earn จาก order ที่ยัง Pending
+        var pendingOrderIds = _db.Orders
+            .Where(o => o.UserId == SessionUserId && o.Status == "Pending")
+            .Select(o => o.OrderId).ToList();
+        int pendingEarn = pendingOrderIds.Any()
+            ? _db.Pointhistories
+                .Where(p => p.UserId == SessionUserId && p.Type == "earn"
+                         && p.OrderId != null && pendingOrderIds.Contains(p.OrderId.Value))
+                .Sum(p => p.Points)
+            : 0;
+        // คำนวณจาก TotalAmount ของ Pending orders (เพราะ earn ยังไม่ถูกบันทึก)
+        pendingEarn = _db.Orders
+            .Where(o => o.UserId == SessionUserId && o.Status == "Pending")
+            .ToList()
+            .Sum(o => (int)(o.TotalAmount / 10));
+        ViewBag.PendingEarn = pendingEarn;
+
         return View();
     }
 
@@ -126,7 +143,6 @@ public class ProjectController : Controller
         if (user == null) return RedirectToAction("Login");
 
         var now = DateTime.Now;
-        // ต่ออายุ: ถ้าหมดแล้วหรือยังไม่เคยสมัคร = เริ่มใหม่, ถ้ายังไม่หมด = ต่อจากวันหมด
         if (!user.IsMember || user.MemberExpiry == null || user.MemberExpiry < now)
             user.MemberExpiry = now.AddDays(30);
         else
@@ -164,7 +180,6 @@ public class ProjectController : Controller
             _            => query.OrderBy(p => p.Pid)
         };
 
-        // Flash sale ขึ้นก่อนเสมอ (ถ้าไม่ได้เรียงราคา)
         if (string.IsNullOrEmpty(sort))
         {
             var flashPidsForSort = _db.Flashsales
@@ -175,7 +190,6 @@ public class ProjectController : Controller
                 .OrderByDescending(p => flashPidsForSort.Contains(p.Pid))
                 .ThenBy(p => p.Pid)
                 .ToList();
-            // จัด flashPids และ Flashsales ViewBag
             var now2 = DateTime.Now;
             ViewBag.Categories = _db.Categories.ToList();
             ViewBag.Brands     = _db.Brands.ToList();
@@ -218,6 +232,9 @@ public class ProjectController : Controller
         var flashMap = _db.Flashsales
             .Where(f => f.IsActive && f.StartTime <= now && f.EndTime >= now && pids.Contains(f.Pid))
             .ToDictionary(f => f.Pid, f => f.SalePrice);
+        var stockMap = _db.Productstocks
+            .Where(s => pids.Contains(s.Pid))
+            .ToDictionary(s => s.Pid, s => s.Quantity ?? 0);
 
         var items = products.Select(p => new CartItemViewModel
         {
@@ -225,7 +242,8 @@ public class ProjectController : Controller
             Pname    = p.Pname,
             Price    = flashMap.ContainsKey(p.Pid) ? flashMap[p.Pid] : p.Price,
             Qty      = cart[p.Pid],
-            Subtotal = (flashMap.ContainsKey(p.Pid) ? flashMap[p.Pid] : p.Price) * cart[p.Pid]
+            Subtotal = (flashMap.ContainsKey(p.Pid) ? flashMap[p.Pid] : p.Price) * cart[p.Pid],
+            Stock    = stockMap.ContainsKey(p.Pid) ? stockMap[p.Pid] : 0
         }).ToList();
 
         var profile = _db.Userprofiles.FirstOrDefault(p => p.UserId == SessionUserId);
@@ -234,55 +252,40 @@ public class ProjectController : Controller
         ViewBag.UserPoints   = user?.Points ?? 0;
         ViewBag.MemberLevel  = user?.MemberLevel ?? "Bronze";
 
-        // เช็ค member quota เดือนนี้
         bool memberActive = user?.IsMember == true &&
                             user.MemberExpiry != null &&
                             user.MemberExpiry >= DateTime.Now;
         bool memberDiscAvailable = false;
+        int  memberDiscRemaining  = 0;
         if (memberActive)
         {
-            var monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            bool usedThisMonth = _db.Orders.Any(o =>
-                o.UserId == SessionUserId &&
-                o.OrderDate >= monthStart &&
-                o.CouponCode != null &&
-                o.CouponCode.Contains("__MEMBER__") &&
-                o.Status == "Paid");
-            memberDiscAvailable = !usedThisMonth;
+            // ★ เช็คจาก users.MemberDiscUsedMonth โดยตรง (แยกจาก coupons table)
+            var thisMonth = DateTime.Now.ToString("yyyy-MM");
+            memberDiscAvailable = user?.MemberDiscUsedMonth != thisMonth;
+            memberDiscRemaining = memberDiscAvailable ? 1 : 0;
         }
-        ViewBag.MemberDiscAvailable = memberDiscAvailable;
+        ViewBag.MemberDiscAvailable  = memberDiscAvailable;
+        ViewBag.MemberDiscRemaining  = memberDiscRemaining;
 
-        // สร้าง member coupon ถ้า user เป็น member
-        var userForCoupon = _db.Users.Find(SessionUserId);
-        if (userForCoupon?.IsMember == true &&
-            userForCoupon.MemberExpiry != null &&
-            userForCoupon.MemberExpiry >= DateTime.Now)
-        {
-            EnsureMemberCoupon(SessionUserId!.Value);
-        }
-
-        // Coupons ที่ user นี้ยังใช้ได้
         var today = DateOnly.FromDateTime(DateTime.Now);
         var usedCountPerCoupon = _db.Couponusages
             .Where(u => u.UserId == SessionUserId!.Value)
             .GroupBy(u => u.CouponId)
             .ToDictionary(g => g.Key, g => g.Count());
 
-        var myCouponCode = GetMemberCouponCode(SessionUserId!.Value);
         var availableCoupons = _db.Coupons
             .Where(c => c.IsActive &&
                 (c.ExpireDate == null || c.ExpireDate >= today))
             .ToList()
             .Where(c => {
-                // ซ่อน MBR coupon ของ user อื่น
-                if (c.Code.StartsWith("MBR") && c.Code != myCouponCode) return false;
+                // ซ่อน Member coupon ทั้งหมด (จัดการผ่าน checkbox แยกต่างหาก)
+                if (c.Code.StartsWith("MEMBER-")) return false;
                 int userUsed = usedCountPerCoupon.ContainsKey(c.CouponId) ? usedCountPerCoupon[c.CouponId] : 0;
                 return userUsed < c.UsageLimit;
             })
             .ToList();
 
         ViewBag.AvailableCoupons = availableCoupons;
-        ViewBag.MemberCouponCode = userForCoupon?.IsMember == true ? GetMemberCouponCode(SessionUserId!.Value) : null;
         return View(items);
     }
 
@@ -326,7 +329,7 @@ public class ProjectController : Controller
         return RedirectToAction("CartPage");
     }
 
-    // ─── APPLY COUPON (AJAX-friendly redirect) ──────────────────────────────
+    // ─── APPLY COUPON ──────────────────────────────────────────────────────
     [HttpPost]
     public IActionResult ApplyCoupon(string couponCode)
     {
@@ -336,7 +339,11 @@ public class ProjectController : Controller
 
     // ─── CHECKOUT / PLACE ORDER ─────────────────────────────────────────────
     [HttpPost]
-    public IActionResult PlaceOrder(string? shippingAddress, string? couponCode, int pointsToRedeem = 0)
+    public IActionResult PlaceOrder(
+        string? shippingAddress,
+        string? couponCode,
+        int pointsToRedeem = 0,
+        bool useMemberDisc = false)
     {
         if (SessionUser == null) return RedirectToAction("Login");
         if (string.IsNullOrWhiteSpace(shippingAddress))
@@ -373,12 +380,19 @@ public class ProjectController : Controller
             return RedirectToAction("CartPage");
         }
 
-        var pids      = cart.Keys.ToList();
-        var products  = _db.Products.Where(p => pids.Contains(p.Pid)).ToList();
+        var pids     = cart.Keys.ToList();
+        var products = _db.Products.Where(p => pids.Contains(p.Pid)).ToList();
         decimal subtotal = products.Sum(p => (flashMap.ContainsKey(p.Pid) ? flashMap[p.Pid] : p.Price) * cart[p.Pid]);
 
-        // Member discount — จะหักตอน Paid ไม่ใช่ Pending
         decimal memberDiscount = 0m;
+        if (useMemberDisc && user.IsMember &&
+            user.MemberExpiry != null && user.MemberExpiry >= now)
+        {
+            // ★ เช็คจาก users.MemberDiscUsedMonth (ไม่ใช้ coupons table)
+            var thisMonth = now.ToString("yyyy-MM");
+            if (user.MemberDiscUsedMonth != thisMonth)
+                memberDiscount = 100m;
+        }
 
         // คำนวณ coupon
         decimal couponDiscount = 0m;
@@ -430,7 +444,8 @@ public class ProjectController : Controller
             ShippingAddress = shippingAddress,
             DiscountAmount  = totalDiscount,
             PointsUsed      = maxRedeemable,
-            CouponCode      = coupon?.Code
+            CouponCode      = coupon?.Code,
+            SlipImagePath   = null              // จะ upload แยกหน้า UploadSlip
         };
         _db.Orders.Add(order);
         _db.SaveChanges();
@@ -442,7 +457,7 @@ public class ProjectController : Controller
             _db.Orderdetails.Add(new Orderdetail { OrderId = order.OrderId, Pid = p.Pid, Qty = cart[p.Pid], UnitPrice = price });
         }
 
-        // หัก stock ทันทีตอนสั่ง (hold)
+        // หัก stock ทันที (hold)
         foreach (var p in products)
         {
             var stock = _db.Productstocks.Find(p.Pid);
@@ -468,23 +483,20 @@ public class ProjectController : Controller
             _db.Couponusages.Add(new Couponusage { CouponId = coupon.CouponId, UserId = user.Id, OrderId = order.OrderId });
             coupon.UsedCount++;
         }
+        // ★ บันทึก MemberDiscUsedMonth เมื่อใช้ส่วนลด Member
+        if (memberDiscount > 0)
+            user.MemberDiscUsedMonth = now.ToString("yyyy-MM");
 
-        // แต้มที่ใช้ (redeem)
+        // แต้มที่ใช้ (redeem) — หักทันทีตอนสั่งซื้อ
         if (maxRedeemable > 0)
         {
             user.Points -= maxRedeemable;
             _db.Pointhistories.Add(new Pointhistory { UserId = user.Id, OrderId = order.OrderId, Points = -maxRedeemable, Type = "redeem", CreatedAt = now });
         }
 
-        // แต้มที่ได้รับ (1 แต้มต่อ ฿10)
+        // ★ แต้มที่จะได้รับ (earn) — ยังไม่บันทึก จะบันทึกตอน Staff กด Paid เท่านั้น
         int earnedPoints = (int)(finalTotal / 10);
-        if (earnedPoints > 0)
-        {
-            user.Points += earnedPoints;
-            _db.Pointhistories.Add(new Pointhistory { UserId = user.Id, OrderId = order.OrderId, Points = earnedPoints, Type = "earn", CreatedAt = now });
-        }
 
-        // อัปเดต member expiry check (ไม่ต้อง calc level แล้ว)
         if (user.IsMember && user.MemberExpiry != null && user.MemberExpiry < now)
         {
             user.IsMember    = false;
@@ -492,20 +504,67 @@ public class ProjectController : Controller
             HttpContext.Session.SetString("IsMember", "0");
         }
 
-        // อัปเดต address
         var prof = _db.Userprofiles.FirstOrDefault(p => p.UserId == user.Id);
         if (prof != null) prof.Address = shippingAddress;
 
         _db.SaveChanges();
 
-        // อัปเดต session
         HttpContext.Session.SetString("MemberLevel",  user.MemberLevel);
         HttpContext.Session.SetInt32 ("Points",       user.Points);
         HttpContext.Session.SetString("IsMember",     user.IsMember ? "1" : "0");
         HttpContext.Session.SetString("MemberExpiry", user.MemberExpiry?.ToString("o") ?? "");
         HttpContext.Session.Remove("Cart");
 
-        TempData["OrderSuccess"] = $"สั่งซื้อสำเร็จ! ออเดอร์ #{order.OrderId} | ได้รับ {earnedPoints} แต้ม";
+        TempData["OrderSuccess"] = $"สั่งซื้อสำเร็จ! ออเดอร์ #{order.OrderId} | จะได้รับ {earnedPoints} แต้มหลัง Staff ยืนยันการชำระเงิน";
+        return RedirectToAction("UploadSlip", new { orderId = order.OrderId });
+    }
+
+    // ─── UPLOAD SLIP ────────────────────────────────────────────────────────
+    public IActionResult UploadSlip(int orderId)
+    {
+        if (SessionUser == null) return RedirectToAction("Login");
+        var order = _db.Orders.FirstOrDefault(o => o.OrderId == orderId && o.UserId == SessionUserId);
+        if (order == null) return RedirectToAction("OrderHistory");
+        return View(order);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UploadSlip(int orderId, IFormFile? slipImage)
+    {
+        if (SessionUser == null) return RedirectToAction("Login");
+        var order = _db.Orders.FirstOrDefault(o => o.OrderId == orderId && o.UserId == SessionUserId);
+        if (order == null) return RedirectToAction("OrderHistory");
+
+        if (slipImage == null || slipImage.Length == 0)
+        {
+            TempData["SlipError"] = "กรุณาเลือกไฟล์สลิป";
+            return RedirectToAction("UploadSlip", new { orderId });
+        }
+
+        var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+        var ext     = Path.GetExtension(slipImage.FileName).ToLowerInvariant();
+        if (!allowed.Contains(ext))
+        {
+            TempData["SlipError"] = "ไฟล์ต้องเป็นรูปภาพ (.jpg, .png, .webp)";
+            return RedirectToAction("UploadSlip", new { orderId });
+        }
+        if (slipImage.Length > 5 * 1024 * 1024)
+        {
+            TempData["SlipError"] = "ไฟล์ต้องมีขนาดไม่เกิน 5MB";
+            return RedirectToAction("UploadSlip", new { orderId });
+        }
+
+        var slipDir  = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "slips");
+        Directory.CreateDirectory(slipDir);
+        var fileName = $"slip_{SessionUserId}_{orderId}_{DateTime.Now:yyyyMMddHHmmss}{ext}";
+        var fullPath = Path.Combine(slipDir, fileName);
+        using (var stream = new FileStream(fullPath, FileMode.Create))
+            await slipImage.CopyToAsync(stream);
+
+        order.SlipImagePath = "/slips/" + fileName;
+        _db.SaveChanges();
+
+        TempData["OrderSuccess"] = $"แนบสลิปออเดอร์ #{orderId} เรียบร้อยแล้ว รอ Staff ตรวจสอบ";
         return RedirectToAction("OrderHistory");
     }
 
@@ -531,7 +590,6 @@ public class ProjectController : Controller
             .Where(o => o.UserId == SessionUserId)
             .OrderByDescending(o => o.OrderDate).ToList();
 
-        // แต้มแต่ละออเดอร์
         var pointMap = _db.Pointhistories
             .Where(p => p.UserId == SessionUserId && p.OrderId != null)
             .ToList()
@@ -672,8 +730,9 @@ public class ProjectController : Controller
         return RedirectToAction("Management");
     }
 
+    // ★ แก้ไข: เพิ่ม string? Address เพื่อรับที่อยู่จาก form เพิ่มพนักงาน
     [HttpPost]
-    public IActionResult AddStaff(User user, string Gender, DateOnly? Birthday, string? Phone, int RoleId)
+    public IActionResult AddStaff(User user, string Gender, DateOnly? Birthday, string? Phone, int RoleId, string? Address)
     {
         if (!IsAdmin) return RedirectToAction("ProductList");
         if (_db.Users.Any(u => u.Username == user.Username)) { TempData["AddStaffError"] = "Username นี้ถูกใช้งานแล้ว"; return RedirectToAction("Management"); }
@@ -681,7 +740,7 @@ public class ProjectController : Controller
         user.RoleId = RoleId; user.CreatedAt = DateTime.Now; user.Points = 0; user.MemberLevel = "Bronze";
         _db.Users.Add(user);
         _db.SaveChanges();
-        _db.Userprofiles.Add(new Userprofile { UserId = user.Id, Gender = Gender, Birthday = Birthday, Tel = Phone });
+        _db.Userprofiles.Add(new Userprofile { UserId = user.Id, Gender = Gender, Birthday = Birthday, Tel = Phone, Address = Address });
         _db.SaveChanges();
         TempData["Success"] = $"เพิ่มพนักงาน '{user.FullName ?? user.Username}' เรียบร้อยแล้ว";
         return RedirectToAction("Management");
@@ -711,7 +770,6 @@ public class ProjectController : Controller
         if (order != null)
         {
             var prevStatus = order.Status;
-            // อนุญาตเฉพาะ Pending→Paid, Pending→Cancelled, Paid→Cancelled, Paid→Done
             if (!((prevStatus == "Pending" && newStatus == "Paid") ||
                   (prevStatus == "Pending" && newStatus == "Cancelled") ||
                   (prevStatus == "Paid"    && newStatus == "Cancelled") ||
@@ -724,10 +782,34 @@ public class ProjectController : Controller
             order.Status = newStatus;
             var now = DateTime.Now;
 
-            // ── Cancel: คืน stock + คืน points ──
+            // ── Pending → Paid: บันทึกแต้มที่ได้รับ ──
+            if (newStatus == "Paid" && prevStatus == "Pending")
+            {
+                var orderUser = _db.Users.Find(order.UserId);
+                if (orderUser != null)
+                {
+                    // คำนวณ earn points จาก TotalAmount (1 แต้ม / ฿10)
+                    int earn = (int)(order.TotalAmount / 10);
+                    if (earn > 0)
+                    {
+                        orderUser.Points += earn;
+                        _db.Pointhistories.Add(new Pointhistory
+                        {
+                            UserId    = orderUser.Id,
+                            OrderId   = order.OrderId,
+                            Points    = earn,
+                            Type      = "earn",
+                            CreatedAt = now
+                        });
+                        // ถ้า user ที่ได้รับแต้มคือ user ที่ login อยู่ อัปเดต session ด้วย
+                        if (orderUser.Id == SessionUserId)
+                            HttpContext.Session.SetInt32("Points", orderUser.Points);
+                    }
+                }
+            }
+
             if (newStatus == "Cancelled" && prevStatus != "Cancelled")
             {
-                // คืน stock
                 foreach (var detail in order.Orderdetails)
                 {
                     var stock = _db.Productstocks.Find(detail.Pid);
@@ -749,7 +831,6 @@ public class ProjectController : Controller
                     }
                 }
 
-                // คืน points ที่เคยได้
                 var earnedHist = _db.Pointhistories
                     .Where(p => p.OrderId == order.OrderId && p.Type == "earn")
                     .ToList();
@@ -770,6 +851,36 @@ public class ProjectController : Controller
                         });
                         HttpContext.Session.SetInt32("Points", orderUser.Points);
                     }
+                }
+
+                // ★ คืน regular coupon usage เมื่อ Cancel
+                var orderCouponUsages = _db.Couponusages
+                    .Where(u => u.OrderId == order.OrderId).ToList();
+                foreach (var cu in orderCouponUsages)
+                {
+                    var cpn = _db.Coupons.Find(cu.CouponId);
+                    if (cpn != null && cpn.UsedCount > 0) cpn.UsedCount--;
+                    _db.Couponusages.Remove(cu);
+                }
+
+                // ★ คืน Member discount quota ถ้า order นี้ใช้ไป
+                // เช็คจาก DiscountAmount > 0 และ order.CouponCode ไม่มี regular coupon
+                // วิธีง่ายกว่า: รีเซ็ต MemberDiscUsedMonth ถ้าเดือนตรงกัน
+                var cancelUser = _db.Users.Find(order.UserId);
+                if (cancelUser != null && order.DiscountAmount > 0)
+                {
+                    var orderMonth = order.OrderDate?.ToString("yyyy-MM");
+                    // ถ้า order นี้เป็น order เดียวที่ใช้ member disc เดือนนั้น → รีเซ็ต
+                    bool otherMbrOrder = _db.Orders.Any(o =>
+                        o.UserId   == order.UserId &&
+                        o.OrderId  != order.OrderId &&
+                        o.OrderDate != null &&
+                        o.OrderDate.Value.ToString("yyyy-MM") == orderMonth &&
+                        o.Status   != "Cancelled" &&
+                        o.DiscountAmount > 0 &&
+                        (o.CouponCode == null || !o.CouponCode.StartsWith("MEMBER-")));
+                    if (!otherMbrOrder && cancelUser.MemberDiscUsedMonth == orderMonth)
+                        cancelUser.MemberDiscUsedMonth = null;
                 }
             }
 
@@ -811,14 +922,12 @@ public class ProjectController : Controller
         return RedirectToAction("StockList");
     }
 
-    // เพิ่มสินค้าใหม่
     [HttpPost]
     public async Task<IActionResult> AddProduct(string pname, decimal price, string? description,
         int? catId, string? newCatName, int? brandId, string? newBrandName, int quantity, IFormFile? image)
     {
         if (!CanManageStock) return RedirectToAction("ProductList");
 
-        // สร้าง category ใหม่ถ้า user พิมพ์เอง
         if (catId == null && !string.IsNullOrWhiteSpace(newCatName))
         {
             newCatName = newCatName.Trim();
@@ -827,7 +936,6 @@ public class ProjectController : Controller
             else { var nc = new Category { CatName = newCatName }; _db.Categories.Add(nc); _db.SaveChanges(); catId = nc.CatId; }
         }
 
-        // สร้าง brand ใหม่ถ้า user พิมพ์เอง
         if (brandId == null && !string.IsNullOrWhiteSpace(newBrandName))
         {
             newBrandName = newBrandName.Trim();
@@ -863,30 +971,88 @@ public class ProjectController : Controller
         return RedirectToAction("StockList");
     }
 
+    // ─── EDIT PRODUCT ────────────────────────────────────────────────────────
+    [HttpPost]
+    public async Task<IActionResult> EditProduct(
+        int pid, string pname, decimal price, string? description,
+        int? catId, int? brandId, IFormFile? image)
+    {
+        if (!CanManageStock) return RedirectToAction("ProductList");
+        var product = _db.Products.Find(pid);
+        if (product == null) { TempData["Error"] = "ไม่พบสินค้า"; return RedirectToAction("StockList"); }
 
-    // ─── MEMBER COUPON ─────────────────────────────────────────────────────────
-    // สร้าง/ดึง coupon code สำหรับ member เดือนนี้
+        product.Pname       = pname.Trim();
+        product.Price       = price;
+        product.Description = description;
+        product.CatId       = catId;
+        product.BrandId     = brandId;
+
+        if (image != null && image.Length > 0)
+        {
+            var ext     = Path.GetExtension(image.FileName).ToLowerInvariant();
+            var allowed = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            if (allowed.Contains(ext))
+            {
+                var fileName = $"product_{Guid.NewGuid():N}{ext}";
+                var dir      = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "products");
+                Directory.CreateDirectory(dir);
+                using var stream = new FileStream(Path.Combine(dir, fileName), FileMode.Create);
+                await image.CopyToAsync(stream);
+                product.ImagePath = $"/images/products/{fileName}";
+            }
+        }
+
+        _db.SaveChanges();
+        TempData["Success"] = $"แก้ไขสินค้า '{product.Pname}' เรียบร้อยแล้ว";
+        return RedirectToAction("StockList");
+    }
+
+    // ─── DELETE PRODUCT ──────────────────────────────────────────────────────
+    [HttpPost]
+    public IActionResult DeleteProduct(int pid)
+    {
+        if (!CanManageStock) return RedirectToAction("ProductList");
+        var product = _db.Products.Find(pid);
+        if (product == null) { TempData["Error"] = "ไม่พบสินค้า"; return RedirectToAction("StockList"); }
+
+        // ตรวจว่ามีใน order history หรือไม่
+        bool hasOrders = _db.Orderdetails.Any(d => d.Pid == pid);
+        if (hasOrders)
+        {
+            TempData["Error"] = $"ไม่สามารถลบ '{product.Pname}' เนื่องจากมีประวัติการสั่งซื้อ";
+            return RedirectToAction("StockList");
+        }
+
+        var stock = _db.Productstocks.Find(pid);
+        if (stock != null) _db.Productstocks.Remove(stock);
+        _db.Products.Remove(product);
+        _db.SaveChanges();
+        TempData["Success"] = $"ลบสินค้า '{product.Pname}' เรียบร้อยแล้ว";
+        return RedirectToAction("StockList");
+    }
+
+    // ─── MEMBER COUPON ──────────────────────────────────────────────────────
     private string GetMemberCouponCode(int userId)
     {
         var now   = DateTime.Now;
-        var month = now.ToString("MMMyyyy").ToUpper(); // e.g. APR2025
+        var month = now.ToString("MMMyyyy").ToUpper();
         return $"MEMBER-{month}-{userId}";
     }
 
     private void EnsureMemberCoupon(int userId)
     {
-        var code      = GetMemberCouponCode(userId);
-        var now       = DateTime.Now;
-        var monthEnd  = new DateOnly(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month));
+        var code     = GetMemberCouponCode(userId);
+        var now      = DateTime.Now;
+        var monthEnd = new DateOnly(now.Year, now.Month, DateTime.DaysInMonth(now.Year, now.Month));
         if (!_db.Coupons.Any(c => c.Code == code))
         {
             _db.Coupons.Add(new Coupon
             {
                 Code        = code,
                 DiscountPct = 0,
-                DiscountAmt = 100m,    // ลด ฿100 fixed
+                DiscountAmt = 100m,
                 MinAmount   = 0,
-                UsageLimit  = 1,       // 1 ครั้งต่อเดือน
+                UsageLimit  = 1,
                 UsedCount   = 0,
                 ExpireDate  = monthEnd,
                 IsActive    = true,
@@ -952,12 +1118,12 @@ public class ProjectController : Controller
             .Include(o => o.User).Include(o => o.Orderdetails).ThenInclude(d => d.PidNavigation)
             .Where(o => o.OrderDate >= start && o.OrderDate <= end.AddDays(1) && o.Status != "Cancelled")
             .OrderByDescending(o => o.OrderDate).ToList();
-        ViewBag.Period       = period; ViewBag.Start = start; ViewBag.End = end;
-        ViewBag.TotalRevenue = orders.Sum(o => o.TotalAmount);
-        ViewBag.TotalDiscount= orders.Sum(o => o.DiscountAmount);
-        ViewBag.TotalOrders  = orders.Count;
-        ViewBag.TotalItems   = orders.SelectMany(o => o.Orderdetails).Sum(d => d.Qty);
-        ViewBag.TopProducts  = orders.SelectMany(o => o.Orderdetails)
+        ViewBag.Period        = period; ViewBag.Start = start; ViewBag.End = end;
+        ViewBag.TotalRevenue  = orders.Sum(o => o.TotalAmount);
+        ViewBag.TotalDiscount = orders.Sum(o => o.DiscountAmount);
+        ViewBag.TotalOrders   = orders.Count;
+        ViewBag.TotalItems    = orders.SelectMany(o => o.Orderdetails).Sum(d => d.Qty);
+        ViewBag.TopProducts   = orders.SelectMany(o => o.Orderdetails)
             .GroupBy(d => d.PidNavigation?.Pname ?? $"#{d.Pid}")
             .Select(g => new { Name = g.Key, Qty = g.Sum(d => d.Qty), Revenue = g.Sum(d => d.UnitPrice * d.Qty) })
             .OrderByDescending(x => x.Revenue).Take(5).ToList();
@@ -968,7 +1134,6 @@ public class ProjectController : Controller
     public IActionResult CouponManagement()
     {
         if (!IsAdmin) return RedirectToAction("ProductList");
-        // ซ่อน MEMBER- coupons (auto-generated) จากรายการ
         var coupons = _db.Coupons
             .Where(c => !c.Code.StartsWith("MEMBER-"))
             .OrderByDescending(c => c.CreatedAt).ToList();
@@ -1006,7 +1171,6 @@ public class ProjectController : Controller
         if (!IsAdmin) return RedirectToAction("ProductList");
         var c = _db.Coupons.Find(couponId);
         if (c == null) return RedirectToAction("CouponManagement");
-        // เช็ค code ซ้ำ
         if (_db.Coupons.Any(x => x.Code == code.Trim().ToUpper() && x.CouponId != couponId))
         {
             TempData["CouponError"] = "Code นี้มีอยู่แล้ว";
@@ -1029,6 +1193,26 @@ public class ProjectController : Controller
         if (!IsAdmin) return RedirectToAction("ProductList");
         var c = _db.Coupons.Find(couponId);
         if (c != null) { c.IsActive = !c.IsActive; _db.SaveChanges(); }
+        return RedirectToAction("CouponManagement");
+    }
+
+    [HttpPost]
+    public IActionResult DeleteCoupon(int couponId)
+    {
+        if (!IsAdmin) return RedirectToAction("ProductList");
+        var c = _db.Coupons.Find(couponId);
+        if (c == null) { TempData["CouponError"] = "ไม่พบ Coupon"; return RedirectToAction("CouponManagement"); }
+
+        bool hasUsage = _db.Couponusages.Any(u => u.CouponId == couponId);
+        if (hasUsage)
+        {
+            TempData["CouponError"] = $"ไม่สามารถลบ '{c.Code}' เนื่องจากมีประวัติการใช้งาน";
+            return RedirectToAction("CouponManagement");
+        }
+
+        _db.Coupons.Remove(c);
+        _db.SaveChanges();
+        TempData["CouponSuccess"] = $"ลบ Coupon '{c.Code}' เรียบร้อยแล้ว";
         return RedirectToAction("CouponManagement");
     }
 
@@ -1059,6 +1243,20 @@ public class ProjectController : Controller
         if (!IsAdmin) return RedirectToAction("ProductList");
         var f = _db.Flashsales.Find(flashSaleId);
         if (f != null) { f.IsActive = !f.IsActive; _db.SaveChanges(); }
+        return RedirectToAction("FlashSaleManagement");
+    }
+
+    [HttpPost]
+    public IActionResult DeleteFlashSale(int flashSaleId)
+    {
+        if (!IsAdmin) return RedirectToAction("ProductList");
+        var f = _db.Flashsales.Find(flashSaleId);
+        if (f != null)
+        {
+            _db.Flashsales.Remove(f);
+            _db.SaveChanges();
+            TempData["FlashSuccess"] = "ลบ Flash Sale เรียบร้อยแล้ว";
+        }
         return RedirectToAction("FlashSaleManagement");
     }
 

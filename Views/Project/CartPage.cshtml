@@ -4,51 +4,53 @@
     var subtotal     = Model.Sum(i => i.Subtotal);
     int userPoints   = (int)(ViewBag.UserPoints ?? 0);
 
-    bool isMember       = (Context.Session.GetString("IsMember") == "1");
-    string memberExpStr = Context.Session.GetString("MemberExpiry") ?? "";
-    DateTime? memberExp = string.IsNullOrEmpty(memberExpStr) ? null : DateTime.Parse(memberExpStr);
-    bool memberActive   = isMember && memberExp != null && memberExp >= DateTime.Now;
-    // เช็ค quota จาก controller (ใช้แล้วเดือนนี้หรือยัง)
+    bool isMember        = (Context.Session.GetString("IsMember") == "1");
+    string memberExpStr  = Context.Session.GetString("MemberExpiry") ?? "";
+    DateTime? memberExp  = string.IsNullOrEmpty(memberExpStr) ? null : DateTime.Parse(memberExpStr);
+    bool memberActive    = isMember && memberExp != null && memberExp >= DateTime.Now;
     bool memberDiscAvail = (bool)(ViewBag.MemberDiscAvailable ?? false);
-    decimal memDisc     = (memberActive && memberDiscAvail) ? 100m : 0m;
+    int  memberDiscRem   = (int)(ViewBag.MemberDiscRemaining ?? 0); // อิงจาก DB จริง
 
-    var availableCoupons  = ViewBag.AvailableCoupons as List<_66044011_Tatsunori.Models.Coupon>
-                            ?? new List<_66044011_Tatsunori.Models.Coupon>();
-    string? memberCouponCode = ViewBag.MemberCouponCode as string;
+    var availableCoupons = ViewBag.AvailableCoupons as List<_66044011_Tatsunori.Models.Coupon>
+                           ?? new List<_66044011_Tatsunori.Models.Coupon>();
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true">
     <style>
-        /* Confirm Modal */
-        .cart-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; align-items:center; justify-content:center; }
+        .cart-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:9999; align-items:center; justify-content:center; }
         .cart-modal-overlay.show { display:flex; }
-        .cart-confirm-modal { background:#fff; border-radius:20px; padding:28px; max-width:440px; width:94%; box-shadow:0 20px 60px rgba(0,0,0,.2); max-height:90vh; overflow-y:auto; }
-        .cart-confirm-modal h5 { font-weight:800; font-size:1.1rem; margin-bottom:16px; }
+        .cart-confirm-modal { background:#fff; border-radius:20px; padding:28px; max-width:460px; width:94%; box-shadow:0 20px 60px rgba(0,0,0,.25); max-height:92vh; overflow-y:auto; }
+        .cart-confirm-modal h5 { font-weight:800; font-size:1.1rem; margin-bottom:16px; color:#111; }
 
         .order-sum-table { width:100%; border-collapse:collapse; margin-bottom:14px; }
-        .order-sum-table td { padding:7px 0; border-bottom:1px solid #f3f4f6; font-size:.88rem; vertical-align:middle; }
+        .order-sum-table td { padding:7px 0; border-bottom:1px solid #f3f4f6; font-size:.88rem; vertical-align:middle; color:#374151; }
         .order-sum-table tr:last-child td { border:none; }
-        .order-sum-table .item-name { color:#374151; }
         .order-sum-table .item-price { text-align:right; font-weight:600; white-space:nowrap; }
         .sum-divider td { border-top:2px solid #e5e7eb !important; padding-top:10px !important; }
         .sum-discount td { color:#059669; }
-        .sum-total td { font-weight:800; font-size:1rem; }
-        .sum-earn td  { color:#f39c12; font-size:.82rem; }
+        .sum-total td { font-weight:800; font-size:1rem; color:#111; }
+        .sum-earn td  { color:#d97706; font-size:.82rem; }
 
-        .pay-title { font-size:.78rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
+        .pay-title { font-size:.78rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
         .pay-grid  { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
-        .pay-option { border:2px solid #e5e7eb; border-radius:10px; padding:10px; text-align:center; cursor:pointer; transition:.15s; font-size:.85rem; font-weight:600; background:#fff; }
-        .pay-option:hover, .pay-option.picked { border-color:#111; background:#111; color:#fff; }
-        .pay-option i { display:block; font-size:1.3rem; margin-bottom:4px; }
+        .pay-option { border:2px solid #d1d5db; border-radius:10px; padding:12px 8px; text-align:center; cursor:pointer; transition:.15s; font-size:.85rem; font-weight:600; background:#f9fafb; color:#374151; }
+        .pay-option:hover { border-color:#6b7280; background:#f3f4f6; }
+        .pay-option.picked { border-color:#111; background:#111; color:#fff; }
+        .pay-option i { display:block; font-size:1.4rem; margin-bottom:5px; }
 
         .pay-ok-msg { background:#d1fae5; color:#065f46; border-radius:8px; padding:9px 12px; font-size:.83rem; margin-bottom:12px; display:none; }
         .pay-ok-msg.show { display:block; }
 
         .btn-confirm-order { width:100%; padding:13px; background:#111; color:#fff; border:none; border-radius:10px; font-weight:800; font-size:.95rem; cursor:pointer; transition:.2s; }
-        .btn-confirm-order:disabled { opacity:.35; cursor:not-allowed; }
+        .btn-confirm-order:disabled { opacity:.4; cursor:not-allowed; }
         .btn-confirm-order:not(:disabled):hover { background:#f39c12; color:#111; }
         .btn-modal-cancel { width:100%; padding:9px; background:transparent; border:none; color:#9ca3af; font-size:.85rem; cursor:pointer; margin-top:6px; }
+        .btn-modal-cancel:hover { color:#6b7280; }
+
+        .member-disc-box { background:#fef3c7; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; margin-bottom:12px; }
+        .member-disc-box label { cursor:pointer; display:flex; align-items:center; gap:10px; margin:0; }
+        .member-disc-used { background:#f3f4f6; border:1px solid #e5e7eb; border-radius:10px; padding:10px 14px; margin-bottom:12px; font-size:.83rem; color:#9ca3af; }
     </style>
 }
 
@@ -81,7 +83,27 @@ else
                         <div class="cart-icon"><i class="fas fa-gun fa-2x opacity-25"></i></div>
                         <div class="cart-info flex-grow-1">
                             <div class="fw-bold">@item.Pname</div>
-                            <div class="text-primary fw-semibold">฿@item.Price.ToString("N0") / ชิ้น</div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="text-primary fw-semibold">฿@item.Price.ToString("N0") / ชิ้น</span>
+                                @if (item.Stock <= 5 && item.Stock > 0)
+                                {
+                                    <span style="background:#fef3c7;color:#92400e;border-radius:6px;padding:1px 8px;font-size:.72rem;font-weight:700;">
+                                        <i class="fas fa-exclamation-circle me-1"></i>เหลือ @item.Stock ชิ้น
+                                    </span>
+                                }
+                                else if (item.Stock == 0)
+                                {
+                                    <span style="background:#fee2e2;color:#991b1b;border-radius:6px;padding:1px 8px;font-size:.72rem;font-weight:700;">
+                                        <i class="fas fa-times-circle me-1"></i>หมดสต็อก
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="background:#d1fae5;color:#065f46;border-radius:6px;padding:1px 8px;font-size:.72rem;font-weight:600;">
+                                        <i class="fas fa-check me-1"></i>คงเหลือ @item.Stock ชิ้น
+                                    </span>
+                                }
+                            </div>
                         </div>
                         <form asp-action="UpdateCart" method="post" class="d-flex align-items-center gap-2">
                             <input type="hidden" name="pid" value="@item.Pid" />
@@ -105,57 +127,68 @@ else
             <div class="summary-card">
                 <h5 class="fw-bold mb-3">สรุปคำสั่งซื้อ</h5>
 
-                @* Member badge *@
                 @if (memberActive)
                 {
                     <div class="member-badge member-gold mb-3">
                         <i class="fas fa-crown me-1"></i> Member
-                        <span class="ms-1 small">(ส่วนลด ฿100/เดือน)</span>
+                        <span class="ms-1 small">(หมดอายุ @memberExp!.Value.ToString("dd MMM yyyy"))</span>
                     </div>
                 }
 
-                @* ยอดรวม *@
                 <div class="d-flex justify-content-between mb-1">
                     <span class="text-muted">ยอดรวม</span>
                     <span class="fw-semibold">฿@subtotal.ToString("N0")</span>
                 </div>
-                @if (memDisc > 0)
+
+                @* Member Discount — แสดงเฉพาะถ้ายังไม่ได้ใช้เดือนนี้ *@
+                @if (memberActive && memberDiscAvail)
                 {
-                    <div class="d-flex justify-content-between mb-2 text-success small">
-                        <span><i class="fas fa-crown me-1"></i>ส่วนลด Member</span>
-                        <span>-฿@memDisc.ToString("N0")</span>
+                    <div class="member-disc-box mt-2 mb-2">
+                        <label>
+                            <input type="checkbox" id="useMemberDisc" onchange="recalc()"
+                                   style="width:1.1rem;height:1.1rem;accent-color:#f39c12;">
+                            <div>
+                                <div class="fw-semibold small" style="color:#92400e;">
+                                    <i class="fas fa-crown me-1 text-warning"></i>ใช้ส่วนลด Member ฿100
+                                </div>
+                                <div class="small" style="color:#b45309;">
+                                    ใช้ได้ 1 ครั้ง/เดือน
+                                    <span class="ms-1 fw-bold" style="color:@(memberDiscRem > 0 ? "#059669" : "#dc2626");">
+                                        (เหลือ @memberDiscRem ครั้ง)
+                                    </span>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                }
+                else if (memberActive && !memberDiscAvail)
+                {
+                    <div class="member-disc-used mt-2 mb-2">
+                        <i class="fas fa-check-circle me-1 text-success"></i>
+                        ใช้ส่วนลด Member ฿100 เดือนนี้แล้ว
+                        <div class="small mt-1">จะรีเซ็ตวันที่ 1 ของเดือนหน้า</div>
                     </div>
                 }
 
                 <hr class="my-2">
 
-                @* Coupon *@
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">
                         <i class="fas fa-ticket-alt me-1 text-warning"></i>เลือก Coupon
                     </label>
                     @if (!availableCoupons.Any())
                     {
-                        <div class="text-muted small py-1">
-                            <i class="fas fa-info-circle me-1"></i>ไม่มี Coupon ที่ใช้ได้ขณะนี้
-                        </div>
+                        <div class="text-muted small py-1"><i class="fas fa-info-circle me-1"></i>ไม่มี Coupon ที่ใช้ได้</div>
                     }
                     else
                     {
-                        <select class="form-select form-select-sm" id="couponSelect"
-                                onchange="recalc()">
+                        <select class="form-select form-select-sm" id="couponSelect" onchange="recalc()">
                             <option value="" data-pct="0" data-amt="0" data-min="0">-- ไม่ใช้ Coupon --</option>
                             @foreach (var c in availableCoupons)
                             {
-                                <option value="@c.Code"
-                                        data-pct="@c.DiscountPct"
-                                        data-amt="@c.DiscountAmt"
-                                        data-min="@c.MinAmount"
-                                        data-limit="@c.UsageLimit">
-                                    @c.Code —
-                                    @(c.DiscountAmt > 0 ? $"ลด ฿{c.DiscountAmt:N0}" : $"ลด {c.DiscountPct}%")
+                                <option value="@c.Code" data-pct="@c.DiscountPct" data-amt="@c.DiscountAmt" data-min="@c.MinAmount">
+                                    @c.Code — @(c.DiscountAmt > 0 ? $"ลด ฿{c.DiscountAmt:N0}" : $"ลด {c.DiscountPct}%")
                                     @(c.MinAmount > 0 ? $" (ขั้นต่ำ ฿{c.MinAmount:N0})" : "")
-                                    @(c.UsageLimit > 1 ? $" [{c.UsageLimit}ครั้ง/คน]" : "")
                                 </option>
                             }
                         </select>
@@ -163,7 +196,6 @@ else
                     }
                 </div>
 
-                @* Points *@
                 <div class="mb-3">
                     <label class="form-label small fw-semibold">
                         <i class="fas fa-coins me-1 text-warning"></i>ใช้แต้ม
@@ -176,44 +208,37 @@ else
                     {
                         <div class="input-group input-group-sm">
                             <span class="input-group-text bg-light"><i class="fas fa-coins text-warning"></i></span>
-                            <input type="number" id="pointsInput" class="form-control"
-                                   placeholder="0" min="0" max="@userPoints" value="0"
-                                   oninput="recalc()">
+                            <input type="number" id="pointsInput" class="form-control" placeholder="0" min="0" max="@userPoints" value="0" oninput="recalc()">
                             <span class="input-group-text bg-light text-muted small" id="pointDiscDisplay">= ฿0</span>
                         </div>
                         <div class="text-muted" style="font-size:.72rem;margin-top:3px;">10 แต้ม = ฿1 | มี @userPoints แต้ม</div>
                     }
-                    else
-                    {
-                        <div class="text-muted small">ยังไม่มีแต้มสะสม</div>
-                    }
+                    else { <div class="text-muted small">ยังไม่มีแต้มสะสม</div> }
                 </div>
 
-                @* ที่อยู่ *@
                 <div class="mb-3">
-                    <label class="form-label small fw-semibold">
-                        ที่อยู่จัดส่ง <span class="text-danger">*</span>
-                    </label>
+                    <label class="form-label small fw-semibold">ที่อยู่จัดส่ง <span class="text-danger">*</span></label>
                     <textarea id="shippingAddrInput" class="form-control form-control-sm" rows="2"
-                              placeholder="ระบุที่อยู่..." required>@ViewBag.SavedAddress</textarea>
+                              placeholder="ระบุที่อยู่...">@ViewBag.SavedAddress</textarea>
                 </div>
 
-                @* สรุปยอด live *@
                 <div id="liveSummary" class="mb-3" style="background:#f8f9fa;border-radius:10px;padding:10px 14px;font-size:.85rem;">
                     <div class="d-flex justify-content-between"><span class="text-muted">ยอดสินค้า</span><span>฿@subtotal.ToString("N0")</span></div>
-
-                    <div id="liveCouponRow" class="d-flex justify-content-between text-success" style="display:none;">
+                    <div id="liveMemberRow" style="display:none; justify-content:space-between; color:#059669;">
+                        <span><i class="fas fa-crown me-1"></i>ส่วนลด Member</span><span>-฿100</span>
+                    </div>
+                    <div id="liveCouponRow" style="display:none; justify-content:space-between; color:#059669;">
                         <span id="liveCouponLabel">Coupon</span><span id="liveCouponAmt"></span>
                     </div>
-                    <div id="livePointRow" class="d-flex justify-content-between text-success" style="display:none;">
+                    <div id="livePointRow" style="display:none; justify-content:space-between; color:#059669;">
                         <span>แต้มสะสม</span><span id="livePointAmt"></span>
                     </div>
                     <hr class="my-1">
                     <div class="d-flex justify-content-between fw-bold">
                         <span>ยอดสุทธิ</span><span id="liveTotal" class="text-primary">฿@subtotal.ToString("N0")</span>
                     </div>
-                    <div class="text-warning small mt-1" id="earnPointsRow">
-                        <i class="fas fa-coins me-1"></i>จะได้รับ <strong id="earnAmt">@((int)(subtotal/10))</strong> แต้ม
+                    <div class="text-warning small mt-1">
+                        <i class="fas fa-coins me-1"></i>จะได้รับ <strong id="earnAmt">@((int)(subtotal/10))</strong> แต้ม (หลัง Staff ยืนยัน)
                     </div>
                 </div>
 
@@ -225,18 +250,17 @@ else
     </div>
 }
 
-@* ── Confirm + Pay Modal ── *@
+@* ── Confirm Modal ── *@
 <div class="cart-modal-overlay" id="cartModal">
     <div class="cart-confirm-modal">
         <h5><i class="fas fa-receipt me-2 text-warning"></i>ยืนยันการสั่งซื้อ</h5>
 
-        @* รายการสินค้า *@
         <div style="background:#f8f9fa;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
             <table class="order-sum-table">
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td class="item-name">@item.Pname <span class="text-muted small">x@item.Qty</span></td>
+                        <td>@item.Pname <span class="text-muted small">x@item.Qty</span></td>
                         <td class="item-price">฿@item.Subtotal.ToString("N0")</td>
                     </tr>
                 }
@@ -244,15 +268,12 @@ else
                     <td class="text-muted">ยอดรวมสินค้า</td>
                     <td class="item-price">฿@subtotal.ToString("N0")</td>
                 </tr>
-                @if (memDisc > 0)
-                {
-                    <tr class="sum-discount">
-                        <td><i class="fas fa-crown me-1"></i>ส่วนลด Member</td>
-                        <td class="item-price">-฿@memDisc.ToString("N0")</td>
-                    </tr>
-                }
+                <tr class="sum-discount" id="modalMemberRow" style="display:none;">
+                    <td><i class="fas fa-crown me-1"></i>ส่วนลด Member</td>
+                    <td class="item-price">-฿100</td>
+                </tr>
                 <tr class="sum-discount" id="modalCouponRow" style="display:none;">
-                    <td><i class="fas fa-tag me-1"></i><span id="modalCouponLabel">Coupon</span></td>
+                    <td><i class="fas fa-tag me-1"></i><span id="modalCouponLabel"></span></td>
                     <td class="item-price" id="modalCouponAmt"></td>
                 </tr>
                 <tr class="sum-discount" id="modalPointRow" style="display:none;">
@@ -264,18 +285,16 @@ else
                     <td class="item-price text-primary" id="modalTotal">฿@subtotal.ToString("N0")</td>
                 </tr>
                 <tr class="sum-earn">
-                    <td colspan="2"><i class="fas fa-coins me-1"></i>จะได้รับ <strong id="modalEarn">@((int)(subtotal/10))</strong> แต้มจากออเดอร์นี้</td>
+                    <td colspan="2"><i class="fas fa-coins me-1"></i>จะได้รับ <strong id="modalEarn">@((int)(subtotal/10))</strong> แต้ม (หลัง Staff ยืนยัน)</td>
                 </tr>
             </table>
         </div>
 
-        @* Address *@
         <div style="background:#f8f9fa;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:.85rem;">
             <div class="text-muted small mb-1"><i class="fas fa-map-marker-alt me-1 text-warning"></i>ที่อยู่จัดส่ง</div>
-            <div id="modalAddress" class="fw-semibold small"></div>
+            <div id="modalAddress" class="fw-semibold small" style="color:#374151;"></div>
         </div>
 
-        @* Payment *@
         <div class="pay-title"><i class="fas fa-credit-card me-1"></i>เลือกวิธีชำระเงิน</div>
         <div class="pay-grid">
             <button type="button" class="pay-option" onclick="pickPay(this)">
@@ -300,6 +319,7 @@ else
             <input type="hidden" name="couponCode"      id="hiddenCoupon">
             <input type="hidden" name="pointsToRedeem"  id="hiddenPoints" value="0">
             <input type="hidden" name="shippingAddress" id="hiddenAddress">
+            <input type="hidden" name="useMemberDisc"   id="hiddenMemberDisc" value="false">
             <button type="submit" class="btn-confirm-order" id="confirmOrderBtn" disabled>
                 <i class="fas fa-check-circle me-1"></i>ยืนยันสั่งซื้อ
             </button>
@@ -310,9 +330,15 @@ else
 
 @section Scripts {
 <script>
-var SUBTOTAL   = @subtotal;
-var MAX_POINTS = @userPoints;
-var MEM_DISC   = 0; // หักตอน Paid ไม่ใช่ตอน checkout // 0 ถ้าใช้ quota ไปแล้ว
+var SUBTOTAL         = @subtotal;
+var MAX_POINTS       = @userPoints;
+var MEMBER_DISC_AVAIL = @(memberActive && memberDiscAvail ? "true" : "false");
+
+function getMemberDisc() {
+    if (!MEMBER_DISC_AVAIL) return 0;
+    var cb = document.getElementById('useMemberDisc');
+    return (cb && cb.checked) ? 100 : 0;
+}
 
 function getCouponDisc() {
     var sel = document.getElementById('couponSelect');
@@ -329,12 +355,11 @@ function getPointDisc() {
     var inp = document.getElementById('pointsInput');
     if (!inp) return 0;
     var v = Math.min(parseInt(inp.value) || 0, MAX_POINTS);
-    if (v < 0) v = 0;
-    return Math.floor(v / 10);
+    return Math.floor(Math.max(v, 0) / 10);
 }
 
 function recalc() {
-    var pts  = document.getElementById('pointsInput');
+    var pts = document.getElementById('pointsInput');
     if (pts) {
         var v = parseInt(pts.value) || 0;
         if (v > MAX_POINTS) { pts.value = MAX_POINTS; v = MAX_POINTS; }
@@ -342,43 +367,42 @@ function recalc() {
         document.getElementById('pointDiscDisplay').textContent = '= ฿' + Math.floor(v / 10);
     }
 
+    var memDisc    = getMemberDisc();
     var couponDisc = getCouponDisc();
     var pointDisc  = getPointDisc();
-    var total      = Math.max(0, SUBTOTAL - MEM_DISC - couponDisc - pointDisc);
+    var total      = Math.max(0, SUBTOTAL - memDisc - couponDisc - pointDisc);
     var earn       = Math.floor(total / 10);
 
-    // live summary
-    var sel = document.getElementById('couponSelect');
+    // Member row
+    var memRow = document.getElementById('liveMemberRow');
+    if (memRow) memRow.style.display = memDisc > 0 ? 'flex' : 'none';
+
+    // Coupon row
+    var sel       = document.getElementById('couponSelect');
     var couponRow = document.getElementById('liveCouponRow');
     var couponMsg = document.getElementById('couponMsg');
     if (sel && sel.value) {
-        var opt = sel.options[sel.selectedIndex];
-        var min = parseFloat(opt.dataset.min) || 0;
+        var min = parseFloat(sel.options[sel.selectedIndex].dataset.min) || 0;
         if (SUBTOTAL < min) {
             couponRow.style.display = 'none';
-            couponMsg.style.display = 'block';
-            couponMsg.className = 'small mt-1 text-danger';
-            couponMsg.textContent = '⚠️ ยอดไม่ถึงขั้นต่ำ ฿' + min.toLocaleString();
+            if (couponMsg) { couponMsg.style.display='block'; couponMsg.className='small mt-1 text-danger'; couponMsg.textContent='⚠️ ยอดไม่ถึงขั้นต่ำ ฿'+min.toLocaleString(); }
         } else {
-            couponRow.style.removeProperty('display');
+            couponRow.style.display = 'flex';
             document.getElementById('liveCouponLabel').textContent = sel.value;
-            document.getElementById('liveCouponAmt').textContent = '-฿' + couponDisc.toLocaleString();
-            couponMsg.style.display = 'none';
+            document.getElementById('liveCouponAmt').textContent = '-฿'+couponDisc.toLocaleString();
+            if (couponMsg) couponMsg.style.display = 'none';
         }
     } else {
         couponRow.style.display = 'none';
         if (couponMsg) couponMsg.style.display = 'none';
     }
 
+    // Point row
     var pointRow = document.getElementById('livePointRow');
-    if (pointDisc > 0) {
-        pointRow.style.removeProperty('display');
-        document.getElementById('livePointAmt').textContent = '-฿' + pointDisc.toLocaleString();
-    } else {
-        pointRow.style.display = 'none';
-    }
+    if (pointDisc > 0) { pointRow.style.display='flex'; document.getElementById('livePointAmt').textContent='-฿'+pointDisc.toLocaleString(); }
+    else pointRow.style.display = 'none';
 
-    document.getElementById('liveTotal').textContent = '฿' + total.toLocaleString();
+    document.getElementById('liveTotal').textContent = '฿'+total.toLocaleString();
     document.getElementById('earnAmt').textContent   = earn;
 }
 
@@ -389,58 +413,54 @@ function openCartConfirm() {
     var sel        = document.getElementById('couponSelect');
     var couponCode = sel ? sel.value : '';
     var couponDisc = getCouponDisc();
+    var memDisc    = getMemberDisc();
     var pointsInp  = document.getElementById('pointsInput');
-    var pointsVal  = pointsInp ? parseInt(pointsInp.value) || 0 : 0;
+    var pointsVal  = pointsInp ? parseInt(pointsInp.value)||0 : 0;
     var pointDisc  = getPointDisc();
-    var total      = Math.max(0, SUBTOTAL - MEM_DISC - couponDisc - pointDisc);
+    var total      = Math.max(0, SUBTOTAL - memDisc - couponDisc - pointDisc);
     var earn       = Math.floor(total / 10);
 
-    // ส่งค่าไป hidden inputs
-    document.getElementById('hiddenCoupon').value  = couponCode;
-    document.getElementById('hiddenPoints').value  = pointsVal;
-    document.getElementById('hiddenAddress').value = addr;
-
-    // update modal
+    document.getElementById('hiddenCoupon').value      = couponCode;
+    document.getElementById('hiddenPoints').value      = pointsVal;
+    document.getElementById('hiddenAddress').value     = addr;
+    document.getElementById('hiddenMemberDisc').value  = (memDisc > 0).toString();
     document.getElementById('modalAddress').textContent = addr;
-    document.getElementById('modalTotal').textContent   = '฿' + total.toLocaleString();
+    document.getElementById('modalTotal').textContent   = '฿'+total.toLocaleString();
     document.getElementById('modalEarn').textContent    = earn;
 
+    // Member row in modal
+    var mMem = document.getElementById('modalMemberRow');
+    if (mMem) mMem.style.display = memDisc > 0 ? 'table-row' : 'none';
+
+    // Coupon row in modal
     var mCoupon = document.getElementById('modalCouponRow');
     if (couponCode && couponDisc > 0) {
-        mCoupon.style.removeProperty('display');
+        mCoupon.style.display = 'table-row';
         document.getElementById('modalCouponLabel').textContent = couponCode;
-        document.getElementById('modalCouponAmt').textContent   = '-฿' + couponDisc.toLocaleString();
-    } else { mCoupon.style.display = 'none'; }
+        document.getElementById('modalCouponAmt').textContent   = '-฿'+couponDisc.toLocaleString();
+    } else mCoupon.style.display = 'none';
 
+    // Point row in modal
     var mPoint = document.getElementById('modalPointRow');
-    if (pointDisc > 0) {
-        mPoint.style.removeProperty('display');
-        document.getElementById('modalPointAmt').textContent = '-฿' + pointDisc.toLocaleString();
-    } else { mPoint.style.display = 'none'; }
+    if (pointDisc > 0) { mPoint.style.display='table-row'; document.getElementById('modalPointAmt').textContent='-฿'+pointDisc.toLocaleString(); }
+    else mPoint.style.display = 'none';
 
-    // reset payment
-    document.querySelectorAll('.pay-option').forEach(b => b.classList.remove('picked'));
+    document.querySelectorAll('.pay-option').forEach(function(b){b.classList.remove('picked');});
     document.getElementById('payOkMsg').classList.remove('show');
     document.getElementById('confirmOrderBtn').disabled = true;
     document.getElementById('cartModal').classList.add('show');
 }
 
-function closeCartModal() {
-    document.getElementById('cartModal').classList.remove('show');
-}
+function closeCartModal() { document.getElementById('cartModal').classList.remove('show'); }
 
 function pickPay(btn) {
-    document.querySelectorAll('.pay-option').forEach(b => b.classList.remove('picked'));
+    document.querySelectorAll('.pay-option').forEach(function(b){b.classList.remove('picked');});
     btn.classList.add('picked');
     document.getElementById('payOkMsg').classList.add('show');
     document.getElementById('confirmOrderBtn').disabled = false;
 }
 
-document.getElementById('cartModal').addEventListener('click', function(e) {
-    if (e.target === this) closeCartModal();
-});
-
-// init
+document.getElementById('cartModal').addEventListener('click', function(e){ if(e.target===this) closeCartModal(); });
 recalc();
 </script>
 }

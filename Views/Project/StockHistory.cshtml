@@ -1,0 +1,120 @@
+@model IEnumerable<_66044011_Tatsunori.Models.Stockhistory>
+@{
+    ViewData["Title"] = "ประวัติสต็อก";
+    var product = ViewBag.Product as _66044011_Tatsunori.Models.Product;
+    var products = ViewBag.Products as IEnumerable<_66044011_Tatsunori.Models.Product>
+                   ?? new List<_66044011_Tatsunori.Models.Product>();
+    int? filterPid = ViewBag.FilterPid as int?;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/stockList.css" asp-append-version="true">
+    <style>
+        .change-up   { color:#059669; font-weight:700; }
+        .change-down { color:#dc2626; font-weight:700; }
+        .change-zero { color:#9ca3af; }
+    </style>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-0">
+            <i class="fas fa-history me-2"></i>ประวัติสต็อก
+            @if (product != null)
+            {
+                <span class="fs-5 text-muted fw-normal ms-2">— @product.Pname</span>
+            }
+        </h2>
+        <small class="text-muted">บันทึกการเปลี่ยนแปลงจำนวนสินค้าทั้งหมด</small>
+    </div>
+    <a asp-action="StockList" asp-controller="Project" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>กลับหน้าสต็อก
+    </a>
+</div>
+
+@* Filter by product *@
+<div class="card border-0 shadow-sm mb-4 p-3" style="background:var(--bg-card,#fff);">
+    <form asp-action="StockHistory" method="get" class="d-flex gap-2 align-items-end flex-wrap">
+        <div style="min-width:220px;">
+            <label class="form-label small fw-semibold mb-1">กรองตามสินค้า</label>
+            <select name="pid" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">— ทั้งหมด —</option>
+                @foreach (var p in products)
+                {
+                    if (filterPid == p.Pid)
+                    {
+                        <option value="@p.Pid" selected>@p.Pname</option>
+                    }
+                    else
+                    {
+                        <option value="@p.Pid">@p.Pname</option>
+                    }
+                }
+            </select>
+        </div>
+        @if (filterPid.HasValue)
+        {
+            <a asp-action="StockHistory" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times me-1"></i>ล้างตัวกรอง
+            </a>
+        }
+    </form>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="fas fa-inbox fa-3x mb-3 opacity-50"></i>
+        <h5>ไม่มีประวัติการเปลี่ยนแปลง</h5>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>วันที่/เวลา</th>
+                    <th>สินค้า</th>
+                    <th class="text-center">ก่อนหน้า</th>
+                    <th class="text-center">การเปลี่ยนแปลง</th>
+                    <th class="text-center">หลัง</th>
+                    <th>โดย</th>
+                    <th>หมายเหตุ</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var h in Model)
+            {
+                int diff = h.NewQty - h.OldQty;
+                <tr>
+                    <td class="small text-muted">
+                        @h.ChangedAt?.ToString("dd/MM/yy")<br>
+                        <span style="font-size:.75rem;">@h.ChangedAt?.ToString("HH:mm:ss")</span>
+                    </td>
+                    <td class="fw-semibold small">@(h.PidNavigation?.Pname ?? $"#{h.Pid}")</td>
+                    <td class="text-center">@h.OldQty</td>
+                    <td class="text-center">
+                        @if (diff > 0)
+                        {
+                            <span class="change-up"><i class="fas fa-arrow-up me-1"></i>+@diff</span>
+                        }
+                        else if (diff < 0)
+                        {
+                            <span class="change-down"><i class="fas fa-arrow-down me-1"></i>@diff</span>
+                        }
+                        else
+                        {
+                            <span class="change-zero">—</span>
+                        }
+                    </td>
+                    <td class="text-center fw-bold">@h.NewQty</td>
+                    <td class="small text-muted">@(h.ChangedBy ?? "-")</td>
+                    <td class="small text-muted">@(h.Note ?? "-")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="text-muted small mt-2 text-end">ทั้งหมด @Model.Count() รายการ</div>
+}

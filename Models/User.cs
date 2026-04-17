@@ -17,6 +17,10 @@ public partial class User
     public bool      IsMember     { get; set; } = false;
     public DateTime? MemberExpiry { get; set; }
 
+    // ★ เพิ่ม: เก็บเดือนที่ใช้ส่วนลด Member ล่าสุด เช่น "2025-04"
+    // แยกออกจาก coupons table ทำให้ logic ชัดเจนและไม่ปนกัน
+    public string?   MemberDiscUsedMonth { get; set; }
+
     public virtual ICollection<Order>        Orders         { get; set; } = new List<Order>();
     public virtual ICollection<Couponusage>  Couponusages   { get; set; } = new List<Couponusage>();
     public virtual ICollection<Pointhistory> Pointhistories { get; set; } = new List<Pointhistory>();

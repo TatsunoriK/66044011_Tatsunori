@@ -20,16 +20,20 @@
     <div class="container d-flex justify-content-end align-items-center">
         @if (sessionUser != null)
         {
-            <span class="text-warning fw-bold nav-user">
-                <i class="fas fa-user me-1"></i> สวัสดี, @sessionUser
-            </span>
             @if (sessionRole == 4)
             {
-                <a asp-controller="Project" asp-action="OrderHistory"><i class="fas fa-history me-1"></i> ประวัติการสั่งซื้อ</a>
-                <a asp-controller="Project" asp-action="MyProfile"><i class="fas fa-user-edit me-1"></i> โปรไฟล์</a>
+                <a asp-controller="Project" asp-action="MyProfile" class="text-warning fw-bold nav-user">
+                    <i class="fas fa-user me-1"></i> @sessionUser
+                </a>
                 <a asp-controller="Project" asp-action="Upgrade" class="upgrade-link">
                     <i class="fas fa-crown me-1"></i> Upgrade
                 </a>
+            }
+            else
+            {
+                <span class="text-warning fw-bold nav-user">
+                    <i class="fas fa-user me-1"></i> @sessionUser
+                </span>
             }
             <a asp-controller="Project" asp-action="Logout" class="text-danger"><i class="fas fa-sign-out-alt me-1"></i> ออกจากระบบ</a>
         }
@@ -69,6 +73,11 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Project" asp-action="CartPage">
                             <i class="fas fa-shopping-cart me-1"></i> ตะกร้า
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Project" asp-action="OrderHistory">
+                            <i class="fas fa-history me-1"></i> ประวัติการสั่งซื้อ
                         </a>
                     </li>
                 }

@@ -1,0 +1,157 @@
+@model _66044011_Tatsunori.Models.Order
+@{
+    ViewData["Title"] = "แนบสลิปการชำระเงิน";
+}
+
+<div class="d-flex justify-content-center align-items-center" style="min-height:80vh;">
+    <div style="background:#fff;border-radius:20px;padding:36px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.12);">
+
+        <div class="text-center mb-4">
+            <div style="width:64px;height:64px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                <i class="fas fa-check-circle text-success" style="font-size:2rem;"></i>
+            </div>
+            <h4 class="fw-bold mb-1">สั่งซื้อสำเร็จ!</h4>
+            <p class="text-muted small mb-0">ออเดอร์ <strong class="text-dark">#@Model.OrderId</strong> ถูกสร้างแล้ว</p>
+        </div>
+
+        <div class="rounded-3 p-3 mb-4" style="background:#f8fafc;border:1px solid #e2e8f0;font-size:.88rem;">
+            <div class="d-flex justify-content-between mb-1">
+                <span class="text-muted">ออเดอร์</span>
+                <span class="fw-bold">#@Model.OrderId</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+                <span class="text-muted">ยอดชำระ</span>
+                <span class="fw-bold text-success">฿@Model.TotalAmount.ToString("N0")</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span class="text-muted">สถานะ</span>
+                <span class="badge bg-warning text-dark">@Model.Status</span>
+            </div>
+        </div>
+
+        @* ── ข้อมูลบัญชีธนาคาร ── *@
+        <div class="mb-3 p-3 rounded-3" style="background:#eff6ff;border:1px solid #bfdbfe;">
+            <div class="fw-semibold small mb-2" style="color:#1e40af;">
+                <i class="fas fa-university me-1"></i>ช่องทางการโอนเงิน
+            </div>
+            <div class="d-flex align-items-center gap-3 mb-2 p-2 rounded-2" style="background:#fff;border:1px solid #dbeafe;">
+                <div style="width:40px;height:40px;background:#1a56db;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas fa-building-columns" style="color:#fff;font-size:.9rem;"></i>
+                </div>
+                <div style="flex:1;">
+                    <div class="fw-bold small" style="color:#1e3a8a;">ธนาคารกสิกรไทย (KBank)</div>
+                    <div class="fw-bold" style="color:#1d4ed8;font-size:1rem;letter-spacing:.05em;">123-4-56789-0</div>
+                    <div class="text-muted small">ชื่อบัญชี: บริษัท สไตรค์ ฟอร์ส จำกัด</div>
+                </div>
+                <button type="button" onclick="copyAcct(this, '1234567890')"
+                        style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:5px 10px;font-size:.75rem;color:#1d4ed8;cursor:pointer;white-space:nowrap;">
+                    <i class="fas fa-copy me-1"></i>คัดลอก
+                </button>
+            </div>
+            <div class="d-flex align-items-center gap-3 p-2 rounded-2" style="background:#fff;border:1px solid #dbeafe;">
+                <div style="width:40px;height:40px;background:#059669;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="fas fa-building-columns" style="color:#fff;font-size:.9rem;"></i>
+                </div>
+                <div style="flex:1;">
+                    <div class="fw-bold small" style="color:#064e3b;">ธนาคารไทยพาณิชย์ (SCB)</div>
+                    <div class="fw-bold" style="color:#059669;font-size:1rem;letter-spacing:.05em;">456-7-89012-3</div>
+                    <div class="text-muted small">ชื่อบัญชี: บริษัท สไตรค์ ฟอร์ส จำกัด</div>
+                </div>
+                <button type="button" onclick="copyAcct(this, '4567890123')"
+                        style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:6px;padding:5px 10px;font-size:.75rem;color:#059669;cursor:pointer;white-space:nowrap;">
+                    <i class="fas fa-copy me-1"></i>คัดลอก
+                </button>
+            </div>
+            <div class="mt-2 small" style="color:#1e40af;">
+                <i class="fas fa-exclamation-circle me-1"></i>
+                โอนยอด <strong>฿@Model.TotalAmount.ToString("N0")</strong> พร้อมแนบสลิปด้านล่าง
+            </div>
+        </div>
+
+        <div class="mb-3 p-3 rounded-3" style="background:#fffbeb;border:1px solid #fde68a;">
+            <div class="fw-semibold small mb-1" style="color:#92400e;">
+                <i class="fas fa-info-circle me-1"></i>ขั้นตอนถัดไป
+            </div>
+            <div class="small" style="color:#78350f;">
+                กรุณาโอนเงินตามยอดด้านบน แล้วแนบสลิปด้านล่างนี้<br>
+                Staff จะตรวจสอบและอัปเดตสถานะ <strong>Paid</strong> ให้
+            </div>
+        </div>
+
+        @if (TempData["SlipError"] != null)
+        {
+            <div class="alert alert-danger py-2 small">
+                <i class="fas fa-exclamation-circle me-1"></i>@TempData["SlipError"]
+            </div>
+        }
+
+        <form asp-action="UploadSlip" asp-controller="Project" method="post"
+              enctype="multipart/form-data">
+            <input type="hidden" name="orderId" value="@Model.OrderId" />
+
+            <label class="form-label fw-semibold small">
+                <i class="fas fa-image me-1 text-primary"></i>แนบสลิปการโอนเงิน
+            </label>
+
+            <label id="slipDrop" for="slipFile"
+                   style="display:block;border:2px dashed #d1d5db;border-radius:12px;padding:24px;text-align:center;cursor:pointer;background:#f9fafb;transition:.2s;margin-bottom:12px;">
+                <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2" style="display:block;"></i>
+                <div class="fw-semibold text-muted small" id="dropText">คลิกหรือลากไฟล์รูปมาวางที่นี่</div>
+                <div class="text-muted" style="font-size:.75rem;">JPG, PNG, WEBP — ไม่เกิน 5MB</div>
+                <img id="slipPreview" src="#" alt="preview"
+                     style="display:none;max-width:100%;max-height:200px;border-radius:8px;margin-top:12px;">
+            </label>
+            <input type="file" id="slipFile" name="slipImage" accept="image/*"
+                   style="display:none;" onchange="handleFile(this.files[0])" required>
+
+            <div class="mt-3">
+                <button type="submit" id="submitBtn" class="btn btn-success fw-bold w-100" disabled>
+                    <i class="fas fa-paper-plane me-1"></i>ส่งสลิปและยืนยัน
+                </button>
+                <div class="text-muted text-center small mt-2">
+                    <i class="fas fa-lock me-1"></i>ต้องแนบสลิปก่อนจึงจะส่งได้
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function copyAcct(btn, num) {
+    navigator.clipboard.writeText(num).then(function() {
+        var orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>คัดลอกแล้ว';
+        btn.style.background = '#d1fae5';
+        setTimeout(function() { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+    });
+}
+
+function handleFile(file) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('ไฟล์ใหญ่เกิน 5MB'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var prev = document.getElementById('slipPreview');
+        prev.src = e.target.result;
+        prev.style.display = 'block';
+        var drop = document.getElementById('slipDrop');
+        drop.style.borderColor = '#059669';
+        drop.style.background  = '#ecfdf5';
+        document.getElementById('dropText').textContent = '\u2713 ' + file.name;
+        document.getElementById('submitBtn').disabled = false;
+    };
+    reader.readAsDataURL(file);
+}
+
+var drop = document.getElementById('slipDrop');
+drop.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor='#059669'; });
+drop.addEventListener('dragleave', function()  { this.style.borderColor='#d1d5db'; });
+drop.addEventListener('drop', function(e) {
+    e.preventDefault(); this.style.borderColor='#d1d5db';
+    var f = e.dataTransfer.files[0];
+    if (f) { document.getElementById('slipFile').files = e.dataTransfer.files; handleFile(f); }
+});
+</script>
+}

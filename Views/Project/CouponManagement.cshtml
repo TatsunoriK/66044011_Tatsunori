@@ -37,13 +37,20 @@
                 <td>
                     <div class="d-flex gap-1">
                         <a asp-action="EditCoupon" asp-route-couponId="@c.CouponId"
-                           class="btn btn-sm btn-outline-dark">
+                           class="btn btn-sm btn-outline-warning">
                             <i class="fas fa-edit"></i>
                         </a>
                         <form asp-action="ToggleCoupon" method="post" class="d-inline">
                             <input type="hidden" name="couponId" value="@c.CouponId">
-                            <button class="btn btn-sm btn-outline-@(c.IsActive ? "warning" : "success")">
+                            <button class="btn btn-sm btn-outline-@(c.IsActive ? "secondary" : "success")">
                                 @(c.IsActive ? "ปิด" : "เปิด")
+                            </button>
+                        </form>
+                        <form asp-action="DeleteCoupon" method="post" class="d-inline"
+                              onsubmit="return confirm('ลบ Coupon '@c.Code' ?')">
+                            <input type="hidden" name="couponId" value="@c.CouponId">
+                            <button class="btn btn-sm btn-outline-danger" title="ลบ">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </form>
                     </div>

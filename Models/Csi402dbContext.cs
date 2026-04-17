@@ -54,14 +54,24 @@ public partial class Csi402dbContext : DbContext
             entity.HasKey(e => e.OrderId).HasName("PRIMARY");
             entity.ToTable("orders");
             entity.HasIndex(e => e.UserId, "UserId");
-            entity.Property(e => e.OrderDate).HasDefaultValueSql("CURRENT_TIMESTAMP").HasColumnType("datetime");
-            entity.Property(e => e.Status).HasDefaultValueSql("'Pending'").HasColumnType("enum('Pending','Paid','Shipped','Cancelled')");
+            entity.Property(e => e.OrderDate)
+                  .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                  .HasColumnType("datetime");
+            // ★ แก้ไข: เพิ่ม 'Done' ใน enum Status
+            entity.Property(e => e.Status)
+                  .HasDefaultValueSql("'Pending'")
+                  .HasColumnType("enum('Pending','Paid','Done','Cancelled')");
             entity.Property(e => e.TotalAmount).HasPrecision(10, 2);
             entity.Property(e => e.ShippingAddress).HasColumnType("text");
             entity.Property(e => e.DiscountAmount).HasPrecision(10, 2).HasDefaultValue(0m);
             entity.Property(e => e.PointsUsed).HasDefaultValue(0);
             entity.Property(e => e.CouponCode).HasMaxLength(50);
-            entity.HasOne(d => d.User).WithMany(p => p.Orders).HasForeignKey(d => d.UserId).HasConstraintName("orders_ibfk_1");
+            // ★ เพิ่ม: SlipImagePath สำหรับเก็บ path รูปสลิปที่ลูกค้าแนบ
+            entity.Property(e => e.SlipImagePath).HasMaxLength(500).IsRequired(false);
+            entity.HasOne(d => d.User)
+                  .WithMany(p => p.Orders)
+                  .HasForeignKey(d => d.UserId)
+                  .HasConstraintName("orders_ibfk_1");
         });
 
         modelBuilder.Entity<Orderdetail>(entity =>
@@ -123,6 +133,7 @@ public partial class Csi402dbContext : DbContext
             entity.Property(e => e.MemberLevel).HasMaxLength(10).HasDefaultValue("Bronze");
             entity.Property(e => e.IsMember).HasDefaultValue(false);
             entity.Property(e => e.MemberExpiry).HasColumnType("datetime");
+            entity.Property(e => e.MemberDiscUsedMonth).HasMaxLength(7).IsRequired(false); // format "yyyy-MM"
             entity.HasOne(d => d.Role).WithMany(p => p.Users).HasForeignKey(d => d.RoleId).HasConstraintName("users_ibfk_1");
         });
 

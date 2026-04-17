@@ -9,14 +9,42 @@
     <style>
         .status-Done { background: #d1fae5; color: #065f46; }
         .btn-confirm-received {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: #065f46; color: #fff;
-            border: none; border-radius: 8px;
-            padding: 7px 16px; font-size: .85rem; font-weight: 700;
-            cursor: pointer; transition: background .2s;
+            display:inline-flex; align-items:center; gap:6px;
+            background:#065f46; color:#fff; border:none; border-radius:8px;
+            padding:7px 16px; font-size:.85rem; font-weight:700;
+            cursor:pointer; transition:background .2s;
         }
-        .btn-confirm-received:hover { background: #047857; }
-        .done-note { font-size: .8rem; color: #059669; margin-top: 6px; }
+        .btn-confirm-received:hover { background:#047857; }
+        .done-note { font-size:.8rem; color:#059669; margin-top:6px; }
+
+        /* Slip buttons */
+        .slip-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+        .btn-slip-view {
+            display:inline-flex; align-items:center; gap:5px;
+            background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;
+            border-radius:8px; padding:6px 14px; font-size:.82rem; font-weight:600;
+            cursor:pointer; transition:.15s; text-decoration:none;
+        }
+        .btn-slip-view:hover { background:#dbeafe; color:#1e40af; }
+        .btn-slip-change {
+            display:inline-flex; align-items:center; gap:5px;
+            background:#fff7ed; color:#c2410c; border:1px solid #fed7aa;
+            border-radius:8px; padding:6px 14px; font-size:.82rem; font-weight:600;
+            cursor:pointer; transition:.15s; text-decoration:none;
+        }
+        .btn-slip-change:hover { background:#ffedd5; }
+        .btn-slip-upload {
+            display:inline-flex; align-items:center; gap:5px;
+            background:#fef3c7; color:#92400e; border:1px solid #fde68a;
+            border-radius:8px; padding:6px 14px; font-size:.82rem; font-weight:600;
+            cursor:pointer; transition:.15s; text-decoration:none;
+        }
+        .btn-slip-upload:hover { background:#fde68a; }
+
+        /* Slip Modal */
+        .slip-modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:9999; align-items:center; justify-content:center; }
+        .slip-modal-backdrop.show { display:flex; }
+        .slip-modal-box { background:#fff; border-radius:16px; padding:24px; max-width:500px; width:94%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.3); }
     </style>
 }
 
@@ -47,7 +75,6 @@
     {
         @foreach (var order in Model)
         {
-            @* คำนวณแต้มของออเดอร์นี้ *@
             int earnedPts    = 0;
             int redeemedPts  = 0;
             int cancelledPts = 0;
@@ -60,7 +87,10 @@
                     if (type == "cancel") cancelledPts += Math.Abs(pts);
                 }
             }
-            bool hasMemberDisc = order.CouponCode != null && order.CouponCode.Contains("__MEMBER__");
+            bool hasMemberDisc   = order.CouponCode != null && order.CouponCode.Contains("__MEMBER__");
+            // ★ ระบบใหม่: DiscountAmount > 0 แต่ไม่มี CouponCode = ใช้ Member discount
+            if (!hasMemberDisc && order.DiscountAmount > 0 && string.IsNullOrEmpty(order.CouponCode))
+                hasMemberDisc = true;
             string? displayCoupon = order.CouponCode?.Replace("__MEMBER__", "").Replace("+", "").Trim();
             if (string.IsNullOrEmpty(displayCoupon)) displayCoupon = null;
 
@@ -88,6 +118,7 @@
                     </div>
                     <span class="status-badge status-@order.Status">@order.Status</span>
                 </div>
+
                 <div class="order-body">
                     @foreach (var d in order.Orderdetails)
                     {
@@ -105,7 +136,7 @@
                             @if (hasMemberDisc)
                             {
                                 <span class="ms-2" style="background:#fef3c7;color:#92400e;border-radius:6px;padding:1px 7px;font-size:.72rem;font-weight:700;">
-                                    <i class="fas fa-crown me-1"></i>Member -฿100
+                                    <i class="fas fa-crown me-1"></i>Member
                                 </span>
                             }
                             @if (displayCoupon != null)
@@ -131,9 +162,49 @@
 
                     <div class="total-row">ยอดสุทธิ: ฿@order.TotalAmount.ToString("N0")</div>
 
+                    @* ── Slip section (เฉพาะ Pending) ── *@
+                    @if (order.Status == "Pending")
+                    {
+                        <div class="slip-actions">
+                            @if (!string.IsNullOrEmpty(order.SlipImagePath))
+                            {
+                                @* มีสลิปแล้ว — ดูได้ + เปลี่ยนได้ *@
+                                <button type="button" class="btn-slip-view"
+                                        onclick="viewSlip('@order.SlipImagePath', '@order.OrderId')">
+                                    <i class="fas fa-image"></i>ดูสลิป
+                                </button>
+                                <a asp-action="UploadSlip" asp-controller="Project"
+                                   asp-route-orderId="@order.OrderId"
+                                   class="btn-slip-change">
+                                    <i class="fas fa-exchange-alt"></i>เปลี่ยนสลิป
+                                </a>
+                            }
+                            else
+                            {
+                                @* ยังไม่มีสลิป — แนบสลิป *@
+                                <a asp-action="UploadSlip" asp-controller="Project"
+                                   asp-route-orderId="@order.OrderId"
+                                   class="btn-slip-upload">
+                                    <i class="fas fa-cloud-upload-alt"></i>แนบสลิปการโอนเงิน
+                                </a>
+                            }
+                        </div>
+                    }
+
+                    @* ── ยืนยันรับของ (Paid) ── *@
                     @if (order.Status == "Paid")
                     {
                         <div class="mt-3 pt-2" style="border-top:1px dashed #f0f0f0;">
+                            @* แสดงสลิปที่แนบไว้ด้วย *@
+                            @if (!string.IsNullOrEmpty(order.SlipImagePath))
+                            {
+                                <div class="mb-2">
+                                    <button type="button" class="btn-slip-view"
+                                            onclick="viewSlip('@order.SlipImagePath', '@order.OrderId')">
+                                        <i class="fas fa-image"></i>ดูสลิปที่แนบ
+                                    </button>
+                                </div>
+                            }
                             <form asp-action="ConfirmReceived" asp-controller="Project" method="post"
                                   onsubmit="return confirm('ยืนยันว่าได้รับสินค้าออเดอร์ #@order.OrderId แล้ว?')">
                                 <input type="hidden" name="orderId" value="@order.OrderId">
@@ -144,6 +215,7 @@
                             <div class="done-note"><i class="fas fa-info-circle me-1"></i>กดเมื่อได้รับสินค้าเรียบร้อยแล้ว</div>
                         </div>
                     }
+
                     @if (order.Status == "Done")
                     {
                         <div class="mt-2 pt-2" style="border-top:1px dashed #f0f0f0;">
@@ -155,3 +227,46 @@
         }
     }
 </div>
+
+@* ── Slip Viewer Modal ── *@
+<div class="slip-modal-backdrop" id="slipViewModal" onclick="if(event.target===this)closeSlipModal()">
+    <div class="slip-modal-box">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0">
+                <i class="fas fa-receipt me-2 text-primary"></i>
+                สลิปออเดอร์ #<span id="slipModalOrderId"></span>
+            </h6>
+            <button type="button" onclick="closeSlipModal()"
+                    style="background:none;border:none;font-size:1.3rem;color:#6b7280;cursor:pointer;">✕</button>
+        </div>
+
+        <div class="text-center mb-3">
+            <img id="slipModalImg" src="" alt="slip"
+                 class="img-fluid rounded-3 border" style="max-height:400px;">
+        </div>
+
+        <div class="d-flex gap-2">
+            <a id="slipModalLink" href="#" target="_blank"
+               class="btn btn-outline-primary btn-sm flex-fill">
+                <i class="fas fa-external-link-alt me-1"></i>เปิดในแท็บใหม่
+            </a>
+            <button type="button" onclick="closeSlipModal()"
+                    class="btn btn-outline-secondary btn-sm flex-fill">ปิด</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function viewSlip(path, orderId) {
+    document.getElementById('slipModalImg').src     = path;
+    document.getElementById('slipModalLink').href   = path;
+    document.getElementById('slipModalOrderId').textContent = orderId;
+    document.getElementById('slipViewModal').classList.add('show');
+}
+function closeSlipModal() {
+    document.getElementById('slipViewModal').classList.remove('show');
+    document.getElementById('slipModalImg').src = '';
+}
+</script>
+}

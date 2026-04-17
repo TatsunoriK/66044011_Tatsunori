@@ -1,7 +1,8 @@
-1.แยก หน้า manage สำหรับ guest / role
+stock history
 
-1.สร้าง viewmodel ยังไง
-2.สร้าง form รับค่า ยีงไง
-3.แสดง ค่า
+headline แสดงชื่อ
+
+เข้า profile แล้วเพิ่มปุ่ม edit
+
 
 dotnet ef dbcontext scaffold "server=localhost;database=csi402db;user=root;password=Nori_kato43016;TrustServerCertificate=True" Microsoft.EntityFrameworkCore.SqlServer -o Models/

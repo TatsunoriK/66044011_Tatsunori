@@ -68,7 +68,7 @@
                         <td>
                             <form asp-controller="Project" asp-action="ChangeRole" method="post">
                                 <input type="hidden" name="userId" value="@user.Id" />
-                                <select name="roleId" onchange="this.form.submit()" class="form-select form-select-sm">
+                                <select name="roleId" onchange="confirmRoleChange(this)" class="form-select form-select-sm" data-original="@user.RoleId">
                                     @{ var rid = user.RoleId; }
                                     @if (rid == 1) { <option value="1" selected>Admin</option> } else { <option value="1">Admin</option> }
                                     @if (rid == 2) { <option value="2" selected>Manager</option> } else { <option value="2">Manager</option> }
@@ -94,7 +94,6 @@
 
 </div>
 
-{{*  ===== ADD STAFF MODAL ===== *}}
 <div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content" style="border-radius:16px; overflow:hidden;">
@@ -154,6 +153,10 @@
                                 <option value="3">Staff</option>
                             </select>
                         </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">ที่อยู่</label>
+                            <textarea name="Address" class="form-control" rows="2" placeholder="บ้านเลขที่ ถนน แขวง/ตำบล เขต/อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+                        </div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
@@ -168,3 +171,17 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function confirmRoleChange(select) {
+        var roleName = select.options[select.selectedIndex].text;
+        var userName = select.closest('tr').querySelector('.fw-bold').textContent.trim();
+        if (confirm('เปลี่ยน Role ของ "' + userName + '" เป็น "' + roleName + '" ใช่หรือไม่?')) {
+            select.form.submit();
+        } else {
+            select.value = select.dataset.original;
+        }
+    }
+</script>
+}
