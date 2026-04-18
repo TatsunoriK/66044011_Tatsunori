@@ -1,0 +1,4 @@
+/* Stock History */
+.change-up   { color:#059669; font-weight:700; }
+.change-down { color:#dc2626; font-weight:700; }
+.change-zero { color:#9ca3af; }

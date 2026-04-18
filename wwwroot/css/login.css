@@ -151,7 +151,7 @@ body {
     flex-shrink: 0;
     box-shadow: 0 0 10px rgba(0,170,255,.15);
 }
-.feat-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: .95rem; color: #e0e8f8; letter-spacing: .04em; }
+.feat-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: .95rem; color: #000; letter-spacing: .04em; }
 .feat-desc  { font-size: .78rem; color: rgba(90,112,144,.8); margin-top: 1px; }
 
 
@@ -227,7 +227,7 @@ body {
     background: rgba(0,170,255,.05);
     border: 1px solid rgba(0,170,255,.18);
     border-radius: 10px;
-    color: #e0e8f8;
+    color: #000;
     font-size: .95rem;
     font-family: 'Sarabun', sans-serif;
     transition: border-color .2s, box-shadow .2s, background .2s;

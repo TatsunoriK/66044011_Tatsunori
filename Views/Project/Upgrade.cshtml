@@ -9,58 +9,6 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/upgrade.css" asp-append-version="true">
-    <style>
-        .member-status.inactive { background:#f8f9fa; border:2px dashed #dee2e6; }
-        .member-status.active   { background:linear-gradient(135deg,#1a1a1a,#2d2d2d); color:#fff; }
-        .ms-icon   { font-size:2.5rem; margin-bottom:8px; }
-        .ms-title  { font-size:1.2rem; font-weight:800; margin-bottom:4px; }
-        .ms-expiry { font-size:.85rem; background:rgba(255,255,255,.12); border-radius:8px; padding:5px 12px; display:inline-block; margin-top:8px; }
-        .member-status.inactive .ms-expiry { background:#e9ecef; color:#6c757d; }
-        .days-num { font-size:1.4rem; font-weight:800; color:#f39c12; }
-
-        .plan-detail { background:#fff; border:2px solid #e5e7eb; border-radius:16px; padding:24px 28px; margin-bottom:24px; }
-        .plan-detail h5 { font-weight:800; margin-bottom:16px; }
-
-        .perks-table { width:100%; border-collapse:collapse; margin-bottom:16px; }
-        .perks-table td { padding:9px 0; border-bottom:1px solid #f3f4f6; font-size:.9rem; vertical-align:middle; }
-        .perks-table tr:last-child td { border:none; }
-        .perk-icon { width:30px; height:30px; border-radius:50%; background:#fef3c7; color:#f39c12; display:inline-flex; align-items:center; justify-content:center; font-size:.78rem; margin-right:10px; flex-shrink:0; }
-        .perk-label { color:#374151; }
-        .perk-val   { text-align:right; font-weight:700; color:#111; white-space:nowrap; }
-
-        .points-rate-box { background:linear-gradient(135deg,#fffbf0,#fef3c7); border:1px solid #f0d9b5; border-radius:10px; padding:12px 16px; margin-bottom:16px; font-size:.85rem; color:#92400e; }
-        .points-rate-box .rate-title { font-weight:800; font-size:.9rem; margin-bottom:6px; }
-        .points-rate-box .rate-row   { display:flex; justify-content:space-between; padding:3px 0; }
-
-        .btn-buy   { width:100%; padding:13px; background:#f39c12; color:#111; border:none; border-radius:12px; font-size:1rem; font-weight:800; cursor:pointer; transition:.2s; }
-        .btn-buy:hover { background:#e67e22; }
-        .btn-renew { width:100%; padding:13px; background:transparent; color:#f39c12; border:2px solid #f39c12; border-radius:12px; font-size:1rem; font-weight:800; cursor:pointer; transition:.2s; }
-        .btn-renew:hover { background:#fef3c7; }
-
-        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; align-items:center; justify-content:center; }
-        .modal-overlay.show { display:flex; }
-        .confirm-modal { background:#fff; border-radius:20px; padding:28px; max-width:420px; width:94%; box-shadow:0 20px 60px rgba(0,0,0,.2); }
-        .confirm-modal h5 { font-weight:800; font-size:1.1rem; margin-bottom:16px; }
-
-        .order-summary { background:#f8f9fa; border-radius:10px; padding:14px 16px; margin-bottom:16px; }
-        .sum-row { display:flex; justify-content:space-between; padding:5px 0; font-size:.88rem; border-bottom:1px solid #e9ecef; }
-        .sum-row:last-child { border:none; font-weight:800; font-size:1rem; }
-        .sum-row.discount { color:#059669; }
-
-        .pay-title  { font-size:.8rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
-        .pay-grid   { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
-        .pay-option { border:2px solid #e5e7eb; border-radius:10px; padding:10px; text-align:center; cursor:pointer; transition:.15s; font-size:.85rem; font-weight:600; background:#fff; color:#374151; }
-        .pay-option:hover, .pay-option.picked { border-color:#111; background:#111; color:#fff; }
-        .pay-option i { display:block; font-size:1.3rem; margin-bottom:4px; }
-
-        .pay-confirm-msg { background:#d1fae5; color:#065f46; border-radius:8px; padding:9px 12px; font-size:.83rem; margin-bottom:14px; display:none; }
-        .pay-confirm-msg.show { display:block; }
-
-        .btn-confirm { width:100%; padding:13px; background:#111; color:#fff; border:none; border-radius:10px; font-weight:800; cursor:pointer; transition:.2s; }
-        .btn-confirm:disabled { opacity:.35; cursor:not-allowed; }
-        .btn-confirm:not(:disabled):hover { background:#f39c12; color:#111; }
-        .btn-modal-cancel { width:100%; padding:9px; background:transparent; border:none; color:#9ca3af; font-size:.85rem; cursor:pointer; margin-top:6px; }
-    </style>
 }
 
 <div class="upgrade-wrapper">

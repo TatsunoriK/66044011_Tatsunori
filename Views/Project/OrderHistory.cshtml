@@ -6,46 +6,6 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/orderHistory.css" asp-append-version="true">
-    <style>
-        .status-Done { background: #d1fae5; color: #065f46; }
-        .btn-confirm-received {
-            display:inline-flex; align-items:center; gap:6px;
-            background:#065f46; color:#fff; border:none; border-radius:8px;
-            padding:7px 16px; font-size:.85rem; font-weight:700;
-            cursor:pointer; transition:background .2s;
-        }
-        .btn-confirm-received:hover { background:#047857; }
-        .done-note { font-size:.8rem; color:#059669; margin-top:6px; }
-
-        /* Slip buttons */
-        .slip-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
-        .btn-slip-view {
-            display:inline-flex; align-items:center; gap:5px;
-            background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;
-            border-radius:8px; padding:6px 14px; font-size:.82rem; font-weight:600;
-            cursor:pointer; transition:.15s; text-decoration:none;
-        }
-        .btn-slip-view:hover { background:#dbeafe; color:#1e40af; }
-        .btn-slip-change {
-            display:inline-flex; align-items:center; gap:5px;
-            background:#fff7ed; color:#c2410c; border:1px solid #fed7aa;
-            border-radius:8px; padding:6px 14px; font-size:.82rem; font-weight:600;
-            cursor:pointer; transition:.15s; text-decoration:none;
-        }
-        .btn-slip-change:hover { background:#ffedd5; }
-        .btn-slip-upload {
-            display:inline-flex; align-items:center; gap:5px;
-            background:#fef3c7; color:#92400e; border:1px solid #fde68a;
-            border-radius:8px; padding:6px 14px; font-size:.82rem; font-weight:600;
-            cursor:pointer; transition:.15s; text-decoration:none;
-        }
-        .btn-slip-upload:hover { background:#fde68a; }
-
-        /* Slip Modal */
-        .slip-modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:9999; align-items:center; justify-content:center; }
-        .slip-modal-backdrop.show { display:flex; }
-        .slip-modal-box { background:#fff; border-radius:16px; padding:24px; max-width:500px; width:94%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.3); }
-    </style>
 }
 
 <div class="history-wrapper">
@@ -136,7 +96,7 @@
                             @if (hasMemberDisc)
                             {
                                 <span class="ms-2" style="background:#fef3c7;color:#92400e;border-radius:6px;padding:1px 7px;font-size:.72rem;font-weight:700;">
-                                    <i class="fas fa-crown me-1"></i>Member
+                                    <i class="fas fa-crown me-1"></i>Member -฿100
                                 </span>
                             }
                             @if (displayCoupon != null)
